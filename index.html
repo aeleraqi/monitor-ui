@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مرصد InfoTimes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* layout: top bar (project + actions) · tab strip · one working panel per tab; results = KPI strip then paired charts then tables */
+:root {
+  --bg:#fafaf8; --surface:#ffffff; --surface2:#f3f2ee; --fg:#1a1a1a; --fg2:#6b6960; --fg3:#9c9889;
+  --line:#e5e3db; --accent:#c0392b; --accent-soft:#f6e3e0; --ok:#2e6b4f; --ok-soft:#e1efe7; --warn:#9a6a12; --warn-soft:#f6ecd6;
+  --pos:#2e6b4f; --neu:#9c9889; --neg:#c0392b;
+  --font:"IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif; --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#141412; --surface:#1c1c19; --surface2:#24231f; --fg:#ecebe6; --fg2:#a9a69c; --fg3:#7d7a71;
+  --line:#33322d; --accent:#e06a58; --accent-soft:#3a201c; --ok:#6cc39a; --ok-soft:#1d3329; --warn:#e2b45a; --warn-soft:#3a2f17;
+  --pos:#6cc39a; --neu:#8d8a80; --neg:#e06a58; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#141412; --surface:#1c1c19; --surface2:#24231f; --fg:#ecebe6; --fg2:#a9a69c; --fg3:#7d7a71;
+  --line:#33322d; --accent:#e06a58; --accent-soft:#3a201c; --ok:#6cc39a; --ok-soft:#1d3329; --warn:#e2b45a; --warn-soft:#3a2f17;
+  --pos:#6cc39a; --neu:#8d8a80; --neg:#e06a58; color-scheme:dark; }
+* { box-sizing:border-box; }
+[hidden] { display:none !important; }
+html,body { margin:0; }
+body { background:var(--bg); color:var(--fg); font-family:var(--font); font-size:14px; line-height:1.65; }
+a { color:var(--accent); }
+button, input, select, textarea { font:inherit; color:inherit; }
+.wrap { max-width:1180px; margin:0 auto; padding-inline:16px; }
+
+/* شريط علوي */
+header.top { background:var(--surface); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5; }
+.top .wrap { display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding-block:10px; }
+.brand { display:flex; align-items:baseline; gap:8px; margin-inline-end:auto; }
+.brand b { font-size:1.15rem; letter-spacing:.2px; }
+.brand span { color:var(--fg3); font-size:.85rem; }
+.brand i { width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; transform:translateY(-1px); }
+select, input[type=text], input[type=password], input[type=date], input[type=number], textarea {
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:7px 10px; min-width:0; }
+textarea { width:100%; resize:vertical; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+.btn { border:1px solid var(--line); background:var(--surface); border-radius:var(--r); padding:7px 14px; cursor:pointer; white-space:nowrap; }
+.btn:hover { background:var(--surface2); }
+.btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+.btn.primary:hover { filter:brightness(1.05); }
+.btn:disabled { opacity:.5; cursor:default; }
+.chip { display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding:3px 10px; font-size:.82rem; background:var(--surface2); color:var(--fg2); }
+.chip.ok { background:var(--ok-soft); color:var(--ok); } .chip.run { background:var(--warn-soft); color:var(--warn); } .chip.bad { background:var(--accent-soft); color:var(--accent); }
+.chip::before { content:""; width:7px; height:7px; border-radius:50%; background:currentColor; }
+
+nav.tabs { border-bottom:1px solid var(--line); background:var(--bg); }
+nav.tabs .wrap { display:flex; gap:2px; overflow-x:auto; }
+nav.tabs button { border:0; background:none; padding:11px 14px; cursor:pointer; color:var(--fg2); border-bottom:2px solid transparent; white-space:nowrap; }
+nav.tabs button[aria-selected="true"] { color:var(--fg); border-bottom-color:var(--accent); font-weight:600; }
+nav.tabs .count { color:var(--fg3); font-size:.8rem; margin-inline-start:4px; font-variant-numeric:tabular-nums; }
+
+main { padding-block:22px 60px; }
+h2 { font-size:1.05rem; margin:0 0 4px; text-wrap:balance; }
+.lead { color:var(--fg2); margin:0 0 16px; max-width:70ch; }
+.panel[hidden] { display:none !important; }
+
+/* الاستمارة */
+.form { display:grid; gap:18px; }
+fieldset { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); padding:14px 16px 16px; margin:0; }
+legend { padding-inline:6px; font-weight:600; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:12px 16px; }
+.field { display:grid; gap:4px; min-width:0; }
+.field label { font-weight:500; font-size:.9rem; }
+.field small { color:var(--fg3); font-size:.78rem; line-height:1.5; }
+.check { display:flex; align-items:center; gap:8px; }
+.check input { width:18px; height:18px; accent-color:var(--accent); }
+
+/* الجداول القابلة للتحرير */
+.tablebar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:10px; }
+.tablebar input[type=search] { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:7px 10px; min-width:200px; }
+.scroll { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r); background:var(--surface); }
+table { border-collapse:collapse; width:100%; }
+th, td { border-bottom:1px solid var(--line); padding:6px 8px; text-align:right; vertical-align:top; }
+th { background:var(--surface2); font-weight:600; font-size:.85rem; position:sticky; top:0; white-space:nowrap; }
+tr.off td:not(:first-child) { opacity:.45; text-decoration:line-through; }
+td input[type=text], td textarea, td select { width:100%; border-color:transparent; background:transparent; padding:4px 6px; }
+td input[type=text]:hover, td textarea:hover { border-color:var(--line); }
+td textarea { font-family:var(--mono); font-size:12px; direction:ltr; text-align:left; min-height:56px; }
+td.mono input { font-family:var(--mono); font-size:12.5px; direction:ltr; text-align:left; }
+td .del { border:0; background:none; color:var(--fg3); cursor:pointer; font-size:1rem; }
+td .del:hover { color:var(--accent); }
+.num { font-variant-numeric:tabular-nums; }
+
+/* النتائج */
+.kpis { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; margin-bottom:18px; }
+.kpi { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:12px 14px; }
+.kpi .l { color:var(--fg2); font-size:.82rem; }
+.kpi .v { font-size:1.6rem; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.3; }
+.kpi.alert .v { color:var(--accent); }
+.cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(340px, 1fr)); gap:14px; }
+.card { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:14px 16px; min-width:0; }
+.card h3 { margin:0 0 10px; font-size:.95rem; }
+.legend { display:flex; gap:12px; font-size:.8rem; color:var(--fg2); margin-bottom:8px; }
+.legend span::before { content:""; display:inline-block; width:10px; height:10px; border-radius:2px; margin-inline-end:4px; background:var(--c); vertical-align:-1px; }
+.bars { display:grid; gap:7px; }
+.bar { display:grid; grid-template-columns:minmax(80px, 30%) 1fr auto; gap:8px; align-items:center; font-size:.85rem; }
+.bar .k { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bar .track { display:flex; height:14px; background:var(--surface2); border-radius:3px; overflow:hidden; }
+.bar .track i { display:block; height:100%; }
+.bar .n { color:var(--fg2); font-variant-numeric:tabular-nums; min-width:3ch; text-align:left; }
+svg text { fill:var(--fg2); font-family:var(--font); font-size:11px; }
+.empty { color:var(--fg3); padding:28px; text-align:center; border:1px dashed var(--line); border-radius:var(--r); }
+.tone-pos { color:var(--pos); } .tone-neg { color:var(--neg); font-weight:600; } .tone-neu { color:var(--fg2); }
+
+/* الاتصال */
+.connect { max-width:620px; margin:40px auto; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:22px 24px; display:grid; gap:14px; }
+.connect ol { margin:0; padding-inline-start:20px; color:var(--fg2); }
+.toast { position:fixed; inset-inline-start:16px; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); background:var(--fg); color:var(--bg); padding:9px 14px; border-radius:var(--r); font-size:.9rem; z-index:20; max-width:calc(100% - 32px); }
+dialog { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); color:var(--fg); max-width:520px; width:calc(100% - 32px); }
+dialog::backdrop { background:rgb(0 0 0 / .35); }
+@media (max-width:640px) { .kpis { grid-template-columns:repeat(2, minmax(0, 1fr)); } .bar { grid-template-columns:90px 1fr auto; } .cards { grid-template-columns:1fr; } }
+@media (prefers-reduced-motion: no-preference) { .bar .track i { transition:width .4s ease; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><i></i><b>مرصد InfoTimes</b><span>محرك الرصد الإعلامي</span></div>
+    <select id="project" aria-label="المشروع"></select>
+    <button class="btn" id="newProject" type="button">＋ مشروع</button>
+    <span class="chip" id="state">غير متصل</span>
+    <button class="btn" id="save" type="button" disabled>حفظ الإعدادات</button>
+    <button class="btn primary" id="run" type="button" disabled>▶ تشغيل الرصد</button>
+    <button class="btn" id="settings" type="button" aria-label="إعدادات الاتصال">⚙</button>
+  </div>
+</header>
+<nav class="tabs"><div class="wrap" role="tablist" id="tabs"></div></nav>
+
+<main class="wrap" id="main">
+  <section class="connect" id="connect" hidden>
+    <h2>اربط الواجهة بالمحرك</h2>
+    <p class="lead" style="margin:0">الواجهة تقرأ الإعدادات والنتائج من الـ repo الخاص وتشغّل الرصد عبر GitHub. يُحفظ المفتاح في متصفحك فقط.</p>
+    <ol>
+      <li>افتح <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub ← Fine-grained token</a>.</li>
+      <li>Repository access: <b>Only select repositories</b> ← <span class="num">monitor-engine</span>.</li>
+      <li>Permissions: <b>Contents</b> = Read and write، <b>Actions</b> = Read and write.</li>
+      <li>انسخ المفتاح والصقه هنا.</li>
+    </ol>
+    <div class="field"><label for="repo">الـ repo</label><input type="text" id="repo" dir="ltr" value="aeleraqi/monitor-engine"></div>
+    <div class="field"><label for="token">GitHub token</label><input type="password" id="token" dir="ltr" autocomplete="off" placeholder="github_pat_…"></div>
+    <div><button class="btn primary" id="connectBtn" type="button">اتصال</button></div>
+  </section>
+
+  <section class="panel" id="p-settings" hidden></section>
+  <section class="panel" id="p-news" hidden></section>
+  <section class="panel" id="p-social" hidden></section>
+  <section class="panel" id="p-exclusions" hidden></section>
+  <section class="panel" id="p-taxonomy" hidden></section>
+  <section class="panel" id="p-context" hidden></section>
+  <section class="panel" id="p-results" hidden></section>
+  <section class="panel" id="p-runs" hidden></section>
+</main>
+
+<dialog id="newDlg">
+  <form method="dialog" style="display:grid;gap:12px">
+    <h2>مشروع رصد جديد</h2>
+    <p class="lead" style="margin:0">ينسخ إعدادات المشروع الحالي كبداية: غيّر بعدها الفترة والاستعلامات والسياق.</p>
+    <div class="field"><label for="newName">اسم المشروع</label><input type="text" id="newName" placeholder="رصد منتدى مصر 2026"></div>
+    <div class="field"><label for="newSlug">المعرّف (حروف إنجليزية وشرطات)</label><input type="text" id="newSlug" dir="ltr" placeholder="egypt-forum-2026"></div>
+    <div style="display:flex;gap:8px"><button class="btn primary" value="ok">إنشاء</button><button class="btn" value="cancel">إلغاء</button></div>
+  </form>
+</dialog>
+
+<script>
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const el = (tag, attrs = {}, ...kids) => {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") e.className = v; else if (k === "html") e.innerHTML = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else if (v !== false && v != null) e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of kids.flat()) if (c != null) e.append(c.nodeType ? c : document.createTextNode(c));
+  return e;
+};
+const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } },
+                set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+const fmt = n => (n || 0).toLocaleString("en-US");
+const pct = x => Math.round((x || 0) * 100) + "%";
+function toast(msg, ms = 3200) { const t = el("div", { class: "toast", role: "status" }, msg); document.body.append(t); setTimeout(() => t.remove(), ms); }
+
+// ── GitHub API ─────────────────────────────────────────────
+const S = { repo: store.get("repo") || "aeleraqi/monitor-engine", token: store.get("token") || "", project: store.get("project") || "",
+            projects: [], cfg: null, sha: null, dirty: false, tab: store.get("tab") || "settings", status: {}, runs: [] };
+async function gh(path, opts = {}) {
+  const r = await fetch(`https://api.github.com/repos/${S.repo}${path}`, { ...opts, headers: {
+    Authorization: `Bearer ${S.token}`, Accept: opts.raw ? "application/vnd.github.raw" : "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28", ...(opts.body ? { "Content-Type": "application/json" } : {}) } });
+  if (r.status === 404 && opts.allow404) return null;
+  if (!r.ok) { let m = r.status + ""; try { m += " — " + (await r.json()).message; } catch {} throw new Error(m); }
+  if (r.status === 204) return true;
+  return opts.raw ? r.text() : r.json();
+}
+const b64e = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+const b64d = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g, "")), c => c.charCodeAt(0)));
+async function readJSON(path, fallback) { const t = await gh(`/contents/${encodeURI(path)}`, { raw: true, allow404: true }); return t == null ? fallback : JSON.parse(t); }
+
+// ── تحميل ───────────────────────────────────────────────────
+async function connect() {
+  S.repo = $("#repo").value.trim(); S.token = $("#token").value.trim() || S.token;
+  if (!S.token) return toast("الصق الـ token أولاً");
+  try {
+    const list = await gh(`/contents/config/projects`);
+    S.projects = list.filter(f => f.name.endsWith(".json")).map(f => f.name.slice(0, -5));
+    store.set("repo", S.repo); store.set("token", S.token);
+    $("#connect").hidden = true; $("#save").disabled = false; $("#run").disabled = false;
+    fillProjects(); await loadProject(S.projects.includes(S.project) ? S.project : S.projects[0]);
+    pollRuns(); setInterval(pollRuns, 20000);
+  } catch (e) { $("#connect").hidden = false; setState("bad", "فشل الاتصال"); toast("تعذّر الاتصال: " + e.message, 6000); }
+}
+function fillProjects() {
+  const sel = $("#project"); sel.replaceChildren(...S.projects.map(p => el("option", { value: p }, p)));
+  sel.value = S.project;
+}
+async function loadProject(p) {
+  if (S.dirty && !confirmLeave()) { $("#project").value = S.project; return; }
+  S.project = p; store.set("project", p); $("#project").value = p;
+  const f = await gh(`/contents/config/projects/${p}.json`);
+  S.cfg = JSON.parse(b64d(f.content)); S.sha = f.sha; S.dirty = false;
+  S.status = await readJSON(`data/${p}/status.json`, {});
+  renderAll(); loadResults();
+}
+function confirmLeave() { toast("احفظ التعديلات أولاً أو أعد تحميل الصفحة لتجاهلها", 5000); return false; }
+function markDirty() { if (!S.dirty) { S.dirty = true; $("#save").textContent = "حفظ الإعدادات •"; } }
+
+// ── الحفظ والتشغيل ─────────────────────────────────────────
+async function save(msg) {
+  const body = JSON.stringify(S.cfg, null, 2) + "\n";
+  const r = await gh(`/contents/config/projects/${S.project}.json`, { method: "PUT", body: JSON.stringify({
+    message: msg || `تحديث إعدادات ${S.project} من الواجهة`, content: b64e(body), sha: S.sha }) });
+  S.sha = r.content.sha; S.dirty = false; $("#save").textContent = "حفظ الإعدادات"; toast("حُفظت الإعدادات ✓");
+}
+async function run() {
+  try {
+    if (S.dirty) await save();
+    await gh(`/actions/workflows/monitor.yml/dispatches`, { method: "POST", body: JSON.stringify({ ref: "main", inputs: { project: S.project, action: "run" } }) });
+    setState("run", "أُرسل طلب التشغيل…"); toast("بدأ التشغيل على GitHub — تتحدث الحالة هنا تلقائياً");
+    setTimeout(pollRuns, 6000);
+  } catch (e) { toast("تعذّر التشغيل: " + e.message, 6000); }
+}
+function setState(kind, text, when) { const s = $("#state"); s.className = "chip " + (kind || ""); s.replaceChildren(text, when ? el("bdi", { dir: "ltr" }, " " + when) : ""); }
+async function pollRuns() {
+  try {
+    const r = await gh(`/actions/workflows/monitor.yml/runs?per_page=10`);
+    S.runs = r.workflow_runs || [];
+    const live = S.runs.find(x => x.status !== "completed" && x.event !== "push");
+    if (live) setState("run", "يعمل الآن… منذ " + ago(live.run_started_at || live.created_at));
+    else if (S.status.status_state) setState(S.status.status_state.startsWith("✅") ? "ok" : S.status.status_state.startsWith("❌") ? "bad" : "",
+                                             S.status.status_state.replace(/^[^\p{L}]+/u, "") + " ·", S.status.status_updated || "");
+    else setState("", "لم يُشغّل بعد");
+    if (S.wasLive && !live) { S.status = await readJSON(`data/${S.project}/status.json`, {}); loadResults(); toast("انتهى التشغيل — حُدّثت النتائج"); }
+    S.wasLive = !!live;
+    if (S.tab === "runs") renderRuns();
+  } catch {}
+}
+function ago(t) { const m = Math.round((Date.now() - new Date(t)) / 60000); return m < 1 ? "لحظات" : m + " دقيقة"; }
+
+// ── التبويبات ───────────────────────────────────────────────
+const TABS = [["settings", "الإعدادات"], ["news", "الأخبار"], ["social", "السوشيال"], ["exclusions", "الاستثناءات"],
+              ["taxonomy", "التصنيف"], ["context", "السياق"], ["results", "النتائج"], ["runs", "السجل"]];
+function renderTabs() {
+  const counts = { news: S.cfg.news.filter(r => r.active).length + "/" + S.cfg.news.length,
+                   social: S.cfg.social.filter(r => r.active).length + "/" + S.cfg.social.length, exclusions: S.cfg.exclusions.length };
+  $("#tabs").replaceChildren(...TABS.map(([k, label]) => el("button", { role: "tab", type: "button", "aria-selected": String(S.tab === k),
+    onclick: () => { S.tab = k; store.set("tab", k); renderTabs(); showTab(); } }, label, counts[k] != null ? el("span", { class: "count" }, counts[k]) : null)));
+}
+function showTab() { for (const [k] of TABS) $("#p-" + k).hidden = k !== S.tab; if (S.tab === "runs") renderRuns(); }
+function renderAll() { renderTabs(); renderSettings(); renderNews(); renderSocial(); renderExclusions(); renderTaxonomy(); renderContext(); showTab(); }
+
+// الإعدادات
+const FORM = [
+  ["المشروع والفترة", [
+    ["project_name", "اسم المشروع", "text", "يظهر في عنوان النتائج"],
+    ["window_start", "بداية الفترة", "date", "أول يوم في فترة الرصد"],
+    ["window_end", "نهاية الفترة", "date", "آخر يوم في الحدث نفسه (لعمود «داخل الفترة»)"],
+    ["collect_until", "اجمع حتى", "date", "لالتقاط التغطية اللاحقة. فارغ = نهاية الفترة"],
+    ["tz_offset_hours", "فرق التوقيت عن UTC", "number", "القاهرة في أكتوبر = 3"],
+    ["daily", "تشغيل يومي تلقائي", "check", "كل يوم 23:45 بتوقيت القاهرة"]]],
+  ["ماذا يُجمع", [
+    ["stage_news", "الأخبار (Google News)", "stage", "الاستعلامات في تبويب «الأخبار»"],
+    ["stage_social", "السوشيال (Apify)", "stage", "المصادر في تبويب «السوشيال»"],
+    ["stage_comments", "تعليقات الجمهور", "stage", "على أعلى المواد تفاعلاً"],
+    ["comments_top_posts", "مواد تُجمع تعليقاتها", "number", "الأعلى تفاعلاً في كل تشغيل"],
+    ["comments_per_post", "حد التعليقات لكل مادة", "number", ""],
+    ["news_lookback_days", "أيام إضافية قبل البداية", "number", "في بحث جوجل نيوز فقط"]]],
+  ["التصنيف بالذكاء الاصطناعي", [
+    ["llm_provider", "مزوّد النموذج", "select:gemini,claude", ""],
+    ["llm_model", "النموذج", "text", "مثل gemini-3.5-flash-lite أو claude-haiku-4-5"],
+    ["batch_size", "مواد في كل نداء", "number", "كلما زاد قلّت التكلفة وطال النداء"],
+    ["keep_irrelevant", "احتفظ بغير المرتبط", "check", "اكتب المواد التي صنّفها النموذج «غير مرتبطة»"],
+    ["apify_timeout", "مهلة كل actor (ثانية)", "number", ""]]]];
+function renderSettings() {
+  const st = S.cfg.settings, stages = new Set(st.stages || []);
+  const sets = FORM.map(([title, fields]) => el("fieldset", {}, el("legend", {}, title), el("div", { class: "grid" }, fields.map(([k, label, type, help]) => {
+    const id = "f-" + k; let input;
+    if (type === "check" || type === "stage") {
+      input = el("input", { type: "checkbox", id, checked: type === "stage" ? stages.has(k.slice(6)) : !!st[k],
+        onchange: e => { if (type === "stage") { e.target.checked ? stages.add(k.slice(6)) : stages.delete(k.slice(6));
+          st.stages = ["news", "social", "comments"].filter(x => stages.has(x)); } else st[k] = e.target.checked; markDirty(); } });
+      return el("div", { class: "field" }, el("div", { class: "check" }, input, el("label", { for: id }, label)), help ? el("small", {}, help) : null);
+    }
+    if (type.startsWith("select:")) input = el("select", { id, onchange: e => { st[k] = e.target.value; markDirty(); } },
+      type.slice(7).split(",").map(o => el("option", { value: o, selected: st[k] === o }, o)));
+    else input = el("input", { type, id, value: st[k] ?? "", dir: type === "text" && k !== "project_name" ? "ltr" : null,
+      oninput: e => { st[k] = type === "number" ? Number(e.target.value) : e.target.value; if (k === "project_name") S.cfg.name = e.target.value; markDirty(); } });
+    return el("div", { class: "field" }, el("label", { for: id }, label), input, help ? el("small", {}, help) : null);
+  }))));
+  const s = S.status;
+  const status = el("fieldset", {}, el("legend", {}, "آخر تشغيل"), el("div", { class: "grid" },
+    [["الحالة", s.status_state], ["آخر تحديث", s.status_updated], ["الفترة", s.status_period], ["الملخص", s.status_summary]]
+      .map(([l, v]) => el("div", { class: "field" }, el("label", {}, l), el("bdi", { class: "num" }, v || "—")))));
+  $("#p-settings").replaceChildren(el("h2", {}, S.cfg.name || S.project),
+    el("p", { class: "lead" }, "عدّل القيم ثم «حفظ الإعدادات». زر «تشغيل الرصد» يحفظ تلقائياً قبل البدء."), el("div", { class: "form" }, status, ...sets));
+}
+
+// جدول عام قابل للتحرير
+function editableTable(host, title, lead, rows, cols, make, opts = {}) {
+  let q = "";
+  const body = el("tbody");
+  const draw = () => {
+    body.replaceChildren(...rows.map((r, i) => ({ r, i })).filter(({ r }) => !q || JSON.stringify(r).includes(q)).map(({ r, i }) => {
+      const tr = el("tr", { class: r.active === false ? "off" : "" });
+      for (const c of cols) {
+        let cell;
+        if (c.key === "active") cell = el("input", { type: "checkbox", checked: r.active !== false, "aria-label": "مفعّل",
+          onchange: e => { r.active = e.target.checked; tr.className = r.active ? "" : "off"; markDirty(); renderTabs(); } });
+        else if (c.area) cell = el("textarea", { rows: 3, "aria-label": c.label, spellcheck: "false", oninput: e => { r[c.key] = e.target.value; markDirty(); } }, r[c.key] || "");
+        else if (c.options) cell = el("select", { "aria-label": c.label, onchange: e => { r[c.key] = e.target.value; markDirty(); } },
+          c.options.map(o => el("option", { value: o, selected: r[c.key] === o }, o)));
+        else cell = el("input", { type: "text", value: r[c.key] ?? "", "aria-label": c.label, oninput: e => { r[c.key] = e.target.value; markDirty(); } });
+        tr.append(el("td", { class: c.mono ? "mono" : "", style: c.w ? `min-width:${c.w}px` : null }, cell));
+      }
+      tr.append(el("td", {}, el("button", { class: "del", type: "button", title: "حذف الصف", "aria-label": "حذف الصف",
+        onclick: () => { rows.splice(i, 1); markDirty(); draw(); renderTabs(); } }, "✕")));
+      return tr;
+    }));
+  };
+  draw();
+  host.replaceChildren(el("h2", {}, title), el("p", { class: "lead" }, lead),
+    el("div", { class: "tablebar" },
+      el("button", { class: "btn", type: "button", onclick: () => { rows.push(make()); markDirty(); draw(); renderTabs(); } }, "＋ صف"),
+      opts.toggle ? el("button", { class: "btn", type: "button", onclick: () => { const on = !rows.every(r => r.active !== false); rows.forEach(r => r.active = on); markDirty(); draw(); renderTabs(); } }, "تفعيل/إيقاف الكل") : null,
+      el("input", { type: "search", placeholder: "بحث في الصفوف…", "aria-label": "بحث", oninput: e => { q = e.target.value.trim(); draw(); } })),
+    el("div", { class: "scroll" }, el("table", {}, el("thead", {}, el("tr", {}, cols.map(c => el("th", {}, c.label)), el("th", {}, ""))), body)));
+}
+function renderNews() {
+  editableTable($("#p-news"), "استعلامات الأخبار", "صف لكل بحث في Google News. hl/gl تحددان لغة وبلد النتائج، ويُضاف تاريخ الفترة تلقائياً.", S.cfg.news, [
+    { key: "active", label: "مفعّل" }, { key: "language", label: "اللغة", w: 90 }, { key: "region", label: "المنطقة", w: 100 },
+    { key: "hl", label: "hl", mono: true, w: 60 }, { key: "gl", label: "gl", mono: true, w: 50 }, { key: "query", label: "الاستعلام", w: 280 }],
+    () => ({ active: true, language: "العربية", region: "مصر", hl: "ar", gl: "EG", query: "" }), { toggle: true });
+}
+function renderSocial() {
+  editableTable($("#p-social"), "مصادر السوشيال (Apify)", "صف لكل actor. input يقبل {START} و{END}. comment_input يقبل {ITEMS} و{MAX}.", S.cfg.social, [
+    { key: "active", label: "مفعّل" }, { key: "platform", label: "المنصة", options: ["Facebook", "X", "YouTube", "TikTok", "Instagram"], w: 128 },
+    { key: "label", label: "الوصف", w: 170 }, { key: "actor", label: "actor", mono: true, w: 200 }, { key: "input", label: "input (JSON)", area: true, w: 320 },
+    { key: "comment_actor", label: "comment_actor", mono: true, w: 180 }, { key: "comment_key", label: "comment_key", mono: true, w: 90 },
+    { key: "comment_sep", label: "comment_sep", mono: true, w: 100 }, { key: "comment_input", label: "comment_input", area: true, w: 300 }],
+    () => ({ active: true, platform: "Facebook", label: "", actor: "", input: "{}", comment_actor: "", comment_key: "url", comment_sep: "", comment_input: "" }), { toggle: true });
+}
+function renderExclusions() {
+  editableTable($("#p-exclusions"), "الاستثناءات", "تُستبعد قبل التصنيف فلا ندفع ثمن تصنيفها. نص = كلمة في العنوان أو النص · حساب = اسم الحساب · نطاق = موقع.",
+    S.cfg.exclusions, [{ key: "type", label: "النوع", options: ["نص", "حساب", "نطاق"], w: 90 }, { key: "value", label: "القيمة", w: 300 }],
+    () => ({ type: "نص", value: "" }));
+}
+function renderTaxonomy() {
+  const tax = S.cfg.taxonomy;
+  const rows = Object.entries(tax).map(([k, v]) => el("div", { class: "field" }, el("label", {}, k),
+    el("input", { type: "text", value: v.join("، "), oninput: e => { tax[k] = e.target.value.split(/[،,]/).map(x => x.trim()).filter(Boolean); markDirty(); } })));
+  $("#p-taxonomy").replaceChildren(el("h2", {}, "قوائم التصنيف"),
+    el("p", { class: "lead" }, "القيم المسموحة لكل حقل، مفصولة بفاصلة. البرومبت يُبنى منها تلقائياً، و«محطة الزيارة» هي المحور الرئيسي للمشروع."),
+    el("fieldset", {}, el("div", { class: "form" }, rows)));
+}
+function renderContext() {
+  const ta = el("textarea", { id: "ctx", rows: 14, style: "font-family:var(--font);font-size:14px;direction:rtl;text-align:right;line-height:1.8",
+    oninput: e => { S.cfg.context = e.target.value.split(/\n\s*\n/).map(x => x.trim()).filter(Boolean); markDirty(); } }, (S.cfg.context || []).join("\n\n"));
+  $("#p-context").replaceChildren(el("h2", {}, "سياق الرصد"),
+    el("p", { class: "lead" }, "رأس البرومبت: موضوع الرصد، وقاعدة الصلة (متى تكون المادة مرتبطة)، وإرشادات التصنيف. افصل الفقرات بسطر فارغ."), ta);
+}
+
+// النتائج
+async function loadResults() {
+  const host = $("#p-results");
+  host.replaceChildren(el("p", { class: "lead" }, "جارٍ تحميل النتائج…"));
+  const [sm, latest] = await Promise.all([readJSON(`data/${S.project}/summary.json`, null), readJSON(`data/${S.project}/latest.json`, [])]);
+  if (!sm) { host.replaceChildren(el("h2", {}, "النتائج"), el("div", { class: "empty" }, "لا نتائج بعد. اضغط «▶ تشغيل الرصد»؛ تظهر المؤشرات هنا بعد أول تشغيل.")); return; }
+  const k = (l, v, alert) => el("div", { class: "kpi" + (alert ? " alert" : "") }, el("div", { class: "l" }, l), el("div", { class: "v" }, v));
+  const kpis = el("div", { class: "kpis" }, k("إجمالي السجلات", fmt(sm.total)), k("المواد", fmt(sm.materials)), k("التعليقات", fmt(sm.comments)),
+    k("إيجابي", pct(sm.positive)), k("سلبي", pct(sm.negative), true), k("المشاهدات", fmt(sm.views)), k("التفاعلات", fmt(sm.interactions)),
+    k("تستدعي التحقق", fmt(sm.verify), sm.verify > 0));
+  const legend = () => el("div", { class: "legend" }, el("span", { style: "--c:var(--pos)" }, "إيجابي"), el("span", { style: "--c:var(--neu)" }, "محايد"), el("span", { style: "--c:var(--neg)" }, "سلبي"));
+  const stacked = (title, data) => {
+    const max = Math.max(1, ...data.map(d => d.total));
+    return el("div", { class: "card" }, el("h3", {}, title), legend(), data.length ? el("div", { class: "bars" }, data.slice(0, 10).map(d =>
+      el("div", { class: "bar" }, el("span", { class: "k", title: d.key }, d.key), el("div", { class: "track", style: `width:${(d.total / max) * 100}%` },
+        ["إيجابي", "محايد", "سلبي"].map((t, i) => el("i", { style: `width:${(d[t] / d.total) * 100}%;background:var(${["--pos", "--neu", "--neg"][i]})`, title: `${t}: ${d[t]}` }))),
+        el("span", { class: "n" }, fmt(d.total))))) : el("div", { class: "empty" }, "لا بيانات"));
+  };
+  const daily = () => {
+    const d = sm.daily || []; const W = 560, H = 190, P = 28;
+    if (d.length < 2) return el("div", { class: "card" }, el("h3", {}, "الحجم اليومي"), el("div", { class: "empty" }, "يحتاج يومين على الأقل"));
+    const tot = d.map(x => (x["مادة"] || 0) + (x["تعليق"] || 0)); const max = Math.max(1, ...tot);
+    const x = i => P + (i * (W - 2 * P)) / (d.length - 1), y = v => H - P - (v / max) * (H - 2 * P);
+    const line = key => d.map((r, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(r[key] || 0).toFixed(1)}`).join(" ");
+    const ticks = d.map((r, i) => i % Math.ceil(d.length / 7) === 0 ? `<text x="${x(i)}" y="${H - 8}" text-anchor="middle">${r.day.slice(5)}</text>` : "").join("");
+    const grid = [0, .5, 1].map(f => `<line x1="${P}" x2="${W - P}" y1="${y(max * f)}" y2="${y(max * f)}" stroke="var(--line)"/><text x="${W - P + 4}" y="${y(max * f) + 4}">${fmt(Math.round(max * f))}</text>`).join("");
+    const svg = `<svg viewBox="0 0 ${W + 20} ${H}" width="100%" role="img" aria-label="الحجم اليومي">${grid}<path d="${line("مادة")}" fill="none" stroke="var(--fg)" stroke-width="2"/><path d="${line("تعليق")}" fill="none" stroke="var(--accent)" stroke-width="2"/>${ticks}</svg>`;
+    return el("div", { class: "card" }, el("h3", {}, "الحجم اليومي"), el("div", { class: "legend" }, el("span", { style: "--c:var(--fg)" }, "مواد"), el("span", { style: "--c:var(--accent)" }, "تعليقات")), el("div", { html: svg }));
+  };
+  const sources = el("div", { class: "card" }, el("h3", {}, "أكثر المصادر نشراً"), el("div", { class: "scroll", style: "border:0" }, el("table", {},
+    el("thead", {}, el("tr", {}, el("th", {}, "المصدر"), el("th", {}, "مواد"), el("th", {}, "تفاعلات"))),
+    el("tbody", {}, (sm.top_sources || []).map(s => el("tr", {}, el("td", {}, s.source), el("td", { class: "num" }, fmt(s.count)), el("td", { class: "num" }, fmt(s.interactions))))))));
+  const toneCls = t => t === "إيجابي" ? "tone-pos" : t === "سلبي" ? "tone-neg" : "tone-neu";
+  let q = "";
+  const tb = el("tbody");
+  const drawLatest = () => tb.replaceChildren(...latest.filter(r => !q || JSON.stringify(r).includes(q)).slice(0, 150).map(r => el("tr", {},
+    el("td", { class: "num" }, r["تاريخ النشر"]), el("td", {}, r["المنصة"]), el("td", {}, r["المصدر / الحساب"]),
+    el("td", { style: "min-width:260px" }, r["الرابط"] ? el("a", { href: r["الرابط"], target: "_blank", rel: "noopener" }, (r["العنوان / النص"] || "").slice(0, 140)) : (r["العنوان / النص"] || "").slice(0, 140)),
+    el("td", {}, r["محطة الزيارة"]), el("td", { class: toneCls(r["النبرة"]) }, r["النبرة"]), el("td", {}, r["نوع السجل"]))));
+  drawLatest();
+  const latestCard = el("div", { class: "card", style: "grid-column:1/-1" }, el("h3", {}, "أحدث السجلات"),
+    el("div", { class: "tablebar" }, el("input", { type: "search", placeholder: "بحث في أحدث 300 سجل…", "aria-label": "بحث في السجلات", oninput: e => { q = e.target.value.trim(); drawLatest(); } }),
+      el("button", { class: "btn", type: "button", onclick: downloadCSV }, "⬇ تنزيل كل السجلات (CSV)")),
+    el("div", { class: "scroll" }, el("table", {}, el("thead", {}, el("tr", {}, ["التاريخ", "المنصة", "المصدر", "العنوان / النص", "المحور", "النبرة", "النوع"].map(h => el("th", {}, h)))), tb)));
+  host.replaceChildren(el("h2", {}, "النتائج"), el("p", { class: "lead" }, el("bdi", {}, S.status.status_period || ""), " · آخر تحديث ", el("bdi", { dir: "ltr" }, S.status.status_updated || "—")), kpis,
+    el("div", { class: "cards" }, stacked("حسب المنصة × النبرة", sm.by_platform || []), stacked("حسب المحور × النبرة", sm.by_segment || []),
+      stacked("حسب الموضوع × النبرة", sm.by_topic || []), daily(), sources, stacked("حسب اللغة × النبرة", sm.by_language || []), latestCard));
+}
+async function downloadCSV() {
+  try {
+    toast("جارٍ تجهيز الملف…");
+    const t = await gh(`/contents/data/${S.project}/records.csv`, { raw: true });
+    const a = el("a", { href: URL.createObjectURL(new Blob([t], { type: "text/csv;charset=utf-8" })), download: `${S.project}-records.csv` });
+    document.body.append(a); a.click(); a.remove();
+  } catch (e) { toast("تعذّر التنزيل: " + e.message, 6000); }
+}
+
+// السجل
+async function renderRuns() {
+  const runsLog = await readJSON(`data/${S.project}/runs.json`, []);
+  const gr = S.runs.filter(r => r.event !== "push");
+  const stateChip = r => el("span", { class: "chip " + (r.status !== "completed" ? "run" : r.conclusion === "success" ? "ok" : "bad") },
+    r.status !== "completed" ? "يعمل" : r.conclusion === "success" ? "نجح" : "فشل");
+  $("#p-runs").replaceChildren(el("h2", {}, "سجل التشغيل"), el("p", { class: "lead" }, "تشغيلات GitHub الأخيرة، وملخص ما كتبه كل تشغيل لهذا المشروع."),
+    el("div", { class: "cards" },
+      el("div", { class: "card" }, el("h3", {}, "تشغيلات GitHub"), el("div", { class: "scroll", style: "border:0" }, el("table", {},
+        el("thead", {}, el("tr", {}, el("th", {}, "الوقت"), el("th", {}, "الحالة"), el("th", {}, ""))),
+        el("tbody", {}, gr.map(r => el("tr", {}, el("td", { class: "num" }, new Date(r.created_at).toLocaleString("en-GB")), el("td", {}, stateChip(r)),
+          el("td", {}, el("a", { href: r.html_url, target: "_blank", rel: "noopener" }, "التفاصيل")))))))),
+      el("div", { class: "card" }, el("h3", {}, "ما كُتب في كل تشغيل"), runsLog.length ? el("div", { class: "scroll", style: "border:0" }, el("table", {},
+        el("thead", {}, el("tr", {}, ["الوقت", "أخبار", "سوشيال", "تعليقات", "دقائق", "الحالة"].map(h => el("th", {}, h)))),
+        el("tbody", {}, runsLog.map(r => el("tr", {}, el("td", { class: "num" }, r.time), el("td", { class: "num" }, r.news), el("td", { class: "num" }, r.social),
+          el("td", { class: "num" }, r.comments), el("td", { class: "num" }, r.minutes), el("td", { class: r.state === "فشل" ? "tone-neg" : "" }, r.state, r.note ? " — " + r.note : "")))))) : el("div", { class: "empty" }, "لا تشغيلات بعد"))));
+}
+
+// مشروع جديد
+async function newProject() {
+  const dlg = $("#newDlg"); dlg.showModal();
+  dlg.onclose = async () => {
+    if (dlg.returnValue !== "ok") return;
+    const slug = $("#newSlug").value.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, "");
+    if (!slug || S.projects.includes(slug)) return toast("اختر معرّفاً جديداً بحروف إنجليزية");
+    const cfg = structuredClone(S.cfg); cfg.name = $("#newName").value.trim() || slug; cfg.settings.project_name = cfg.name; cfg.settings.daily = false;
+    try {
+      await gh(`/contents/config/projects/${slug}.json`, { method: "PUT", body: JSON.stringify({ message: `مشروع جديد: ${slug}`, content: b64e(JSON.stringify(cfg, null, 2) + "\n") }) });
+      S.projects.push(slug); S.dirty = false; fillProjects(); await loadProject(slug); S.tab = "settings"; renderTabs(); showTab(); toast("أُنشئ المشروع ✓ — عدّل إعداداته الآن");
+    } catch (e) { toast("تعذّر الإنشاء: " + e.message, 6000); }
+  };
+}
+
+// ربط الأحداث
+$("#connectBtn").onclick = connect;
+$("#settings").onclick = () => { $("#connect").hidden = !$("#connect").hidden; $("#repo").value = S.repo; };
+$("#save").onclick = () => save().catch(e => toast("تعذّر الحفظ: " + e.message, 6000));
+$("#run").onclick = run;
+$("#project").onchange = e => loadProject(e.target.value);
+$("#newProject").onclick = newProject;
+window.addEventListener("beforeunload", e => { if (S.dirty) { e.preventDefault(); e.returnValue = ""; } });
+$("#repo").value = S.repo;
+if (S.token) connect(); else { $("#connect").hidden = false; }
+</script>
+</body>
+</html>
