@@ -9,6 +9,7 @@
 <style>
 /* layout: top bar (project + actions) · tab strip · one working panel per tab; results = KPI strip then paired charts then tables */
 :root {
+  --dot:#dedcd3; --edge:#b9b6ab;
   --bg:#fafaf8; --surface:#ffffff; --surface2:#f3f2ee; --fg:#1a1a1a; --fg2:#6b6960; --fg3:#9c9889;
   --line:#e5e3db; --accent:#c0392b; --accent-soft:#f6e3e0; --ok:#2e6b4f; --ok-soft:#e1efe7; --warn:#9a6a12; --warn-soft:#f6ecd6;
   --pos:#2e6b4f; --neu:#9c9889; --neg:#c0392b;
@@ -18,11 +19,12 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg:#141412; --surface:#1c1c19; --surface2:#24231f; --fg:#ecebe6; --fg2:#a9a69c; --fg3:#7d7a71;
   --line:#33322d; --accent:#e06a58; --accent-soft:#3a201c; --ok:#6cc39a; --ok-soft:#1d3329; --warn:#e2b45a; --warn-soft:#3a2f17;
-  --pos:#6cc39a; --neu:#8d8a80; --neg:#e06a58; color-scheme:dark; } }
+  --pos:#6cc39a; --neu:#8d8a80; --neg:#e06a58; --dot:#2c2b27; --edge:#5a5850; color-scheme:dark; } }
 :root[data-theme="dark"] {
   --bg:#141412; --surface:#1c1c19; --surface2:#24231f; --fg:#ecebe6; --fg2:#a9a69c; --fg3:#7d7a71;
   --line:#33322d; --accent:#e06a58; --accent-soft:#3a201c; --ok:#6cc39a; --ok-soft:#1d3329; --warn:#e2b45a; --warn-soft:#3a2f17;
-  --pos:#6cc39a; --neu:#8d8a80; --neg:#e06a58; color-scheme:dark; }
+  --pos:#6cc39a; --neu:#8d8a80; --neg:#e06a58; --dot:#2c2b27; --edge:#5a5850; color-scheme:dark; }
+:root[data-theme="light"] { color-scheme:light; }
 * { box-sizing:border-box; }
 [hidden] { display:none !important; }
 html,body { margin:0; }
@@ -94,7 +96,7 @@ td .del:hover { color:var(--accent); }
 .progress .pr-head { display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; } .progress .pr-head a { margin-inline-start:auto; font-size:.85rem; }
 .progress .pr-stage { margin:8px 0; color:var(--fg2); } .progress .pr-note { display:block; margin-top:10px; color:var(--fg2); }
 .pr-track { height:8px; border-radius:99px; background:var(--surface2); overflow:hidden; } .pr-track i { display:block; height:100%; background:var(--accent); transition:width .6s; }
-.btn.primary.stop { background:var(--fg); border-color:var(--fg); }
+.btn.primary.stop { background:var(--fg); border-color:var(--fg); color:var(--bg); }
 .kpis { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; margin-bottom:18px; }
 .kpi { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:12px 14px; }
 .kpi .l { color:var(--fg2); font-size:.82rem; }
@@ -115,6 +117,37 @@ svg text { fill:var(--fg2); font-family:var(--font); font-size:11px; }
 .empty { color:var(--fg3); padding:28px; text-align:center; border:1px dashed var(--line); border-radius:var(--r); }
 .tone-pos { color:var(--pos); } .tone-neg { color:var(--neg); font-weight:600; } .tone-neu { color:var(--fg2); }
 
+/* سير العمل — بأسلوب Make */
+.flow { position:relative; border:1px solid var(--line); border-radius:12px; overflow-x:auto; overflow-y:hidden;
+  background-color:var(--surface); background-image:radial-gradient(var(--dot) 1px, transparent 1px); background-size:18px 18px; }
+.flow svg { display:block; min-width:980px; width:100%; height:auto; }
+.flow .edge { fill:none; stroke:var(--edge); stroke-width:2.5; stroke-dasharray:1 7; stroke-linecap:round; }
+.flow .edge.live { stroke:var(--accent); animation:dash 1s linear infinite; }
+@keyframes dash { to { stroke-dashoffset:-16; } }
+.flow .node { cursor:pointer; }
+.flow .node circle.ring { fill:var(--surface); stroke:var(--line); stroke-width:1.5; }
+.flow .node:hover circle.ring, .flow .node:focus-visible circle.ring { stroke:var(--fg2); }
+.flow .node.off { opacity:.35; }
+.flow .node.live circle.ring { stroke:var(--accent); stroke-width:3; }
+.flow .node .ico { font-family:var(--font); font-weight:700; fill:#fff; text-anchor:middle; dominant-baseline:central; pointer-events:none; }
+.flow .node .lbl { fill:var(--fg); font-size:12px; text-anchor:middle; font-weight:600; }
+.flow .node .sub { fill:var(--fg3); font-size:10.5px; text-anchor:middle; }
+.flow .bub rect { fill:var(--accent); } .flow .bub text { fill:#fff; font-size:11px; font-weight:700; text-anchor:middle; dominant-baseline:central; font-family:var(--mono); }
+.flow .bub.done rect { fill:var(--ok); }
+.flow .branch { fill:var(--fg3); font-size:11px; text-anchor:middle; }
+.flowbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:12px 0 0; color:var(--fg2); font-size:.85rem; }
+.flowstats { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-top:14px; }
+
+/* معالج المشروع */
+dialog.wide { max-width:860px; }
+.src-grid { display:flex; flex-wrap:wrap; gap:8px; }
+.src-grid label { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); border-radius:999px; padding:5px 12px; cursor:pointer; background:var(--surface); }
+.src-grid input { accent-color:var(--accent); }
+.src-grid .dot { width:10px; height:10px; border-radius:50%; }
+textarea.kw { font-family:var(--mono); font-size:12.5px; direction:rtl; min-height:260px; line-height:1.7; }
+.preview { font-size:.85rem; color:var(--fg2); }
+.row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+
 /* الاتصال */
 .connect { max-width:620px; margin:40px auto; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:22px 24px; display:grid; gap:14px; }
 .connect ol { margin:0; padding-inline-start:20px; color:var(--fg2); }
@@ -134,6 +167,7 @@ dialog::backdrop { background:rgb(0 0 0 / .35); }
     <span class="chip" id="state">غير متصل</span>
     <button class="btn" id="save" type="button" disabled>حفظ الإعدادات</button>
     <button class="btn primary" id="run" type="button" disabled>▶ تشغيل الرصد</button>
+    <button class="btn" id="theme" type="button" aria-label="الوضع الفاتح أو الداكن" title="الوضع الفاتح / الداكن">◐</button>
     <button class="btn" id="settings" type="button" aria-label="إعدادات الاتصال">⚙</button>
   </div>
 </header>
@@ -155,6 +189,7 @@ dialog::backdrop { background:rgb(0 0 0 / .35); }
   </section>
 
   <section class="progress" id="progressBox" hidden aria-live="polite"></section>
+  <section class="panel" id="p-flow" hidden></section>
   <section class="panel" id="p-settings" hidden></section>
   <section class="panel" id="p-news" hidden></section>
   <section class="panel" id="p-social" hidden></section>
@@ -165,13 +200,33 @@ dialog::backdrop { background:rgb(0 0 0 / .35); }
   <section class="panel" id="p-runs" hidden></section>
 </main>
 
-<dialog id="newDlg">
-  <form method="dialog" style="display:grid;gap:12px">
+<dialog id="newDlg" class="wide">
+  <form method="dialog" style="display:grid;gap:14px">
     <h2>مشروع رصد جديد</h2>
-    <p class="lead" style="margin:0">ينسخ إعدادات المشروع الحالي كبداية: غيّر بعدها الفترة والاستعلامات والسياق.</p>
-    <div class="field"><label for="newName">اسم المشروع</label><input type="text" id="newName" placeholder="رصد منتدى مصر 2026"></div>
-    <div class="field"><label for="newSlug">المعرّف (حروف إنجليزية وشرطات)</label><input type="text" id="newSlug" dir="ltr" placeholder="egypt-forum-2026"></div>
-    <div style="display:flex;gap:8px"><button class="btn primary" value="ok">إنشاء</button><button class="btn" value="cancel">إلغاء</button></div>
+    <p class="lead" style="margin:0">اكتب الاسم، واختر مصادر الجمع، والصق ملف الكلمات المفتاحية. المحرك يبني استعلامات الأخبار وإعدادات Apify لكل منصة تلقائياً، وتقدر تعدّل أي صف بعدها.</p>
+    <div class="grid">
+      <div class="field"><label for="newName">اسم المشروع</label><input type="text" id="newName" placeholder="رصد حسن علام الشهري"></div>
+      <div class="field"><label for="newSlug">المعرّف (حروف إنجليزية وشرطات)</label><input type="text" id="newSlug" dir="ltr" placeholder="hah-monthly"></div>
+      <div class="field"><label for="newPeriod">الفترة</label><select id="newPeriod"><option value="prev">الشهر الماضي</option><option value="this">الشهر الحالي</option><option value="copy">نفس فترة المشروع الحالي</option></select></div>
+    </div>
+    <div class="field"><label>مصادر الجمع</label><div class="src-grid" id="newSources"></div></div>
+    <div class="field">
+      <div class="row"><label for="newKw" style="margin-inline-end:auto">ملف الكلمات المفتاحية</label>
+        <button class="btn" type="button" id="kwTemplate">إدراج نموذج</button>
+        <label class="btn" style="cursor:pointer">فتح ملف .txt<input type="file" id="kwFile" accept=".txt,.md,.json,text/plain" hidden></label></div>
+      <textarea id="newKw" class="kw" spellcheck="false" placeholder="[الكلمات]&#10;&quot;حسن علام&quot;&#10;&quot;Hassan Allam&quot;"></textarea>
+      <small class="preview" id="kwPreview">الصق الملف بالتنسيق أعلاه، أو ملف JSON لمشروع كامل.</small>
+    </div>
+    <div class="field"><label for="newCtx">سياق الرصد (اختياري)</label><textarea id="newCtx" rows="4" placeholder="أنت محلل رصد إعلامي لحساب … قاعدة الصلة: …"></textarea></div>
+    <div style="display:flex;gap:8px"><button class="btn primary" value="ok">إنشاء المشروع</button><button class="btn" value="cancel" formnovalidate>إلغاء</button></div>
+  </form>
+</dialog>
+<dialog id="importDlg" class="wide">
+  <form method="dialog" style="display:grid;gap:12px">
+    <h2>استيراد مشاريع</h2>
+    <p class="lead" style="margin:0" id="importLead"></p>
+    <div class="scroll"><table><thead><tr><th>إنشاء</th><th>المشروع</th><th>المعرّف</th><th>أخبار</th><th>سوشيال</th></tr></thead><tbody id="importRows"></tbody></table></div>
+    <div style="display:flex;gap:8px"><button class="btn primary" value="ok">استيراد المحدد</button><button class="btn" value="cancel">إلغاء</button></div>
   </form>
 </dialog>
 
@@ -195,7 +250,7 @@ function toast(msg, ms = 3200) { const t = el("div", { class: "toast", role: "st
 
 // ── GitHub API ─────────────────────────────────────────────
 const S = { repo: store.get("repo") || "aeleraqi/monitor-engine", token: store.get("token") || "", project: store.get("project") || "",
-            projects: [], cfg: null, sha: null, dirty: false, tab: store.get("tab") || "settings", status: {}, runs: [] };
+            projects: [], cfg: null, sha: null, dirty: false, tab: store.get("tab") || "flow", status: {}, runs: [] };
 async function gh(path, opts = {}) {
   const r = await fetch(`https://api.github.com/repos/${S.repo}${path}`, { cache: "no-store", ...opts, headers: {
     Authorization: `Bearer ${S.token}`, Accept: opts.raw ? "application/vnd.github.raw" : "application/vnd.github+json",
@@ -253,8 +308,11 @@ function renderProgress() {
       el("a", { href: S.live.html_url, target: "_blank", rel: "noopener" }, "السجل التفصيلي على GitHub")),
     el("div", { class: "pr-stage" }, p ? (p.stage || "") + (p.total ? ` — ${fmt(p.done)} من ${fmt(p.total)}` : "") : "يبدأ… (تظهر الأرقام بعد أول دقيقة)"),
     el("div", { class: "pr-track" }, el("i", { style: `width:${ratio * 100}%` })),
-    el("div", { class: "kpis", style: "margin:12px 0 0" }, ["أخبار", "سوشيال", "تعليقات"].map(k =>
-      el("div", { class: "kpi" }, el("div", { class: "l" }, "كُتب: " + k), el("div", { class: "v" }, fmt((p && p.written || {})[k] || 0))))),
+    el("div", { class: "kpis", style: "margin:12px 0 0" },
+      [["الأخبار", "أخبار"], ["السوشيال", "سوشيال"], ["التعليقات", "تعليقات"]].map(([c, w]) =>
+        el("div", { class: "kpi" }, el("div", { class: "l" }, c + ": سُحب / كُتب"),
+          el("div", { class: "v" }, fmt((p && p.collected || {})[c] || 0), el("span", { style: "color:var(--fg3);font-size:1rem" }, " / " + fmt((p && p.written || {})[w] || 0))))),
+      el("div", { class: "kpi" }, el("div", { class: "l" }, "إجمالي ما سُحب"), el("div", { class: "v" }, fmt(Object.values((p && p.collected) || {}).reduce((a, b) => a + b, 0))))),
     el("small", { class: "pr-note" }, "تُحفظ النتائج على دفعات من 100 مادة. لو أوقفت التشغيل يبقى ما اكتمل حفظه في ملف CSV."));
 }
 async function stopRun() {
@@ -289,23 +347,24 @@ async function pollRuns() {
     if (S.wasLive && !live) { S.status = await readJSON(`data/${S.project}/status.json`, {}); loadResults(); toast("انتهى التشغيل — حُدّثت النتائج"); }
     S.wasLive = !!live; S.progress = live ? S.progress : null;
     const rb = $("#run"); rb.textContent = live ? "⏹ إيقاف التشغيل" : "▶ تشغيل الرصد"; rb.classList.toggle("stop", !!live);
-    renderProgress();
+    renderProgress(); if (S.tab === "flow") renderFlow();
     if (S.tab === "runs") renderRuns();
   } catch {}
 }
 function ago(t) { const m = Math.round((Date.now() - new Date(t)) / 60000); return m < 1 ? "لحظات" : m + " دقيقة"; }
 
 // ── التبويبات ───────────────────────────────────────────────
-const TABS = [["settings", "الإعدادات"], ["news", "الأخبار"], ["social", "السوشيال"], ["exclusions", "الاستثناءات"],
+const TABS = [["flow", "سير العمل"], ["settings", "الإعدادات"], ["news", "الأخبار"], ["social", "السوشيال"], ["exclusions", "الاستثناءات"],
               ["taxonomy", "التصنيف"], ["context", "السياق"], ["results", "النتائج"], ["runs", "السجل"]];
 function renderTabs() {
   const counts = { news: S.cfg.news.filter(r => r.active).length + "/" + S.cfg.news.length,
                    social: S.cfg.social.filter(r => r.active).length + "/" + S.cfg.social.length, exclusions: S.cfg.exclusions.length };
   $("#tabs").replaceChildren(...TABS.map(([k, label]) => el("button", { role: "tab", type: "button", "aria-selected": String(S.tab === k),
-    onclick: () => { S.tab = k; store.set("tab", k); renderTabs(); showTab(); } }, label, counts[k] != null ? el("span", { class: "count" }, counts[k]) : null)));
+    onclick: () => goTab(k) }, label, counts[k] != null ? el("span", { class: "count" }, counts[k]) : null)));
 }
-function showTab() { for (const [k] of TABS) $("#p-" + k).hidden = k !== S.tab; if (S.tab === "runs") renderRuns(); }
-function renderAll() { renderTabs(); renderSettings(); renderNews(); renderSocial(); renderExclusions(); renderTaxonomy(); renderContext(); showTab(); }
+function showTab() { for (const [k] of TABS) $("#p-" + k).hidden = k !== S.tab; if (S.tab === "runs") renderRuns(); if (S.tab === "flow") renderFlow(); }
+function goTab(k) { S.tab = k; store.set("tab", k); renderTabs(); showTab(); window.scrollTo({ top: 0 }); }
+function renderAll() { renderTabs(); renderFlow(); renderSettings(); renderNews(); renderSocial(); renderExclusions(); renderTaxonomy(); renderContext(); showTab(); }
 
 // الإعدادات
 const FORM = [
@@ -322,7 +381,8 @@ const FORM = [
     ["stage_comments", "تعليقات الجمهور", "stage", "على أعلى المواد تفاعلاً"],
     ["comments_top_posts", "مواد تُجمع تعليقاتها", "number", "الأعلى تفاعلاً في كل تشغيل"],
     ["comments_per_post", "حد التعليقات لكل مادة", "number", ""],
-    ["news_lookback_days", "أيام إضافية قبل البداية", "number", "في بحث جوجل نيوز فقط"]]],
+    ["news_lookback_days", "أيام إضافية قبل البداية", "number", "في بحث جوجل نيوز فقط"],
+    ["news_chunk_days", "تقسيم بحث الأخبار (أيام)", "number", "Google News يعيد 100 نتيجة بحد أقصى لكل بحث، فنقسّم الفترة: 7 = أسبوع"]]],
   ["التصنيف بالذكاء الاصطناعي", [
     ["llm_provider", "مزوّد النموذج", "select:gemini,claude", ""],
     ["llm_model", "النموذج", "text", "مثل gemini-3.5-flash-lite أو claude-haiku-4-5"],
@@ -349,8 +409,11 @@ function renderSettings() {
   const status = el("fieldset", {}, el("legend", {}, "آخر تشغيل"), el("div", { class: "grid" },
     [["الحالة", s.status_state], ["آخر تحديث", s.status_updated], ["الفترة", s.status_period], ["الملخص", s.status_summary]]
       .map(([l, v]) => el("div", { class: "field" }, el("label", {}, l), el("bdi", { class: "num" }, v || "—")))));
+  const preset = (label, fn) => el("button", { class: "btn", type: "button", onclick: () => { Object.assign(st, fn()); markDirty(); renderSettings(); } }, label);
+  const presets = el("div", { class: "row" }, el("span", { class: "preview" }, "الفترة بسرعة:"),
+    preset("الشهر الماضي", () => monthRange(-1)), preset("الشهر الحالي", () => monthRange(0)), preset("آخر 7 أيام", () => lastDays(7)));
   $("#p-settings").replaceChildren(el("h2", {}, S.cfg.name || S.project),
-    el("p", { class: "lead" }, "عدّل القيم ثم «حفظ الإعدادات». زر «تشغيل الرصد» يحفظ تلقائياً قبل البدء."), el("div", { class: "form" }, status, ...sets));
+    el("p", { class: "lead" }, "عدّل القيم ثم «حفظ الإعدادات». زر «تشغيل الرصد» يحفظ تلقائياً قبل البدء."), el("div", { class: "form" }, status, presets, ...sets));
 }
 
 // جدول عام قابل للتحرير
@@ -366,7 +429,7 @@ function editableTable(host, title, lead, rows, cols, make, opts = {}) {
           onchange: e => { r.active = e.target.checked; tr.className = r.active ? "" : "off"; markDirty(); renderTabs(); } });
         else if (c.area) cell = el("textarea", { rows: 3, "aria-label": c.label, spellcheck: "false", oninput: e => { r[c.key] = e.target.value; markDirty(); } }, r[c.key] || "");
         else if (c.options) cell = el("select", { "aria-label": c.label, onchange: e => { r[c.key] = e.target.value; markDirty(); } },
-          c.options.map(o => el("option", { value: o, selected: r[c.key] === o }, o)));
+          c.options.map(o => el("option", { value: o, selected: (r[c.key] || c.options[0]) === o }, o)));
         else cell = el("input", { type: "text", value: r[c.key] ?? "", "aria-label": c.label, oninput: e => { r[c.key] = e.target.value; markDirty(); } });
         tr.append(el("td", { class: c.mono ? "mono" : "", style: c.w ? `min-width:${c.w}px` : null }, cell));
       }
@@ -380,22 +443,23 @@ function editableTable(host, title, lead, rows, cols, make, opts = {}) {
     el("div", { class: "tablebar" },
       el("button", { class: "btn", type: "button", onclick: () => { rows.push(make()); markDirty(); draw(); renderTabs(); } }, "＋ صف"),
       opts.toggle ? el("button", { class: "btn", type: "button", onclick: () => { const on = !rows.every(r => r.active !== false); rows.forEach(r => r.active = on); markDirty(); draw(); renderTabs(); } }, "تفعيل/إيقاف الكل") : null,
+      ...(opts.extra || []),
       el("input", { type: "search", placeholder: "بحث في الصفوف…", "aria-label": "بحث", oninput: e => { q = e.target.value.trim(); draw(); } })),
     el("div", { class: "scroll" }, el("table", {}, el("thead", {}, el("tr", {}, cols.map(c => el("th", {}, c.label)), el("th", {}, ""))), body)));
 }
 function renderNews() {
-  editableTable($("#p-news"), "استعلامات الأخبار", "صف لكل بحث في Google News. hl/gl تحددان لغة وبلد النتائج، ويُضاف تاريخ الفترة تلقائياً.", S.cfg.news, [
-    { key: "active", label: "مفعّل" }, { key: "language", label: "اللغة", w: 90 }, { key: "region", label: "المنطقة", w: 100 },
+  editableTable($("#p-news"), "استعلامات الأخبار", "صف لكل بحث. المصدر: google = Google News · bing = Bing News · newsscope = NewsScope · rss = خلاصة موقع (ضع الرابط في خانة الاستعلام). hl/gl لغة وبلد النتائج، وتاريخ الفترة يُضاف تلقائياً.", S.cfg.news, [
+    { key: "active", label: "مفعّل" }, { key: "source", label: "المصدر", options: ["google", "bing", "newsscope", "rss"], w: 110 }, { key: "language", label: "اللغة", w: 90 }, { key: "region", label: "المنطقة", w: 100 },
     { key: "hl", label: "hl", mono: true, w: 60 }, { key: "gl", label: "gl", mono: true, w: 50 }, { key: "query", label: "الاستعلام", w: 280 }],
-    () => ({ active: true, language: "العربية", region: "مصر", hl: "ar", gl: "EG", query: "" }), { toggle: true });
+    () => ({ active: true, source: "google", language: "العربية", region: "مصر", hl: "ar", gl: "EG", query: "" }), { toggle: true, extra: kwButtons() });
 }
 function renderSocial() {
   editableTable($("#p-social"), "مصادر السوشيال (Apify)", "صف لكل actor. input يقبل {START} و{END}. comment_input يقبل {ITEMS} و{MAX}.", S.cfg.social, [
-    { key: "active", label: "مفعّل" }, { key: "platform", label: "المنصة", options: ["Facebook", "X", "YouTube", "TikTok", "Instagram"], w: 128 },
+    { key: "active", label: "مفعّل" }, { key: "platform", label: "المنصة", options: ["Facebook", "X", "YouTube", "TikTok", "Instagram", "LinkedIn"], w: 128 },
     { key: "label", label: "الوصف", w: 170 }, { key: "actor", label: "actor", mono: true, w: 200 }, { key: "input", label: "input (JSON)", area: true, w: 320 },
     { key: "comment_actor", label: "comment_actor", mono: true, w: 180 }, { key: "comment_key", label: "comment_key", mono: true, w: 90 },
     { key: "comment_sep", label: "comment_sep", mono: true, w: 100 }, { key: "comment_input", label: "comment_input", area: true, w: 300 }],
-    () => ({ active: true, platform: "Facebook", label: "", actor: "", input: "{}", comment_actor: "", comment_key: "url", comment_sep: "", comment_input: "" }), { toggle: true });
+    () => ({ active: true, platform: "Facebook", label: "", actor: "", input: "{}", comment_actor: "", comment_key: "url", comment_sep: "", comment_input: "" }), { toggle: true, extra: kwButtons() });
 }
 function renderExclusions() {
   editableTable($("#p-exclusions"), "الاستثناءات", "تُستبعد قبل التصنيف فلا ندفع ثمن تصنيفها. نص = كلمة في العنوان أو النص · حساب = اسم الحساب · نطاق = موقع.",
@@ -406,9 +470,14 @@ function renderTaxonomy() {
   const tax = S.cfg.taxonomy;
   const rows = Object.entries(tax).map(([k, v]) => el("div", { class: "field" }, el("label", {}, k),
     el("input", { type: "text", value: v.join("، "), oninput: e => { tax[k] = e.target.value.split(/[،,]/).map(x => x.trim()).filter(Boolean); markDirty(); } })));
+  S.cfg.extra_fields = S.cfg.extra_fields || [];
+  const extraHost = el("div");
+  editableTable(extraHost, "حقول إضافية", "أعمدة خاصة بهذا المشروع تُضاف في آخر ملف CSV ويملؤها النموذج، مثل الملكية (مملوك/مكتسب) أو الدرجة الخماسية أو السوق. الخيارات مفصولة بفاصلة، واتركها فارغة لنص حر.",
+    S.cfg.extra_fields, [{ key: "label", label: "اسم العمود", w: 160 }, { key: "choices", label: "الخيارات", w: 300 }, { key: "desc", label: "تعليمات للنموذج", w: 260 }],
+    () => ({ label: "", choices: "", desc: "" }));
   $("#p-taxonomy").replaceChildren(el("h2", {}, "قوائم التصنيف"),
-    el("p", { class: "lead" }, "القيم المسموحة لكل حقل، مفصولة بفاصلة. البرومبت يُبنى منها تلقائياً، و«محطة الزيارة» هي المحور الرئيسي للمشروع."),
-    el("fieldset", {}, el("div", { class: "form" }, rows)));
+    el("p", { class: "lead" }, "القيم المسموحة لكل حقل، مفصولة بفاصلة. البرومبت يُبنى منها تلقائياً، و«المحور» هو التقسيم الرئيسي للمشروع (المحطة، الشركة التابعة، الكيان…)."),
+    el("fieldset", {}, el("div", { class: "form" }, rows)), el("div", { style: "margin-top:22px" }, extraHost));
 }
 function renderContext() {
   const ta = el("textarea", { id: "ctx", rows: 14, style: "font-family:var(--font);font-size:14px;direction:rtl;text-align:right;line-height:1.8",
@@ -425,6 +494,7 @@ async function loadResults() {
     gh(`/contents/data/${S.project}`, { allow404: true }).catch(() => null)]);
   const csvFile = (files || []).find(f => f.name === "records.csv");
   const size = b => b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
+  S.summary = sm || {}; if (S.tab === "flow") renderFlow();
   if (!sm) { host.replaceChildren(el("h2", {}, "النتائج"), el("div", { class: "empty" }, "لا نتائج بعد. اضغط «▶ تشغيل الرصد»؛ تظهر المؤشرات هنا بعد أول تشغيل.")); return; }
   const k = (l, v, alert) => el("div", { class: "kpi" + (alert ? " alert" : "") }, el("div", { class: "l" }, l), el("div", { class: "v" }, v));
   const kpis = el("div", { class: "kpis" }, k("إجمالي السجلات", fmt(sm.total)), k("المواد", fmt(sm.materials)), k("التعليقات", fmt(sm.comments)),
@@ -458,7 +528,7 @@ async function loadResults() {
   const drawLatest = () => tb.replaceChildren(...latest.filter(r => !q || JSON.stringify(r).includes(q)).slice(0, 150).map(r => el("tr", {},
     el("td", { class: "num" }, r["تاريخ النشر"]), el("td", {}, r["المنصة"]), el("td", {}, r["المصدر / الحساب"]),
     el("td", { style: "min-width:260px" }, r["الرابط"] ? el("a", { href: r["الرابط"], target: "_blank", rel: "noopener" }, (r["العنوان / النص"] || "").slice(0, 140)) : (r["العنوان / النص"] || "").slice(0, 140)),
-    el("td", {}, r["محطة الزيارة"]), el("td", { class: toneCls(r["النبرة"]) }, r["النبرة"]), el("td", {}, r["نوع السجل"]))));
+    el("td", {}, r["المحور"] ?? r["محطة الزيارة"]), el("td", { class: toneCls(r["النبرة"]) }, r["النبرة"]), el("td", {}, r["نوع السجل"]))));
   drawLatest();
   const latestCard = el("div", { class: "card", style: "grid-column:1/-1" }, el("h3", {}, "أحدث السجلات"),
     el("div", { class: "tablebar" }, el("input", { type: "search", placeholder: "بحث في أحدث 300 سجل…", "aria-label": "بحث في السجلات", oninput: e => { q = e.target.value.trim(); drawLatest(); } }),
@@ -497,19 +567,327 @@ async function renderRuns() {
 }
 
 // مشروع جديد
-async function newProject() {
-  const dlg = $("#newDlg"); dlg.showModal();
+// ── الفترات الجاهزة ─────────────────────────────────────────
+const iso = d => d.toISOString().slice(0, 10);
+function monthRange(offset) {
+  const now = new Date(), a = new Date(Date.UTC(now.getFullYear(), now.getMonth() + offset, 1));
+  const b = new Date(Date.UTC(a.getUTCFullYear(), a.getUTCMonth() + 1, 0));
+  const end = offset === 0 ? new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())) : b;
+  return { window_start: iso(a), window_end: iso(end), collect_until: iso(end) };
+}
+function lastDays(n) {
+  const e = new Date(); const a = new Date(Date.now() - (n - 1) * 864e5);
+  return { window_start: iso(a), window_end: iso(e), collect_until: iso(e) };
+}
+
+// ── الوضع الفاتح/الداكن ──────────────────────────────────────
+function applyTheme(t) {
+  if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
+  const dark = t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+  $("#theme").textContent = dark ? "☀" : "☾"; $("#theme").title = dark ? "الوضع الفاتح" : "الوضع الداكن";
+}
+function toggleTheme() {
+  const dark = document.documentElement.dataset.theme === "dark" || (!document.documentElement.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+  const t = dark ? "light" : "dark"; store.set("theme", t); applyTheme(t);
+}
+
+// ── المصادر: ألوان وأيقونات (مثل وحدات Make) ─────────────────
+const SRC = {
+  google:    { label: "Google News", ico: "G",  c: "#4285F4", kind: "news" },
+  bing:      { label: "Bing News",   ico: "b",  c: "#00897B", kind: "news" },
+  newsscope: { label: "NewsScope",   ico: "N",  c: "#c0392b", kind: "news" },
+  rss:       { label: "RSS",         ico: "◉",  c: "#F26522", kind: "news" },
+  X:         { label: "X",           ico: "𝕏",  c: "#14171A", kind: "social" },
+  Facebook:  { label: "Facebook",    ico: "f",  c: "#1877F2", kind: "social" },
+  Instagram: { label: "Instagram",   ico: "◎",  c: "#D62976", kind: "social" },
+  TikTok:    { label: "TikTok",      ico: "♪",  c: "#111111", kind: "social" },
+  YouTube:   { label: "YouTube",     ico: "▶",  c: "#FF0000", kind: "social" },
+  LinkedIn:  { label: "LinkedIn",    ico: "in", c: "#0A66C2", kind: "social" },
+};
+
+// ── سير العمل بأسلوب Make ───────────────────────────────────
+function renderFlow() {
+  const host = $("#p-flow"); if (!host || !S.cfg) return;
+  const cfg = S.cfg, st = new Set(cfg.settings.stages || []), sm = S.summary || {}, p = S.progress, live = !!S.live;
+  const newsBy = {}, socBy = {};
+  for (const r of cfg.news) if (r.active !== false) { const k = (r.source || "google"); newsBy[k] = (newsBy[k] || 0) + 1; }
+  for (const r of cfg.social) if (r.active !== false) socBy[r.platform] = (socBy[r.platform] || 0) + 1;
+  const stage = (p && p.stage) || "";
+  const W = 1100, H = 480, R = 26;
+  const nodes = [], edges = [];
+  const N = (id, x, y, o) => { nodes.push({ id, x, y, ...o }); return id; };
+  N("trigger", 1045, 215, { ico: "⏱", c: "#6D00CC", lbl: "التشغيل", sub: cfg.settings.daily ? "يومياً 23:45" : "يدوي", tab: "settings" });
+  N("router", 930, 215, { ico: "⑂", c: "#8f8b80", lbl: "توزيع", sub: "المسارات", r: 22, tab: "settings" });
+  edges.push(["trigger", "router"]);
+  const newsKeys = Object.keys(newsBy), socKeys = Object.keys(socBy);
+  const xs = (n, from, to) => n <= 1 ? [(from + to) / 2] : Array.from({ length: n }, (_, i) => from - i * Math.min(95, (from - to) / (n - 1)));
+  const bub = (k) => {
+    if (p && p.by_source && p.by_source[k] != null) return { n: p.by_source[k], done: false };
+    const fromSum = k in SRC && SRC[k].kind === "news" ? (sm.by_collector || {})[SRC[k].label] : (sm.by_platform || []).find(b => b.key === k)?.total;
+    return fromSum != null ? { n: fromSum, done: true } : null;
+  };
+  let prevNews = "router";
+  xs(newsKeys.length, 820, 470).forEach((x, i) => {
+    const k = newsKeys[i], id = N("n_" + k, x, 95, { ico: SRC[k]?.ico || "?", c: SRC[k]?.c || "#888", lbl: SRC[k]?.label || k, sub: `${newsBy[k]} بحث`, tab: "news",
+      off: !st.has("news"), live: live && stage.startsWith("الأخبار: جمع"), bubble: bub(k) });
+    edges.push([prevNews, id]); prevNews = id;
+  });
+  let prevSoc = "router";
+  xs(socKeys.length, 820, 470).forEach((x, i) => {
+    const k = socKeys[i], id = N("s_" + k, x, 270, { ico: SRC[k]?.ico || k[0], c: SRC[k]?.c || "#888", lbl: k, sub: `${socBy[k]} مصدر`, tab: "social",
+      off: !st.has("social"), live: live && stage.startsWith("السوشيال: جمع"), bubble: bub(k) });
+    edges.push([prevSoc, id]); prevSoc = id;
+  });
+  N("filter", 360, 215, { ico: "⧩", c: "#7a776d", lbl: "فلترة", sub: "التكرار والفترة والاستثناءات", tab: "exclusions",
+    live: live && /فلترة/.test(stage) });
+  if (prevNews !== "router") edges.push([prevNews, "filter"]);
+  if (prevSoc !== "router") edges.push([prevSoc, "filter"]);
+  if (prevSoc !== "router") {
+    N("comments", 470, 405, { ico: "💬", c: "#E8710A", lbl: "التعليقات", sub: `أعلى ${cfg.settings.comments_top_posts || 40} مادة`, tab: "social",
+      off: !st.has("comments"), live: live && stage.startsWith("التعليقات"), bubble: p && p.collected && p.collected["التعليقات"] != null ? { n: p.collected["التعليقات"] } : (sm.comments ? { n: sm.comments, done: true } : null) });
+    edges.push([prevSoc, "comments"]); edges.push(["comments", "filter"]);
+  }
+  const prov = (cfg.settings.llm_provider || "gemini").toLowerCase();
+  const classified = p && /تصنيف/.test(stage) && p.total ? { n: `${fmt(p.done)}/${fmt(p.total)}` } : null;
+  N("ai", 245, 215, { ico: "✦", c: prov.startsWith("claude") ? "#D97757" : "#7C4DFF", lbl: prov.startsWith("claude") ? "Claude" : "Gemini",
+    sub: `${cfg.settings.batch_size || 25} مادة في كل نداء`, tab: "taxonomy", live: live && /تصنيف/.test(stage), bubble: classified });
+  const written = p && p.written ? Object.values(p.written).reduce((a, b) => a + b, 0) : null;
+  N("csv", 120, 215, { ico: "▦", c: "#1E8E3E", lbl: "records.csv", sub: "ملف النتائج", tab: "results",
+    bubble: written != null ? { n: written } : (sm.total != null ? { n: sm.total, done: true } : null) });
+  edges.push(["filter", "ai"], ["ai", "csv"]);
+  const at = Object.fromEntries(nodes.map(n => [n.id, n]));
+  const path = (a, b) => { const A = at[a], B = at[b], mx = (A.x + B.x) / 2; return `M${A.x},${A.y} C${mx},${A.y} ${mx},${B.y} ${B.x},${B.y}`; };
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const liveEdge = (a, b) => live && (at[b].live || at[a].live);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="سير عمل الرصد">`;
+  svg += edges.map(([a, b]) => `<path class="edge${liveEdge(a, b) ? " live" : ""}" d="${path(a, b)}"/>`).join("");
+  if (newsKeys.length) svg += `<text class="branch" x="645" y="40">الأخبار</text>`;
+  for (const n of nodes) {
+    const r = n.r || R;
+    svg += `<g class="node${n.off ? " off" : ""}${n.live ? " live" : ""}" data-tab="${n.tab}" tabindex="0" role="button" aria-label="${esc(n.lbl)}">`
+      + `<circle class="ring" cx="${n.x}" cy="${n.y}" r="${r + 5}"/><circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${n.c}"/>`
+      + `<text class="ico" x="${n.x}" y="${n.y}" font-size="${n.ico.length > 1 ? 17 : 22}">${esc(n.ico)}</text>`
+      + `<text class="lbl" x="${n.x}" y="${n.y + r + 22}">${esc(n.lbl)}</text>`
+      + (n.sub ? `<text class="sub" x="${n.x}" y="${n.y + r + 37}">${esc(n.sub)}</text>` : "");
+    if (n.bubble && n.bubble.n != null) {
+      const t = typeof n.bubble.n === "number" ? fmt(n.bubble.n) : n.bubble.n, w = Math.max(24, String(t).length * 7.5 + 12);
+      const bx = n.x - r * 0.75, by = n.y - r * 0.85;
+      svg += `<g class="bub${n.bubble.done ? " done" : ""}"><rect x="${bx - w / 2}" y="${by - 10}" width="${w}" height="20" rx="10"/>`
+        + `<text x="${bx}" y="${by}">${esc(t)}</text></g>`;
+    }
+    svg += `</g>`;
+  }
+  svg += "</svg>";
+  const box = el("div", { class: "flow", html: svg });
+  box.querySelectorAll(".node").forEach(g => { const go = () => goTab(g.dataset.tab); g.addEventListener("click", go); g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }); });
+  const per = `${cfg.settings.window_start || "؟"} ← ${cfg.settings.window_end || "؟"}`;
+  const coll = p && p.collected ? Object.values(p.collected).reduce((a, b) => a + b, 0) : null;
+  const k = (l, v) => el("div", { class: "kpi" }, el("div", { class: "l" }, l), el("div", { class: "v", style: "font-size:1.3rem" }, v));
+  host.replaceChildren(el("h2", {}, cfg.name || S.project),
+    el("p", { class: "lead" }, "مسار البيانات من المصادر إلى ملف النتائج. اضغط أي وحدة لتعديلها. أثناء التشغيل تتحرك الوصلات، والفقاعات تعدّ ما سُحب لحظة بلحظة، وبعده تعرض الأخضر ما كُتب في الملف."),
+    box,
+    el("div", { class: "flowstats" },
+      k("الفترة", el("bdi", { dir: "ltr", style: "font-size:1rem;white-space:nowrap" }, per)),
+      k(live ? "سُحب حتى الآن" : "سجلات الملف", fmt(live ? (coll || 0) : (sm.total || 0))),
+      k(live ? "المرحلة" : "آخر تشغيل", live ? (stage || "يبدأ…") : (S.status.status_state || "—")),
+      k("المصادر المفعّلة", fmt(cfg.news.filter(r => r.active !== false).length + cfg.social.filter(r => r.active !== false).length))));
+}
+
+// ── ملف الكلمات المفتاحية ───────────────────────────────────
+const KW_TEMPLATE = `# ملف كلمات مشروع رصد — السطور التي تبدأ بـ # ملاحظات.
+# كل قسم يبدأ باسمه بين قوسين مربعين، وتحته سطر لكل قيمة.
+
+[الكلمات]
+# كلمة أو عبارة في كل سطر. ضع العبارة بين "..." للمطابقة الحرفية.
+"حسن علام"
+"Hassan Allam"
+PGESCO
+
+[استبعاد]
+# أي مادة فيها هذه الكلمات تُستبعد من البحث ومن النتائج.
+وصلة دهشور
+
+[الأسواق]
+# لغة-بلد لبحث الأخبار: ar-EG ar-SA ar-AE en-US en-GB fr-FR …
+ar-EG
+en-US
+
+[الهاشتاجات]
+HassanAllam
+
+[الحسابات]
+# المنصة | رابط الصفحة أو الحساب (LinkedIn وFacebook وInstagram)
+LinkedIn | https://www.linkedin.com/company/hassan-allam-holding/
+
+[خلاصات RSS]
+# رابط خلاصة RSS لموقع بعينه
+https://feeds.bbci.co.uk/news/world/middle_east/rss.xml
+
+[استعلامات]
+# بحث متقدم كما هو: المصدر | لغة-بلد | الاستعلام  (المصدر: google أو bing أو newsscope)
+google | en-US | ("Hassan Allam" OR "Amr Allam") -"real estate"
+`;
+const SECTIONS = { "الكلمات": "kw", "كلمات": "kw", "استبعاد": "ex", "الاستبعاد": "ex", "الأسواق": "mk", "اسواق": "mk", "الهاشتاجات": "ht",
+  "هاشتاجات": "ht", "الحسابات": "ac", "حسابات": "ac", "خلاصات rss": "rss", "rss": "rss", "استعلامات": "q", "الاستعلامات": "q" };
+function parseKw(text) {
+  const out = { kw: [], ex: [], mk: [], ht: [], ac: [], rss: [], q: [] }; let cur = "kw";
+  for (let line of text.split(/\r?\n/)) {
+    line = line.trim(); if (!line || line.startsWith("#")) continue;
+    const m = line.match(/^\[(.+)\]$/); if (m) { cur = SECTIONS[m[1].trim().toLowerCase()] || "kw"; continue; }
+    out[cur].push(line);
+  }
+  out.ht = out.ht.map(h => h.replace(/^#/, ""));
+  out.ac = out.ac.map(l => { const [pl, ...u] = l.split("|"); return { platform: pl.trim(), url: u.join("|").trim() }; }).filter(a => a.url);
+  out.q = out.q.map(l => { const [src, mk, ...q] = l.split("|").map(x => x.trim()); return { src: (src || "google").toLowerCase(), mk, q: q.join(" | ") }; }).filter(x => x.q);
+  if (!out.mk.length) out.mk = ["ar-EG", "en-US"];
+  return out;
+}
+const LANG = { ar: "العربية", en: "الإنجليزية", fr: "الفرنسية", de: "الألمانية", es: "الإسبانية", it: "الإيطالية", tr: "التركية", ko: "الكورية", ms: "الملايوية", id: "الإندونيسية" };
+const REGION = { EG: "مصر", SA: "السعودية", AE: "الإمارات", OM: "عُمان", KW: "الكويت", QA: "قطر", BH: "البحرين", JO: "الأردن", IQ: "العراق", LY: "ليبيا", MA: "المغرب",
+  TN: "تونس", DZ: "الجزائر", SD: "السودان", US: "الولايات المتحدة", GB: "بريطانيا", FR: "فرنسا", DE: "ألمانيا", CA: "كندا", KE: "كينيا", NG: "نيجيريا" };
+const q1 = k => /^".*"$/.test(k) || !/\s/.test(k) ? k : `"${k}"`;
+function orGroups(words, max = 380) {   // نجمع الكلمات بـ OR في بحث واحد بطول معقول
+  const groups = []; let cur = [];
+  for (const w of words.map(q1)) { if (cur.length && (cur.join(" OR ").length + w.length > max)) { groups.push(cur); cur = []; } cur.push(w); }
+  if (cur.length) groups.push(cur);
+  return groups.map(g => g.length > 1 ? `(${g.join(" OR ")})` : g[0]);
+}
+const COMMENTS = {"Facebook": {"comment_actor": "apify~facebook-comments-scraper", "comment_key": "url", "comment_sep": "\"},{\"url\":\"", "comment_input": "{\"startUrls\":[{\"url\":\"{ITEMS}\"}],\"resultsLimit\":50,\"includeNestedComments\":false,\"viewOption\":\"RANKED_UNFILTERED\"}"}, "YouTube": {"comment_actor": "streamers~youtube-comments-scraper", "comment_key": "url", "comment_sep": "\"},{\"url\":\"", "comment_input": "{\"startUrls\":[{\"url\":\"{ITEMS}\"}],\"maxComments\":50,\"sortCommentsBy\":\"TOP_COMMENTS\"}"}, "TikTok": {"comment_actor": "clockworks~tiktok-comments-scraper", "comment_key": "webVideoUrl", "comment_sep": "\",\"", "comment_input": "{\"postURLs\":[\"{ITEMS}\"],\"commentsPerPost\":50,\"maxRepliesPerComment\":0}"}, "Instagram": {"comment_actor": "apify~instagram-comment-scraper", "comment_key": "url", "comment_sep": "\",\"", "comment_input": "{\"directUrls\":[\"{ITEMS}\"],\"resultsLimit\":50}"}, "X": {"comment_actor": "kaitoeasyapi~twitter-x-data-tweet-scraper-pay-per-result-cheapest", "comment_key": "id", "comment_sep": "\",\"conversation_id:", "comment_input": "{\"searchTerms\":[\"conversation_id:{ITEMS}\"],\"maxItems\":{MAX},\"queryType\":\"Latest\"}"}};
+function commentCfg(platform) {
+  const fromCur = (S.cfg?.social || []).find(r => r.platform === platform && r.comment_actor);
+  return fromCur ? { comment_actor: fromCur.comment_actor, comment_key: fromCur.comment_key, comment_sep: fromCur.comment_sep, comment_input: fromCur.comment_input }
+    : (COMMENTS[platform] || { comment_actor: "", comment_key: "", comment_sep: "", comment_input: "" });
+}
+function buildFromKw(k, sources) {
+  const has = s => sources.includes(s), news = [], social = [];
+  const exQ = k.ex.map(e => `-${q1(e)}`).join(" ");
+  const groups = orGroups(k.kw);
+  for (const src of ["google", "bing", "newsscope"]) if (has(src)) for (const mk of k.mk) {
+    const [hl, gl = ""] = mk.split("-"); const lang = hl.toLowerCase();
+    for (const g of groups) news.push({ active: true, source: src, language: LANG[lang] || lang, region: REGION[gl.toUpperCase()] || gl, hl: src === "google" ? mk : lang, gl: gl.toUpperCase(), query: `${g} ${exQ}`.trim() });
+  }
+  for (const x of k.q) if (has(x.src)) { const [hl, gl = ""] = (x.mk || "ar-EG").split("-"); news.push({ active: true, source: x.src, language: LANG[hl] || hl, region: REGION[gl.toUpperCase()] || gl, hl: x.src === "google" ? x.mk : hl, gl: gl.toUpperCase(), query: x.q }); }
+  if (has("rss")) for (const u of k.rss) news.push({ active: true, source: "rss", language: "", region: "", hl: "", gl: "", query: u });
+  const J = o => JSON.stringify(o);
+  const S_ = (platform, label, actor, input) => social.push({ active: true, platform, label, actor, input: J(input), ...commentCfg(platform) });
+  const acc = pl => k.ac.filter(a => a.platform.toLowerCase() === pl.toLowerCase()).map(a => a.url);
+  const top = k.kw.slice(0, 8).map(w => w.replace(/^"|"$/g, ""));
+  if (has("X")) S_("X", "X – بحث بالكلمات", "kaitoeasyapi~twitter-x-data-tweet-scraper-pay-per-result-cheapest",
+    { searchTerms: orGroups(k.kw, 300).map(g => `${g} ${exQ} since:{START}_00:00:00_UTC until:{END}_00:00:00_UTC`.replace(/\s+/g, " ")), maxItems: 1000, queryType: "Latest" });
+  if (has("Facebook")) {
+    top.slice(0, 6).forEach(w => S_("Facebook", `Facebook – بحث «${w}»`, "scraper_one~facebook-posts-search", { query: w, resultsCount: 100, searchType: "latest", startDate: "{START}", endDate: "{END}" }));
+    if (acc("Facebook").length) S_("Facebook", "Facebook – الصفحات", "apify~facebook-posts-scraper", { startUrls: acc("Facebook").map(url => ({ url })), resultsLimit: 150, onlyPostsNewerThan: "{START}", onlyPostsOlderThan: "{END}" });
+  }
+  if (has("Instagram")) {
+    if (k.ht.length) S_("Instagram", "Instagram – هاشتاجات", "apify~instagram-hashtag-scraper", { hashtags: k.ht, resultsType: "posts", resultsLimit: 100 });
+    if (acc("Instagram").length) S_("Instagram", "Instagram – حسابات", "apify~instagram-scraper", { directUrls: acc("Instagram"), resultsType: "posts", resultsLimit: 150, onlyPostsNewerThan: "{START}", addParentData: true });
+  }
+  if (has("TikTok")) S_("TikTok", "TikTok – بحث وهاشتاجات", "clockworks~tiktok-scraper", { searchQueries: top, hashtags: k.ht, searchSection: "/video", resultsPerPage: 100,
+    oldestPostDateUnified: "{START}", newestPostDate: "{END}", shouldDownloadVideos: false, shouldDownloadCovers: false, videoSearchSorting: "LATEST" });
+  if (has("YouTube")) S_("YouTube", "YouTube – بحث", "streamers~youtube-scraper", { searchQueries: top, maxResults: 50, maxResultsShorts: 30, maxResultStreams: 0, sortingOrder: "date", oldestPostDate: "{START}" });
+  if (has("LinkedIn")) {
+    S_("LinkedIn", "LinkedIn – بحث المنشورات", "harvestapi~linkedin-post-search", { searchQueries: [...k.kw, ...k.ht.map(h => "#" + h)].slice(0, 15), maxPosts: 60, postedLimit: "month", sortBy: "date" });
+    if (acc("LinkedIn").length) S_("LinkedIn", "LinkedIn – صفحات الشركات", "harvestapi~linkedin-company-posts", { targetUrls: acc("LinkedIn"), maxPosts: 150, includeReposts: true, includeQuotePosts: true, postedLimitDate: "{START}" });
+  }
+  return { news, social, exclusions: k.ex.map(v => ({ type: "نص", value: v.replace(/^"|"$/g, "") })) };
+}
+const DEFAULT_TAX = { "نوع الوسيلة": ["صحيفة", "وكالة أنباء", "موقع إخباري", "تلفزيون", "سوشيال ميديا"], "بلد المصدر": ["مصر", "السعودية", "الإمارات", "دولة عربية أخرى", "دولي", "غير محدد"],
+  "اللغة": ["العربية", "الإنجليزية", "الفرنسية", "أخرى"], "المحور": [], "الموضوع": [], "النبرة": ["إيجابي", "محايد", "سلبي"],
+  "العاطفة": ["بلا عاطفة", "فخر واعتزاز", "إعجاب وتقدير", "تفاؤل وأمل", "فضول واهتمام", "قلق وتشكك", "غضب واستياء"] };
+function slugify(t) { return String(t).trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, ""); }
+async function createProject(slug, cfg, msg) {
+  await gh(`/contents/config/projects/${slug}.json`, { method: "PUT", body: JSON.stringify({ message: msg || `مشروع جديد: ${slug}`, content: b64e(JSON.stringify(cfg, null, 2) + "\n") }) });
+  if (!S.projects.includes(slug)) S.projects.push(slug);
+}
+function kwButtons() {
+  return [
+    el("button", { class: "btn", type: "button", onclick: () => importIntoCurrent() }, "⇪ استيراد ملف كلمات"),
+    el("button", { class: "btn", type: "button", onclick: () => {
+      const a = el("a", { href: URL.createObjectURL(new Blob([JSON.stringify(S.cfg, null, 2)], { type: "application/json" })), download: `${S.project}.json` });
+      document.body.append(a); a.click(); a.remove(); } }, "⬇ تصدير المشروع (JSON)")];
+}
+function importIntoCurrent() {
+  openWizard({ replace: true });
+}
+
+// ── معالج المشروع الجديد ────────────────────────────────────
+function openWizard(opts = {}) {
+  const dlg = $("#newDlg");
+  const cur = S.cfg || {}, curSrc = new Set([...(cur.news || []).map(r => r.source || "google"), ...(cur.social || []).map(r => r.platform)]);
+  const defaults = opts.replace ? curSrc : new Set(["google", "bing", "X", "Facebook", "Instagram", "TikTok", "YouTube", "LinkedIn"]);
+  $("#newSources").replaceChildren(...Object.entries(SRC).map(([k, v]) => el("label", {}, el("input", { type: "checkbox", value: k, checked: defaults.has(k) }),
+    el("span", { class: "dot", style: `background:${v.c}` }), v.label)));
+  dlg.querySelector("h2").textContent = opts.replace ? `استيراد كلمات إلى «${cur.name || S.project}»` : "مشروع رصد جديد";
+  for (const id of ["newName", "newSlug", "newPeriod"]) $("#" + id).closest(".field").hidden = !!opts.replace;
+  $("#newCtx").closest(".field").hidden = !!opts.replace;
+  dlg.querySelector("button[value=ok]").textContent = opts.replace ? "استبدال الاستعلامات والمصادر" : "إنشاء المشروع";
+  const preview = () => {
+    const t = $("#newKw").value.trim(); if (!t) { $("#kwPreview").textContent = "الصق الملف بالتنسيق أعلاه، أو ملف JSON لمشروع كامل."; return; }
+    if (t.startsWith("{")) { try { const j = JSON.parse(t); $("#kwPreview").textContent = `ملف مشروع كامل: ${j.news?.length || 0} بحث أخبار · ${j.social?.length || 0} مصدر سوشيال.`; } catch { $("#kwPreview").textContent = "JSON غير صالح."; } return; }
+    const k = parseKw(t), b = buildFromKw(k, chosen());
+    $("#kwPreview").textContent = `${k.kw.length} كلمة · ${k.mk.length} سوق · ${k.ex.length} استبعاد ← ${b.news.length} بحث أخبار · ${b.social.length} مصدر سوشيال`;
+  };
+  const chosen = () => [...$("#newSources").querySelectorAll("input:checked")].map(i => i.value);
+  $("#newKw").oninput = preview; $("#newSources").onchange = preview;
+  $("#kwTemplate").onclick = () => { $("#newKw").value = KW_TEMPLATE; preview(); };
+  $("#kwFile").onchange = async e => { const f = e.target.files[0]; if (f) { $("#newKw").value = await f.text(); preview(); } e.target.value = ""; };
+  $("#newName").oninput = () => { if (!$("#newSlug").dataset.touched) $("#newSlug").value = slugify($("#newName").value); };
+  $("#newSlug").oninput = () => { $("#newSlug").dataset.touched = "1"; };
+  preview(); dlg.showModal();
   dlg.onclose = async () => {
     if (dlg.returnValue !== "ok") return;
-    const slug = $("#newSlug").value.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, "");
-    if (!slug || S.projects.includes(slug)) return toast("اختر معرّفاً جديداً بحروف إنجليزية");
-    const cfg = structuredClone(S.cfg); cfg.name = $("#newName").value.trim() || slug; cfg.settings.project_name = cfg.name; cfg.settings.daily = false;
-    try {
-      await gh(`/contents/config/projects/${slug}.json`, { method: "PUT", body: JSON.stringify({ message: `مشروع جديد: ${slug}`, content: b64e(JSON.stringify(cfg, null, 2) + "\n") }) });
-      S.projects.push(slug); S.dirty = false; fillProjects(); await loadProject(slug); S.tab = "settings"; renderTabs(); showTab(); toast("أُنشئ المشروع ✓ — عدّل إعداداته الآن");
-    } catch (e) { toast("تعذّر الإنشاء: " + e.message, 6000); }
+    const t = $("#newKw").value.trim();
+    let built;
+    if (t.startsWith("{")) { try { built = JSON.parse(t); } catch { return toast("ملف JSON غير صالح", 5000); } }
+    else built = t ? buildFromKw(parseKw(t), chosen()) : { news: [], social: [], exclusions: [] };
+    if (opts.replace) {
+      S.cfg.news = built.news || []; S.cfg.social = built.social || [];
+      if (built.exclusions?.length) S.cfg.exclusions = built.exclusions;
+      if (built.context) S.cfg.context = built.context; if (built.taxonomy) S.cfg.taxonomy = built.taxonomy;
+      if (built.extra_fields) S.cfg.extra_fields = built.extra_fields;
+      markDirty(); renderAll(); return toast("استُبدلت الاستعلامات والمصادر — راجعها ثم «حفظ الإعدادات»", 5000);
+    }
+    const name = $("#newName").value.trim() || built.name || "مشروع رصد";
+    const slug = slugify($("#newSlug").value) || slugify(built.slug || "");
+    if (!slug || S.projects.includes(slug)) return toast("اختر معرّفاً جديداً بحروف إنجليزية", 5000);
+    const per = $("#newPeriod").value, period = per === "copy" ? {} : monthRange(per === "prev" ? -1 : 0);
+    const base = structuredClone(S.cfg?.settings || {});
+    const cfg = { name, settings: { ...base, ...(built.settings || {}), ...period, project_name: name, daily: false },
+      news: built.news || [], social: built.social || [], exclusions: built.exclusions || [],
+      taxonomy: built.taxonomy || DEFAULT_TAX, extra_fields: built.extra_fields || [],
+      context: built.context || ($("#newCtx").value.trim() ? $("#newCtx").value.trim().split(/\n\s*\n/) : [`أنت محلل رصد إعلامي لمشروع «${name}». قاعدة الصلة: «نعم» إذا كانت المادة عن موضوع الرصد أو كياناته، و«لا» إذا كان التشابه في الاسم فقط.`]) };
+    try { await createProject(slug, cfg); S.dirty = false; fillProjects(); await loadProject(slug); goTab("flow"); toast("أُنشئ المشروع ✓", 4000); }
+    catch (e) { toast("تعذّر الإنشاء: " + e.message, 6000); }
   };
 }
+async function newProject() { $("#newKw").value = ""; $("#newName").value = ""; $("#newSlug").value = ""; delete $("#newSlug").dataset.touched; openWizard(); }
+
+// ── استيراد مشاريع من Make (رسالة من تبويب Make بعد موافقتك) ─────
+let pendingImport = null;
+window.addEventListener("message", e => {
+  if (!/^https:\/\/([a-z0-9-]+\.)*make\.com$/.test(e.origin)) return;
+  const d = e.data; if (!d || d.type !== "monitor-import" || !Array.isArray(d.projects)) return;
+  e.source?.postMessage({ type: "monitor-import-received" }, e.origin);
+  if ($("#importDlg").open) return;
+  pendingImport = d.projects;
+  if (!S.token) return toast("اربط الواجهة أولاً ثم أعد الاستيراد", 6000);
+  $("#importLead").textContent = `وصلت ${d.projects.length} مشاريع من Make. اختر ما تريد إنشاءه هنا (المفاتيح لا تُنقل؛ المحرك يستخدم Secrets).`;
+  $("#importRows").replaceChildren(...d.projects.map((p, i) => el("tr", {},
+    el("td", {}, el("input", { type: "checkbox", checked: !S.projects.includes(p.slug), "data-i": i })),
+    el("td", {}, p.cfg.name), el("td", { class: "num", dir: "ltr" }, p.slug + (S.projects.includes(p.slug) ? " (موجود)" : "")),
+    el("td", { class: "num" }, fmt(p.cfg.news.length)), el("td", { class: "num" }, fmt(p.cfg.social.length)))));
+  const dlg = $("#importDlg"); dlg.showModal();
+  dlg.onclose = async () => {
+    if (dlg.returnValue !== "ok") return;
+    const pick = [...$("#importRows").querySelectorAll("input:checked")].map(i => pendingImport[+i.dataset.i]);
+    for (const p of pick) {
+      try { await createProject(p.slug, p.cfg, `استيراد من Make: ${p.slug}`); toast(`استُورد ${p.cfg.name} ✓`); }
+      catch (err) { toast(`تعذّر ${p.slug}: ${err.message}`, 6000); }
+    }
+    fillProjects(); if (pick[0]) await loadProject(pick[0].slug);
+    e.source?.postMessage({ type: "monitor-import-done", count: pick.length }, e.origin);
+  };
+});
 
 // ربط الأحداث
 $("#connectBtn").onclick = connect;
@@ -518,6 +896,8 @@ $("#save").onclick = () => save().catch(e => toast("تعذّر الحفظ: " + e
 $("#run").onclick = run;
 $("#project").onchange = e => loadProject(e.target.value);
 $("#newProject").onclick = newProject;
+$("#theme").onclick = toggleTheme;
+applyTheme(store.get("theme"));
 window.addEventListener("beforeunload", e => { if (S.dirty) { e.preventDefault(); e.returnValue = ""; } });
 $("#repo").value = S.repo;
 if (S.token) connect(); else { $("#connect").hidden = false; }
