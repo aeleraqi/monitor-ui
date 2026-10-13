@@ -90,6 +90,11 @@ td .del:hover { color:var(--accent); }
 .num { font-variant-numeric:tabular-nums; }
 
 /* النتائج */
+.progress { border:1px solid var(--line); border-radius:12px; background:var(--surface); padding:14px 16px; margin:0 0 16px; }
+.progress .pr-head { display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; } .progress .pr-head a { margin-inline-start:auto; font-size:.85rem; }
+.progress .pr-stage { margin:8px 0; color:var(--fg2); } .progress .pr-note { display:block; margin-top:10px; color:var(--fg2); }
+.pr-track { height:8px; border-radius:99px; background:var(--surface2); overflow:hidden; } .pr-track i { display:block; height:100%; background:var(--accent); transition:width .6s; }
+.btn.primary.stop { background:var(--fg); border-color:var(--fg); }
 .kpis { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; margin-bottom:18px; }
 .kpi { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:12px 14px; }
 .kpi .l { color:var(--fg2); font-size:.82rem; }
@@ -149,6 +154,7 @@ dialog::backdrop { background:rgb(0 0 0 / .35); }
     <div><button class="btn primary" id="connectBtn" type="button">اتصال</button></div>
   </section>
 
+  <section class="progress" id="progressBox" hidden aria-live="polite"></section>
   <section class="panel" id="p-settings" hidden></section>
   <section class="panel" id="p-news" hidden></section>
   <section class="panel" id="p-social" hidden></section>
@@ -191,7 +197,7 @@ function toast(msg, ms = 3200) { const t = el("div", { class: "toast", role: "st
 const S = { repo: store.get("repo") || "aeleraqi/monitor-engine", token: store.get("token") || "", project: store.get("project") || "",
             projects: [], cfg: null, sha: null, dirty: false, tab: store.get("tab") || "settings", status: {}, runs: [] };
 async function gh(path, opts = {}) {
-  const r = await fetch(`https://api.github.com/repos/${S.repo}${path}`, { ...opts, headers: {
+  const r = await fetch(`https://api.github.com/repos/${S.repo}${path}`, { cache: "no-store", ...opts, headers: {
     Authorization: `Bearer ${S.token}`, Accept: opts.raw ? "application/vnd.github.raw" : "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28", ...(opts.body ? { "Content-Type": "application/json" } : {}) } });
   if (r.status === 404 && opts.allow404) return null;
@@ -213,7 +219,7 @@ async function connect() {
     store.set("repo", S.repo); store.set("token", S.token);
     $("#connect").hidden = true; $("#save").disabled = false; $("#run").disabled = false;
     fillProjects(); await loadProject(S.projects.includes(S.project) ? S.project : S.projects[0]);
-    pollRuns(); setInterval(pollRuns, 20000);
+    pollRuns(); setInterval(pollRuns, 15000);
   } catch (e) { $("#connect").hidden = false; setState("bad", "فشل الاتصال"); toast("تعذّر الاتصال: " + e.message, 6000); }
 }
 function fillProjects() {
@@ -238,7 +244,26 @@ async function save(msg) {
     message: msg || `تحديث إعدادات ${S.project} من الواجهة`, content: b64e(body), sha: S.sha }) });
   S.sha = r.content.sha; S.dirty = false; $("#save").textContent = "حفظ الإعدادات"; toast("حُفظت الإعدادات ✓");
 }
+function renderProgress() {
+  const box = $("#progressBox"); if (!box) return;
+  if (!S.live) { box.hidden = true; return; }
+  const p = S.progress, ratio = p && p.total ? Math.min(1, p.done / p.total) : 0;
+  box.hidden = false;
+  box.replaceChildren(el("div", { class: "pr-head" }, el("strong", {}, "التشغيل جارٍ"), el("span", {}, "منذ " + ago(S.live.run_started_at || S.live.created_at)),
+      el("a", { href: S.live.html_url, target: "_blank", rel: "noopener" }, "السجل التفصيلي على GitHub")),
+    el("div", { class: "pr-stage" }, p ? (p.stage || "") + (p.total ? ` — ${fmt(p.done)} من ${fmt(p.total)}` : "") : "يبدأ… (تظهر الأرقام بعد أول دقيقة)"),
+    el("div", { class: "pr-track" }, el("i", { style: `width:${ratio * 100}%` })),
+    el("div", { class: "kpis", style: "margin:12px 0 0" }, ["أخبار", "سوشيال", "تعليقات"].map(k =>
+      el("div", { class: "kpi" }, el("div", { class: "l" }, "كُتب: " + k), el("div", { class: "v" }, fmt((p && p.written || {})[k] || 0))))),
+    el("small", { class: "pr-note" }, "تُحفظ النتائج على دفعات من 100 مادة. لو أوقفت التشغيل يبقى ما اكتمل حفظه في ملف CSV."));
+}
+async function stopRun() {
+  if (!S.live || !confirm("إيقاف التشغيل الجاري؟ ما اكتمل حفظه يبقى في ملف CSV.")) return;
+  try { await gh(`/actions/runs/${S.live.id}/cancel`, { method: "POST" }); toast("أُرسل طلب الإيقاف… يتوقف خلال ثوانٍ ويحفظ ما اكتمل"); setTimeout(pollRuns, 5000); }
+  catch (e) { toast("تعذّر الإيقاف: " + e.message, 6000); }
+}
 async function run() {
+  if (S.live) return stopRun();
   try {
     if (S.dirty) await save();
     await gh(`/actions/workflows/monitor.yml/dispatches`, { method: "POST", body: JSON.stringify({ ref: "main", inputs: { project: S.project, action: "run" } }) });
@@ -252,12 +277,19 @@ async function pollRuns() {
     const r = await gh(`/actions/workflows/monitor.yml/runs?per_page=10`);
     S.runs = r.workflow_runs || [];
     const live = S.runs.find(x => x.status !== "completed" && x.event !== "push");
-    if (live) setState("run", "يعمل الآن… منذ " + ago(live.run_started_at || live.created_at));
+    S.live = live || null;
+    if (live) {
+      const pr = await readJSON(`progress/${S.project}.json`, null).catch(() => null);
+      S.progress = pr && String(pr.run_id) === String(live.id) ? pr : null;
+      const pp = S.progress; setState("run", pp && pp.total ? `يعمل · ${Math.round(pp.done / pp.total * 100)}%` : "يعمل منذ " + ago(live.run_started_at || live.created_at));
+    }
     else if (S.status.status_state) setState(S.status.status_state.startsWith("✅") ? "ok" : S.status.status_state.startsWith("❌") ? "bad" : "",
                                              S.status.status_state.replace(/^[^\p{L}]+/u, "") + " ·", S.status.status_updated || "");
     else setState("", "لم يُشغّل بعد");
     if (S.wasLive && !live) { S.status = await readJSON(`data/${S.project}/status.json`, {}); loadResults(); toast("انتهى التشغيل — حُدّثت النتائج"); }
-    S.wasLive = !!live;
+    S.wasLive = !!live; S.progress = live ? S.progress : null;
+    const rb = $("#run"); rb.textContent = live ? "⏹ إيقاف التشغيل" : "▶ تشغيل الرصد"; rb.classList.toggle("stop", !!live);
+    renderProgress();
     if (S.tab === "runs") renderRuns();
   } catch {}
 }
@@ -389,7 +421,10 @@ function renderContext() {
 async function loadResults() {
   const host = $("#p-results");
   host.replaceChildren(el("p", { class: "lead" }, "جارٍ تحميل النتائج…"));
-  const [sm, latest] = await Promise.all([readJSON(`data/${S.project}/summary.json`, null), readJSON(`data/${S.project}/latest.json`, [])]);
+  const [sm, latest, files] = await Promise.all([readJSON(`data/${S.project}/summary.json`, null), readJSON(`data/${S.project}/latest.json`, []),
+    gh(`/contents/data/${S.project}`, { allow404: true }).catch(() => null)]);
+  const csvFile = (files || []).find(f => f.name === "records.csv");
+  const size = b => b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
   if (!sm) { host.replaceChildren(el("h2", {}, "النتائج"), el("div", { class: "empty" }, "لا نتائج بعد. اضغط «▶ تشغيل الرصد»؛ تظهر المؤشرات هنا بعد أول تشغيل.")); return; }
   const k = (l, v, alert) => el("div", { class: "kpi" + (alert ? " alert" : "") }, el("div", { class: "l" }, l), el("div", { class: "v" }, v));
   const kpis = el("div", { class: "kpis" }, k("إجمالي السجلات", fmt(sm.total)), k("المواد", fmt(sm.materials)), k("التعليقات", fmt(sm.comments)),
@@ -427,7 +462,8 @@ async function loadResults() {
   drawLatest();
   const latestCard = el("div", { class: "card", style: "grid-column:1/-1" }, el("h3", {}, "أحدث السجلات"),
     el("div", { class: "tablebar" }, el("input", { type: "search", placeholder: "بحث في أحدث 300 سجل…", "aria-label": "بحث في السجلات", oninput: e => { q = e.target.value.trim(); drawLatest(); } }),
-      el("button", { class: "btn", type: "button", onclick: downloadCSV }, "⬇ تنزيل كل السجلات (CSV)")),
+      el("button", { class: "btn", type: "button", onclick: downloadCSV }, `⬇ تنزيل كل السجلات (CSV · ${fmt(sm.total)} سجل${csvFile ? " · " + size(csvFile.size) : ""})`),
+      csvFile ? el("a", { class: "btn", href: csvFile.html_url, target: "_blank", rel: "noopener" }, "فتح الملف على GitHub") : null),
     el("div", { class: "scroll" }, el("table", {}, el("thead", {}, el("tr", {}, ["التاريخ", "المنصة", "المصدر", "العنوان / النص", "المحور", "النبرة", "النوع"].map(h => el("th", {}, h)))), tb)));
   host.replaceChildren(el("h2", {}, "النتائج"), el("p", { class: "lead" }, el("bdi", {}, S.status.status_period || ""), " · آخر تحديث ", el("bdi", { dir: "ltr" }, S.status.status_updated || "—")), kpis,
     el("div", { class: "cards" }, stacked("حسب المنصة × النبرة", sm.by_platform || []), stacked("حسب المحور × النبرة", sm.by_segment || []),
