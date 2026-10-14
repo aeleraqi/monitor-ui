@@ -5,25 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>مرصد InfoTimes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* layout: top bar (project + actions) · tab strip · one working panel per tab; results = KPI strip then paired charts then tables */
 :root {
-  --dot:#dedcd3; --edge:#b9b6ab;
-  --bg:#fafaf8; --surface:#ffffff; --surface2:#f3f2ee; --fg:#1a1a1a; --fg2:#6b6960; --fg3:#9c9889;
-  --line:#e5e3db; --accent:#c0392b; --accent-soft:#f6e3e0; --ok:#2e6b4f; --ok-soft:#e1efe7; --warn:#9a6a12; --warn-soft:#f6ecd6;
-  --pos:#2e6b4f; --neu:#9c9889; --neg:#c0392b;
-  --font:"IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif; --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
-  --r:6px;
+  --dot:#dfe2ef; --edge:#b4b9d3;
+  --bg:#f4f5fb; --surface:#ffffff; --surface2:#eef0f8; --fg:#11123a; --fg2:#565b7e; --fg3:#9095b3;
+  --line:#e2e5f1; --accent:#4a3aff; --accent-soft:#ecebff; --ok:#0b8f6e; --ok-soft:#ddf5ee; --warn:#b26b00; --warn-soft:#fdf0d8;
+  --pos:#12b38a; --neu:#aab0cc; --neg:#f0445a; --navy:#0d0e33; --pink:#ff4f8b; --sky:#26c6ff;
+  --font:"Readex Pro", "Segoe UI", Tahoma, sans-serif; --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --r:10px;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg:#141412; --surface:#1c1c19; --surface2:#24231f; --fg:#ecebe6; --fg2:#a9a69c; --fg3:#7d7a71;
-  --line:#33322d; --accent:#e06a58; --accent-soft:#3a201c; --ok:#6cc39a; --ok-soft:#1d3329; --warn:#e2b45a; --warn-soft:#3a2f17;
-  --pos:#6cc39a; --neu:#8d8a80; --neg:#e06a58; --dot:#2c2b27; --edge:#5a5850; color-scheme:dark; } }
+  --bg:#090a24; --surface:#121437; --surface2:#1a1d47; --fg:#eef0ff; --fg2:#a7abd2; --fg3:#6e73a1;
+  --line:#262a5e; --accent:#7f72ff; --accent-soft:#231f5c; --ok:#3ad6a8; --ok-soft:#10352d; --warn:#ffbe55; --warn-soft:#3a2c10;
+  --pos:#34d3a4; --neu:#5d6394; --neg:#ff6b81; --dot:#1f2250; --edge:#4a4f86; color-scheme:dark; } }
 :root[data-theme="dark"] {
-  --bg:#141412; --surface:#1c1c19; --surface2:#24231f; --fg:#ecebe6; --fg2:#a9a69c; --fg3:#7d7a71;
-  --line:#33322d; --accent:#e06a58; --accent-soft:#3a201c; --ok:#6cc39a; --ok-soft:#1d3329; --warn:#e2b45a; --warn-soft:#3a2f17;
-  --pos:#6cc39a; --neu:#8d8a80; --neg:#e06a58; --dot:#2c2b27; --edge:#5a5850; color-scheme:dark; }
+  --bg:#090a24; --surface:#121437; --surface2:#1a1d47; --fg:#eef0ff; --fg2:#a7abd2; --fg3:#6e73a1;
+  --line:#262a5e; --accent:#7f72ff; --accent-soft:#231f5c; --ok:#3ad6a8; --ok-soft:#10352d; --warn:#ffbe55; --warn-soft:#3a2c10;
+  --pos:#34d3a4; --neu:#5d6394; --neg:#ff6b81; --dot:#1f2250; --edge:#4a4f86; color-scheme:dark; }
 :root[data-theme="light"] { color-scheme:light; }
 * { box-sizing:border-box; }
 [hidden] { display:none !important; }
@@ -296,6 +296,58 @@ body.present .hero .actions { display:none; }
   .est-total { grid-template-columns:1fr 1fr; } .est-total > :first-child { grid-column:1/-1; }
   nav.tabs { top:auto; position:static; } .brand span { display:none; }
 }
+
+/* ═══ هوية «ميلت ووتر»: شريط كحلي متدرّج، أزرار كبسولية، بطاقات واسعة ═══ */
+:root { --grad:linear-gradient(115deg, #0d0e33 0%, #1d1a6b 45%, #4a3aff 78%, #ff4f8b 118%); --rl:16px; }
+body { background:var(--bg); }
+header.top { background:var(--grad); border-bottom:0; color:#fff; backdrop-filter:none; -webkit-backdrop-filter:none; box-shadow:0 8px 30px -18px #1d1a6b; }
+header.top .brand b { color:#fff; } header.top .brand span { color:rgb(255 255 255 / .62); }
+header.top .brand .logo { color:#fff; } header.top .brand .logo circle[fill] { fill:var(--sky); }
+header.top .btn { background:rgb(255 255 255 / .08); border-color:rgb(255 255 255 / .18); color:#fff; border-radius:999px; }
+header.top .btn:hover { background:rgb(255 255 255 / .18); }
+header.top .btn.primary { background:#fff; color:#1d1a6b; border-color:#fff; box-shadow:0 6px 18px -8px rgb(0 0 0 / .5); font-weight:600; }
+header.top .btn.primary:hover { background:#eef0ff; }
+header.top .btn.ghost[aria-pressed="true"] { background:#fff; color:#1d1a6b; }
+header.top select { background:rgb(255 255 255 / .1); border-color:rgb(255 255 255 / .22); color:#fff; border-radius:999px; padding-inline:14px; }
+header.top select option { color:#11123a; background:#fff; }
+header.top .chip { background:rgb(255 255 255 / .14) !important; color:#fff !important; }
+header.top .chip.ok::before, header.top .chip.run::before { content:""; display:inline-block; width:7px; height:7px; border-radius:50%; margin-inline-end:6px; background:#34d3a4; }
+header.top .chip.run::before { background:#ffbe55; animation:pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity:.3; } }
+.btn { border-radius:999px; padding-inline:16px; }
+.btn.primary { background:var(--accent); border-color:var(--accent); box-shadow:0 8px 20px -10px var(--accent); }
+.btn.primary:hover { background:color-mix(in oklab, var(--accent) 85%, #000); }
+select, input[type=text], input[type=password], input[type=date], input[type=number], textarea { border-radius:10px; }
+nav.tabs { background:var(--surface); border-bottom:1px solid var(--line); top:60px; }
+nav.tabs button { border-radius:0; border-bottom-width:3px; font-weight:500; }
+nav.tabs button[aria-selected="true"] { color:var(--accent); border-bottom-color:var(--accent); }
+nav.tabs button:hover { background:transparent; color:var(--accent); }
+.kpi, .card, fieldset, .pcard, .progress, .scroll { border-color:var(--line); box-shadow:0 1px 2px rgb(17 18 58 / .04), 0 10px 30px -22px rgb(17 18 58 / .35); }
+.kpi .v, .hero .stat .v, .ring .hole b { font-weight:600; letter-spacing:-.6px; }
+.kpi.big { background:var(--grad); color:#fff; border:0; }
+.kpi.big .l, .kpi.big .s { color:rgb(255 255 255 / .72); }
+.kpi.big .spark .l { stroke:#fff; } .kpi.big .spark .a { fill:#fff; opacity:.15; }
+.spark .l { stroke:var(--accent); } .spark .a { fill:var(--accent); }
+.eyebrow { color:var(--accent); text-transform:none; background:var(--accent-soft); padding:3px 10px; border-radius:999px; }
+.hero { background:var(--grad); color:#fff; border-radius:24px; padding:30px 30px 26px; margin-top:18px; position:relative; overflow:hidden; border:0; }
+.hero::after { content:""; position:absolute; inset:auto -80px -140px auto; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle, rgb(38 198 255 / .35), transparent 65%); pointer-events:none; }
+.hero h1, .hero b { color:#fff; } .hero p, .hero .muted, .hero .stat .l, .hero small { color:rgb(255 255 255 / .75) !important; }
+.hero .eyebrow { background:rgb(255 255 255 / .14); color:#fff; }
+.hero .stat { border-inline-start-color:var(--sky); }
+.hero .btn { background:rgb(255 255 255 / .1); color:#fff; border-color:rgb(255 255 255 / .25); }
+.hero .btn.primary { background:#fff; color:#1d1a6b; border-color:#fff; }
+.pcard { border-radius:18px; } .pcard:hover { border-color:color-mix(in oklab, var(--accent) 40%, var(--line)); }
+.tag.m { background:var(--accent-soft); color:var(--accent); }
+.flow .bub rect { fill:var(--accent); }
+.connect .pitch h1 { background:linear-gradient(100deg, var(--fg) 30%, var(--accent) 75%, var(--pink)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.connect .login { border-radius:22px; border-top:4px solid var(--accent); }
+.feats li { border-radius:16px; }
+.pr-track i { background:linear-gradient(90deg, var(--accent), var(--pink)); }
+.est-row .bar i { background:linear-gradient(90deg, var(--accent), var(--sky)); }
+dialog { border-radius:22px !important; }
+@media (max-width:1500px) { header.top .brand span { display:none; } header.top .btn { padding-inline:12px; } header.top .top .wrap, .top .wrap { gap:8px; } }
+nav.tabs { position:static; }
+@media (max-width:860px) { .hero { padding:22px 18px; border-radius:18px; } nav.tabs { top:auto; } }
 </style>
 </head>
 <body>
@@ -1148,7 +1200,7 @@ function toggleTheme() {
 const SRC = {
   google:    { label: "Google News", ico: "G",  c: "#4285F4", kind: "news" },
   bing:      { label: "Bing News",   ico: "b",  c: "#00897B", kind: "news" },
-  newsscope: { label: "NewsScope",   ico: "N",  c: "#c0392b", kind: "news" },
+  newsscope: { label: "NewsScope",   ico: "N",  c: "#4a3aff", kind: "news" },
   rss:       { label: "RSS",         ico: "◉",  c: "#F26522", kind: "news" },
   api:       { label: "تلفزيون",     ico: "📺", c: "#5E35B1", kind: "news" },
   X:         { label: "X",           ico: "𝕏",  c: "#14171A", kind: "social" },
