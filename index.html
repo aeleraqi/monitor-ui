@@ -975,7 +975,7 @@ function parseKw(text) {
 const LANG = { ar: "العربية", en: "الإنجليزية", fr: "الفرنسية", de: "الألمانية", es: "الإسبانية", it: "الإيطالية", tr: "التركية", ko: "الكورية", ms: "الملايوية", id: "الإندونيسية" };
 const REGION = { EG: "مصر", SA: "السعودية", AE: "الإمارات", OM: "عُمان", KW: "الكويت", QA: "قطر", BH: "البحرين", JO: "الأردن", IQ: "العراق", LY: "ليبيا", MA: "المغرب",
   TN: "تونس", DZ: "الجزائر", SD: "السودان", US: "الولايات المتحدة", GB: "بريطانيا", FR: "فرنسا", DE: "ألمانيا", CA: "كندا", KE: "كينيا", NG: "نيجيريا" };
-const q1 = k => /^".*"$/.test(k) || !/\s/.test(k) ? k : `"${k}"`;
+const q1 = k => k.includes('"') || !/\s/.test(k) ? k : `"${k}"`;
 function orGroups(words, max = 380) {   // نجمع الكلمات بـ OR في بحث واحد بطول معقول
   const groups = []; let cur = [];
   for (const w of words.map(q1)) { if (cur.length && (cur.join(" OR ").length + w.length > max)) { groups.push(cur); cur = []; } cur.push(w); }
