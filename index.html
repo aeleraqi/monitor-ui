@@ -138,6 +138,14 @@ svg text { fill:var(--fg2); font-family:var(--font); font-size:11px; }
 .flowbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:12px 0 0; color:var(--fg2); font-size:.85rem; }
 .flowstats { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-top:14px; }
 
+/* الشهور */
+.months { display:flex; gap:10px; align-items:flex-end; height:210px; overflow-x:auto; padding-top:6px; }
+.mcol { flex:1 0 54px; display:grid; grid-template-rows:auto 1fr auto auto; height:100%; text-align:center; font-size:.8rem; }
+.mcol .stack { display:flex; flex-direction:column; justify-content:flex-end; width:28px; margin:0 auto; }
+.mcol .stack i { display:block; width:100%; }
+.mcol .n { color:var(--fg2); font-variant-numeric:tabular-nums; } .mcol .p { color:var(--pos); font-size:.72rem; }
+details.fails { margin-top:10px; font-size:.85rem; } details.fails summary { cursor:pointer; color:var(--fg2); } details.fails ul { margin:6px 0 0; padding-inline-start:18px; }
+
 /* معالج المشروع */
 dialog.wide { max-width:860px; }
 .src-grid { display:flex; flex-wrap:wrap; gap:8px; }
@@ -197,6 +205,7 @@ dialog::backdrop { background:rgb(0 0 0 / .35); }
   <section class="panel" id="p-taxonomy" hidden></section>
   <section class="panel" id="p-context" hidden></section>
   <section class="panel" id="p-results" hidden></section>
+  <section class="panel" id="p-reports" hidden></section>
   <section class="panel" id="p-runs" hidden></section>
 </main>
 
@@ -313,7 +322,8 @@ function renderProgress() {
         el("div", { class: "kpi" }, el("div", { class: "l" }, c + ": سُحب / كُتب"),
           el("div", { class: "v" }, fmt((p && p.collected || {})[c] || 0), el("span", { style: "color:var(--fg3);font-size:1rem" }, " / " + fmt((p && p.written || {})[w] || 0))))),
       el("div", { class: "kpi" }, el("div", { class: "l" }, "إجمالي ما سُحب"), el("div", { class: "v" }, fmt(Object.values((p && p.collected) || {}).reduce((a, b) => a + b, 0))))),
-    el("small", { class: "pr-note" }, "تُحفظ النتائج على دفعات من 100 مادة. لو أوقفت التشغيل يبقى ما اكتمل حفظه في ملف CSV."));
+    failuresList(p && p.failures),
+    el("small", { class: "pr-note" }, "تُحفظ النتائج على دفعات من 100 مادة. لو أوقفت التشغيل يبقى ما اكتمل حفظه في ملف CSV. المصدر الذي يفشل بسبب المهلة أو حد الاستخدام يُعاد وحده في آخر المرحلة."));
 }
 async function stopRun() {
   if (!S.live || !confirm("إيقاف التشغيل الجاري؟ ما اكتمل حفظه يبقى في ملف CSV.")) return;
@@ -355,14 +365,14 @@ function ago(t) { const m = Math.round((Date.now() - new Date(t)) / 60000); retu
 
 // ── التبويبات ───────────────────────────────────────────────
 const TABS = [["flow", "سير العمل"], ["settings", "الإعدادات"], ["news", "الأخبار"], ["social", "السوشيال"], ["exclusions", "الاستثناءات"],
-              ["taxonomy", "التصنيف"], ["context", "السياق"], ["results", "النتائج"], ["runs", "السجل"]];
+              ["taxonomy", "التصنيف"], ["context", "السياق"], ["results", "النتائج"], ["reports", "التقارير"], ["runs", "السجل"]];
 function renderTabs() {
   const counts = { news: S.cfg.news.filter(r => r.active).length + "/" + S.cfg.news.length,
                    social: S.cfg.social.filter(r => r.active).length + "/" + S.cfg.social.length, exclusions: S.cfg.exclusions.length };
   $("#tabs").replaceChildren(...TABS.map(([k, label]) => el("button", { role: "tab", type: "button", "aria-selected": String(S.tab === k),
     onclick: () => goTab(k) }, label, counts[k] != null ? el("span", { class: "count" }, counts[k]) : null)));
 }
-function showTab() { for (const [k] of TABS) $("#p-" + k).hidden = k !== S.tab; if (S.tab === "runs") renderRuns(); if (S.tab === "flow") renderFlow(); }
+function showTab() { for (const [k] of TABS) $("#p-" + k).hidden = k !== S.tab; if (S.tab === "runs") renderRuns(); if (S.tab === "flow") renderFlow(); if (S.tab === "reports") renderReports(); }
 function goTab(k) { S.tab = k; store.set("tab", k); renderTabs(); showTab(); window.scrollTo({ top: 0 }); }
 function renderAll() { renderTabs(); renderFlow(); renderSettings(); renderNews(); renderSocial(); renderExclusions(); renderTaxonomy(); renderContext(); showTab(); }
 
@@ -376,7 +386,7 @@ const FORM = [
     ["tz_offset_hours", "فرق التوقيت عن UTC", "number", "القاهرة في أكتوبر = 3"],
     ["daily", "تشغيل يومي تلقائي", "check", "كل يوم 23:45 بتوقيت القاهرة"]]],
   ["ماذا يُجمع", [
-    ["stage_news", "الأخبار (Google News)", "stage", "الاستعلامات في تبويب «الأخبار»"],
+    ["stage_news", "الأخبار", "stage", "الاستعلامات في تبويب «الأخبار»"],
     ["stage_social", "السوشيال (Apify)", "stage", "المصادر في تبويب «السوشيال»"],
     ["stage_comments", "تعليقات الجمهور", "stage", "على أعلى المواد تفاعلاً"],
     ["comments_top_posts", "مواد تُجمع تعليقاتها", "number", "الأعلى تفاعلاً في كل تشغيل"],
@@ -388,27 +398,37 @@ const FORM = [
     ["llm_model", "النموذج", "text", "مثل gemini-3.5-flash-lite أو claude-haiku-4-5"],
     ["batch_size", "مواد في كل نداء", "number", "كلما زاد قلّت التكلفة وطال النداء"],
     ["keep_irrelevant", "احتفظ بغير المرتبط", "check", "اكتب المواد التي صنّفها النموذج «غير مرتبطة»"],
-    ["apify_timeout", "مهلة كل actor (ثانية)", "number", ""]]]];
+    ["apify_timeout", "مهلة كل actor (ثانية)", "number", "التشغيل الأول متزامن حتى 300 ثانية"],
+    ["retry_minutes", "مهلة إعادة المحاولة (دقيقة)", "number", "ما يفشل بسبب المهلة أو حد الاستخدام يُعاد وحده في آخر المرحلة بتشغيل طويل"]]],
+  ["التقرير الشهري", [
+    ["monthly_report", "تقرير شهري تلقائي", "check1", "صفحة لكل شهر في تبويب «التقارير»: الأرقام، المقارنة بالشهر السابق، أعلى المواد، وقراءة تحليلية"],
+    ["report_title", "عنوان التقرير", "text", "مثل «مصر كما تُروى». فارغ = اسم المشروع"],
+    ["report_brand", "العلامة في رأس التقرير", "text", "نص مثل 4labs، أو فارغ"],
+    ["report_logo_url", "رابط الشعار (اختياري)", "text", "صورة تظهر بدل النص"]]],
+  ["مصدر التلفزيون (API)", [
+    ["broadcast_api_url", "رابط الـ API", "text", "يقبل {QUERY} {START} {END} {KEY}. المفتاح في Secret باسم BROADCAST_API_KEY. أضف صفاً مصدره api في «الأخبار»"],
+    ["broadcast_items_path", "مسار القائمة في الرد", "text", "مثل data.items — فارغ = اكتشاف تلقائي"]]]];
+const PH = { news_chunk_days: "7", retry_minutes: "20", apify_timeout: "290", batch_size: "25", comments_top_posts: "40", comments_per_post: "50", news_lookback_days: "1", llm_model: "gemini-3.5-flash-lite" };
 function renderSettings() {
   const st = S.cfg.settings, stages = new Set(st.stages || []);
   const sets = FORM.map(([title, fields]) => el("fieldset", {}, el("legend", {}, title), el("div", { class: "grid" }, fields.map(([k, label, type, help]) => {
     const id = "f-" + k; let input;
-    if (type === "check" || type === "stage") {
-      input = el("input", { type: "checkbox", id, checked: type === "stage" ? stages.has(k.slice(6)) : !!st[k],
+    if (type === "check" || type === "check1" || type === "stage") {
+      input = el("input", { type: "checkbox", id, checked: type === "stage" ? stages.has(k.slice(6)) : type === "check1" ? st[k] !== false && st[k] !== "لا" : !!st[k],
         onchange: e => { if (type === "stage") { e.target.checked ? stages.add(k.slice(6)) : stages.delete(k.slice(6));
           st.stages = ["news", "social", "comments"].filter(x => stages.has(x)); } else st[k] = e.target.checked; markDirty(); } });
       return el("div", { class: "field" }, el("div", { class: "check" }, input, el("label", { for: id }, label)), help ? el("small", {}, help) : null);
     }
     if (type.startsWith("select:")) input = el("select", { id, onchange: e => { st[k] = e.target.value; markDirty(); } },
       type.slice(7).split(",").map(o => el("option", { value: o, selected: st[k] === o }, o)));
-    else input = el("input", { type, id, value: st[k] ?? "", dir: type === "text" && k !== "project_name" ? "ltr" : null,
+    else input = el("input", { type, id, value: st[k] ?? "", placeholder: PH[k] ?? null, dir: type === "text" && k !== "project_name" ? "ltr" : null,
       oninput: e => { st[k] = type === "number" ? Number(e.target.value) : e.target.value; if (k === "project_name") S.cfg.name = e.target.value; markDirty(); } });
     return el("div", { class: "field" }, el("label", { for: id }, label), input, help ? el("small", {}, help) : null);
   }))));
   const s = S.status;
   const status = el("fieldset", {}, el("legend", {}, "آخر تشغيل"), el("div", { class: "grid" },
     [["الحالة", s.status_state], ["آخر تحديث", s.status_updated], ["الفترة", s.status_period], ["الملخص", s.status_summary]]
-      .map(([l, v]) => el("div", { class: "field" }, el("label", {}, l), el("bdi", { class: "num" }, v || "—")))));
+      .map(([l, v]) => el("div", { class: "field" }, el("label", {}, l), el("bdi", { class: "num" }, v || "—")))), failuresList(s.failures));
   const preset = (label, fn) => el("button", { class: "btn", type: "button", onclick: () => { Object.assign(st, fn()); markDirty(); renderSettings(); } }, label);
   const presets = el("div", { class: "row" }, el("span", { class: "preview" }, "الفترة بسرعة:"),
     preset("الشهر الماضي", () => monthRange(-1)), preset("الشهر الحالي", () => monthRange(0)), preset("آخر 7 أيام", () => lastDays(7)));
@@ -448,8 +468,8 @@ function editableTable(host, title, lead, rows, cols, make, opts = {}) {
     el("div", { class: "scroll" }, el("table", {}, el("thead", {}, el("tr", {}, cols.map(c => el("th", {}, c.label)), el("th", {}, ""))), body)));
 }
 function renderNews() {
-  editableTable($("#p-news"), "استعلامات الأخبار", "صف لكل بحث. المصدر: google = Google News · bing = Bing News · newsscope = NewsScope · rss = خلاصة موقع (ضع الرابط في خانة الاستعلام). hl/gl لغة وبلد النتائج، وتاريخ الفترة يُضاف تلقائياً.", S.cfg.news, [
-    { key: "active", label: "مفعّل" }, { key: "source", label: "المصدر", options: ["google", "bing", "newsscope", "rss"], w: 110 }, { key: "language", label: "اللغة", w: 90 }, { key: "region", label: "المنطقة", w: 100 },
+  editableTable($("#p-news"), "استعلامات الأخبار", "صف لكل بحث. المصدر: google = Google News · bing = Bing News · newsscope = NewsScope · rss = خلاصة موقع (ضع الرابط في خانة الاستعلام) · api = مصدر التلفزيون (رابطه في الإعدادات). hl/gl لغة وبلد النتائج، وتاريخ الفترة يُضاف تلقائياً.", S.cfg.news, [
+    { key: "active", label: "مفعّل" }, { key: "source", label: "المصدر", options: ["google", "bing", "newsscope", "rss", "api"], w: 110 }, { key: "language", label: "اللغة", w: 90 }, { key: "region", label: "المنطقة", w: 100 },
     { key: "hl", label: "hl", mono: true, w: 60 }, { key: "gl", label: "gl", mono: true, w: 50 }, { key: "query", label: "الاستعلام", w: 280 }],
     () => ({ active: true, source: "google", language: "العربية", region: "مصر", hl: "ar", gl: "EG", query: "" }), { toggle: true, extra: kwButtons() });
 }
@@ -487,14 +507,18 @@ function renderContext() {
 }
 
 // النتائج
-async function loadResults() {
+async function loadResults(month) {
   const host = $("#p-results");
   host.replaceChildren(el("p", { class: "lead" }, "جارٍ تحميل النتائج…"));
-  const [sm, latest, files] = await Promise.all([readJSON(`data/${S.project}/summary.json`, null), readJSON(`data/${S.project}/latest.json`, []),
+  S.month = month || "";
+  const [all, latestAll, files] = await Promise.all([readJSON(`data/${S.project}/summary.json`, null), readJSON(`data/${S.project}/latest.json`, []),
     gh(`/contents/data/${S.project}`, { allow404: true }).catch(() => null)]);
-  const csvFile = (files || []).find(f => f.name === "records.csv");
+  const sm = S.month ? await readJSON(`data/${S.project}/months/summary-${S.month}.json`, all) : all;
+  const latest = S.month ? latestAll.filter(r => (r["تاريخ النشر"] || "").startsWith(S.month)) : latestAll;
+  const csvName = S.month ? `records-${S.month}.csv` : "records.csv";
+  const csvFile = (files || []).find(f => f.name === csvName);
   const size = b => b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
-  S.summary = sm || {}; if (S.tab === "flow") renderFlow();
+  S.summary = all || {}; if (S.tab === "flow") renderFlow();
   if (!sm) { host.replaceChildren(el("h2", {}, "النتائج"), el("div", { class: "empty" }, "لا نتائج بعد. اضغط «▶ تشغيل الرصد»؛ تظهر المؤشرات هنا بعد أول تشغيل.")); return; }
   const k = (l, v, alert) => el("div", { class: "kpi" + (alert ? " alert" : "") }, el("div", { class: "l" }, l), el("div", { class: "v" }, v));
   const kpis = el("div", { class: "kpis" }, k("إجمالي السجلات", fmt(sm.total)), k("المواد", fmt(sm.materials)), k("التعليقات", fmt(sm.comments)),
@@ -532,23 +556,80 @@ async function loadResults() {
   drawLatest();
   const latestCard = el("div", { class: "card", style: "grid-column:1/-1" }, el("h3", {}, "أحدث السجلات"),
     el("div", { class: "tablebar" }, el("input", { type: "search", placeholder: "بحث في أحدث 300 سجل…", "aria-label": "بحث في السجلات", oninput: e => { q = e.target.value.trim(); drawLatest(); } }),
-      el("button", { class: "btn", type: "button", onclick: downloadCSV }, `⬇ تنزيل كل السجلات (CSV · ${fmt(sm.total)} سجل${csvFile ? " · " + size(csvFile.size) : ""})`),
+      el("button", { class: "btn", type: "button", onclick: () => downloadCSV(csvName) }, `⬇ ${S.month ? "ملف " + monthAr(S.month) : "كل السجلات"} (CSV · ${fmt(sm.total)} سجل${csvFile ? " · " + size(csvFile.size) : ""})`),
       csvFile ? el("a", { class: "btn", href: csvFile.html_url, target: "_blank", rel: "noopener" }, "فتح الملف على GitHub") : null),
     el("div", { class: "scroll" }, el("table", {}, el("thead", {}, el("tr", {}, ["التاريخ", "المنصة", "المصدر", "العنوان / النص", "المحور", "النبرة", "النوع"].map(h => el("th", {}, h)))), tb)));
-  host.replaceChildren(el("h2", {}, "النتائج"), el("p", { class: "lead" }, el("bdi", {}, S.status.status_period || ""), " · آخر تحديث ", el("bdi", { dir: "ltr" }, S.status.status_updated || "—")), kpis,
-    el("div", { class: "cards" }, stacked("حسب المنصة × النبرة", sm.by_platform || []), stacked("حسب المحور × النبرة", sm.by_segment || []),
+  const months = (all.monthly || []).map(m => m.key);
+  const picker = el("div", { class: "row", style: "margin-bottom:14px" }, el("span", { class: "preview" }, "الفترة:"),
+    el("select", { "aria-label": "اختيار الشهر", onchange: e => loadResults(e.target.value) },
+      el("option", { value: "" }, "كل الشهور"), ...months.slice().reverse().map(m => el("option", { value: m, selected: m === S.month }, monthAr(m)))));
+  const trend = monthlyTrend(all.monthly || [], all.quarterly || []);
+  host.replaceChildren(el("h2", {}, "النتائج"), el("p", { class: "lead" }, el("bdi", {}, S.status.status_period || ""), " · آخر تحديث ", el("bdi", { dir: "ltr" }, S.status.status_updated || "—")), picker, kpis,
+    el("div", { class: "cards" }, ...(S.month ? [] : trend), stacked("حسب المنصة × النبرة", sm.by_platform || []), stacked("حسب المحور × النبرة", sm.by_segment || []),
       stacked("حسب الموضوع × النبرة", sm.by_topic || []), daily(), sources, stacked("حسب اللغة × النبرة", sm.by_language || []), latestCard));
 }
-async function downloadCSV() {
+const MONTHS_AR = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+const monthAr = m => /^\d{4}-\d{2}$/.test(m) ? `${MONTHS_AR[+m.slice(5) - 1]} ${m.slice(0, 4)}` : m;
+const quarterAr = q => q.replace(/^(\d{4})-Q(\d)$/, (_, y, n) => `الربع ${["الأول", "الثاني", "الثالث", "الرابع"][n - 1]} ${y}`);
+function monthlyTrend(monthly, quarterly) {
+  if (monthly.length < 1) return [];
+  const max = Math.max(1, ...monthly.map(m => m.total));
+  const cols = monthly.slice(-12).map(m => {
+    const seg = ["إيجابي", "محايد", "سلبي"].map((t, i) => el("i", { style: `height:${(m[t] / max) * 100}%;background:var(${["--pos", "--neu", "--neg"][i]})`, title: `${t}: ${fmt(m[t])}` }));
+    const pos = m.total ? Math.round(m["إيجابي"] / m.total * 100) : 0;
+    return el("div", { class: "mcol", title: `${monthAr(m.key)}: ${fmt(m.total)}` }, el("span", { class: "n" }, fmt(m.total)),
+      el("div", { class: "stack" }, ...seg.reverse()), el("span", { class: "k" }, monthAr(m.key).replace(/ \d{4}$/, "")), el("span", { class: "p" }, pos + "٪ +"));
+  });
+  const legend = el("div", { class: "legend" }, el("span", { style: "--c:var(--pos)" }, "إيجابي"), el("span", { style: "--c:var(--neu)" }, "محايد"), el("span", { style: "--c:var(--neg)" }, "سلبي"));
+  const card1 = el("div", { class: "card", style: "grid-column:1/-1" }, el("h3", {}, "الحجم والنبرة شهراً بشهر"), legend, el("div", { class: "months" }, cols));
+  const q = quarterly.slice(-6);
+  const card2 = q.length ? el("div", { class: "card", style: "grid-column:1/-1" }, el("h3", {}, "مقارنة ربع سنوية"), el("div", { class: "scroll", style: "border:0" }, el("table", {},
+    el("thead", {}, el("tr", {}, ["الربع", "المواد", "التعليقات", "إيجابي", "سلبي", "التفاعلات", "التغير"].map(h => el("th", {}, h)))),
+    el("tbody", {}, q.map((r, i) => { const p = q[i - 1]; const ch = p && p.total ? Math.round((r.total - p.total) / p.total * 100) : null;
+      return el("tr", {}, el("td", {}, quarterAr(r.key)), el("td", { class: "num" }, fmt(r.materials)), el("td", { class: "num" }, fmt(r.comments)),
+        el("td", { class: "num tone-pos" }, r.total ? Math.round(r["إيجابي"] / r.total * 100) + "٪" : "—"), el("td", { class: "num tone-neg" }, r.total ? Math.round(r["سلبي"] / r.total * 100) + "٪" : "—"),
+        el("td", { class: "num" }, fmt(r.interactions)), el("td", { class: "num" + (ch > 0 ? " tone-pos" : ch < 0 ? " tone-neg" : "") }, ch == null ? "—" : (ch > 0 ? "▲ " : ch < 0 ? "▼ " : "") + Math.abs(ch) + "٪")); }))))) : null;
+  return [card1, card2].filter(Boolean);
+}
+async function downloadCSV(name = "records.csv") {
   try {
     toast("جارٍ تجهيز الملف…");
-    const t = await gh(`/contents/data/${S.project}/records.csv`, { raw: true });
-    const a = el("a", { href: URL.createObjectURL(new Blob([t], { type: "text/csv;charset=utf-8" })), download: `${S.project}-records.csv` });
+    const t = await gh(`/contents/data/${S.project}/${name}`, { raw: true });
+    const a = el("a", { href: URL.createObjectURL(new Blob([t], { type: "text/csv;charset=utf-8" })), download: `${S.project}-${name}` });
     document.body.append(a); a.click(); a.remove();
   } catch (e) { toast("تعذّر التنزيل: " + e.message, 6000); }
 }
 
 // السجل
+async function renderReports() {
+  const host = $("#p-reports");
+  const idx = await readJSON(`data/${S.project}/reports/index.json`, []);
+  const open = async (r, dl) => {
+    try {
+      toast("جارٍ فتح التقرير…");
+      const t = await gh(`/contents/data/${S.project}/reports/${r.file}`, { raw: true });
+      const url = URL.createObjectURL(new Blob([t], { type: "text/html;charset=utf-8" }));
+      if (dl) { const a = el("a", { href: url, download: `${S.project}-${r.file}` }); document.body.append(a); a.click(); a.remove(); }
+      else window.open(url, "_blank", "noopener");
+    } catch (e) { toast("تعذّر فتح التقرير: " + e.message, 6000); }
+  };
+  host.replaceChildren(el("h2", {}, "التقارير الشهرية"),
+    el("p", { class: "lead" }, "تُبنى تلقائياً في آخر كل تشغيل لكل شهر تغطيه الفترة. افتح التقرير واطبعه PDF من المتصفح، أو نزّله HTML. العنوان والعلامة من «الإعدادات ← التقرير الشهري»."),
+    idx.length ? el("div", { class: "scroll" }, el("table", {},
+      el("thead", {}, el("tr", {}, ["الشهر", "المواد", "التعليقات", "إيجابي", "سلبي", "قراءة تحليلية", ""].map(h => el("th", {}, h)))),
+      el("tbody", {}, idx.map(r => el("tr", {}, el("td", {}, monthAr(r.month)), el("td", { class: "num" }, fmt(r.materials)), el("td", { class: "num" }, fmt(r.comments)),
+        el("td", { class: "num tone-pos" }, pct(r.positive)), el("td", { class: "num tone-neg" }, pct(r.negative)), el("td", {}, r.narrative ? "✓" : "—"),
+        el("td", {}, el("div", { class: "row" }, el("button", { class: "btn", type: "button", onclick: () => open(r) }, "فتح"),
+          el("button", { class: "btn", type: "button", onclick: () => open(r, true) }, "⬇ تنزيل"),
+          el("button", { class: "btn", type: "button", onclick: () => downloadCSV(`records-${r.month}.csv`) }, "CSV الشهر"))))))))
+      : el("div", { class: "empty" }, "لا تقارير بعد. يُبنى أول تقرير بعد أول تشغيل."));
+}
+function failuresList(list) {
+  const bad = (list || []).filter(f => !f.ok);
+  if (!list || !list.length) return null;
+  return el("details", { class: "fails" }, el("summary", {}, `${bad.length ? "⚠️ " + bad.length + " مصدر فشل" : "✓ لا أخطاء نهائية"}${list.length - bad.length ? ` · ${list.length - bad.length} نجح بعد إعادة المحاولة` : ""}`),
+    el("ul", {}, list.map(f => el("li", { class: f.ok ? "tone-pos" : "tone-neg" }, `${f.stage} · ${f.source}: ${f.reason}${f.retried ? (f.ok ? " ← نجح بعد الإعادة" : " ← فشل بعد الإعادة") : ""}`))));
+}
 async function renderRuns() {
   const runsLog = await readJSON(`data/${S.project}/runs.json`, []);
   const gr = S.runs.filter(r => r.event !== "push");
@@ -563,7 +644,7 @@ async function renderRuns() {
       el("div", { class: "card" }, el("h3", {}, "ما كُتب في كل تشغيل"), runsLog.length ? el("div", { class: "scroll", style: "border:0" }, el("table", {},
         el("thead", {}, el("tr", {}, ["الوقت", "أخبار", "سوشيال", "تعليقات", "دقائق", "الحالة"].map(h => el("th", {}, h)))),
         el("tbody", {}, runsLog.map(r => el("tr", {}, el("td", { class: "num" }, r.time), el("td", { class: "num" }, r.news), el("td", { class: "num" }, r.social),
-          el("td", { class: "num" }, r.comments), el("td", { class: "num" }, r.minutes), el("td", { class: r.state === "فشل" ? "tone-neg" : "" }, r.state, r.note ? " — " + r.note : "")))))) : el("div", { class: "empty" }, "لا تشغيلات بعد"))));
+          el("td", { class: "num" }, r.comments), el("td", { class: "num" }, r.minutes), el("td", { class: r.state === "فشل" ? "tone-neg" : "" }, r.state, r.note ? " — " + r.note : "", failuresList(r.failures))))))) : el("div", { class: "empty" }, "لا تشغيلات بعد"))));
 }
 
 // مشروع جديد
@@ -597,6 +678,7 @@ const SRC = {
   bing:      { label: "Bing News",   ico: "b",  c: "#00897B", kind: "news" },
   newsscope: { label: "NewsScope",   ico: "N",  c: "#c0392b", kind: "news" },
   rss:       { label: "RSS",         ico: "◉",  c: "#F26522", kind: "news" },
+  api:       { label: "تلفزيون",     ico: "📺", c: "#5E35B1", kind: "news" },
   X:         { label: "X",           ico: "𝕏",  c: "#14171A", kind: "social" },
   Facebook:  { label: "Facebook",    ico: "f",  c: "#1877F2", kind: "social" },
   Instagram: { label: "Instagram",   ico: "◎",  c: "#D62976", kind: "social" },
