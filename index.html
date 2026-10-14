@@ -626,6 +626,8 @@ function markDirty() { if (!S.dirty) { S.dirty = true; $("#save").textContent = 
 
 // ── الحفظ والتشغيل ─────────────────────────────────────────
 async function save(msg) {
+  const st = S.cfg.settings || {};  // «اجمع حتى» لا يسبق نهاية الفترة (بقايا شهر سابق كانت تُفرغ النتائج)
+  if (st.collect_until && st.window_end && st.collect_until < st.window_end) st.collect_until = st.window_end;
   const body = JSON.stringify(S.cfg, null, 2) + "\n";
   const r = await gh(`/contents/config/projects/${S.project}.json`, { method: "PUT", body: JSON.stringify({
     message: msg || `تحديث إعدادات ${S.project} من الواجهة`, content: b64e(body), sha: S.sha }) });
@@ -1022,7 +1024,7 @@ function openNode(id) {
   let parts = [];
   if (id === "trigger" || id === "router") {
     parts = [fld("بداية الفترة", el("input", { type: "date", value: st.window_start || "", oninput: e => { st.window_start = e.target.value; touched(); } })),
-      fld("نهاية الفترة", el("input", { type: "date", value: st.window_end || "", oninput: e => { st.window_end = e.target.value; touched(); } })),
+      fld("نهاية الفترة", el("input", { type: "date", value: st.window_end || "", oninput: e => { st.window_end = e.target.value; if (!st.collect_until || st.collect_until < st.window_end) st.collect_until = st.window_end; touched(); } })),
       el("label", { class: "nswitch" }, el("input", { type: "checkbox", checked: !!st.daily, onchange: e => { st.daily = e.target.checked; touched(); } }), el("span", {}, "تشغيل يومي تلقائي (23:45 القاهرة)")),
       el("h3", {}, "المسارات"), stageToggle("news", "الأخبار"), stageToggle("social", "السوشيال"), stageToggle("comments", "تعليقات الجمهور")];
   } else if (id.startsWith("n_")) {
