@@ -121,8 +121,8 @@ svg text { fill:var(--fg2); font-family:var(--font); font-size:11px; }
 .flow { position:relative; border:1px solid var(--line); border-radius:12px; overflow-x:auto; overflow-y:hidden;
   background-color:var(--surface); background-image:radial-gradient(var(--dot) 1px, transparent 1px); background-size:18px 18px; }
 .flow svg { display:block; min-width:980px; width:100%; height:auto; }
-.flow .edge { fill:none; stroke:var(--edge); stroke-width:2.5; stroke-dasharray:1 7; stroke-linecap:round; }
-.flow .edge.live { stroke:var(--accent); animation:dash 1s linear infinite; }
+.flow .edge { fill:none; stroke:var(--edge); stroke-width:1.6; stroke-linecap:round; opacity:.7; }
+.flow .edge.live { stroke:var(--accent); stroke-width:2.2; opacity:1; }
 @keyframes dash { to { stroke-dashoffset:-16; } }
 .flow .node { cursor:pointer; }
 .flow .node circle.ring { fill:var(--surface); stroke:var(--line); stroke-width:1.5; }
@@ -248,10 +248,10 @@ h2 { font-size:1.2rem; letter-spacing:-.1px; }
 .res-hero .kpi.big { grid-row:span 2; display:flex; flex-direction:column; justify-content:center; }
 .res-hero .kpi.big .v { font-size:2.6rem; }
 .ring-card { display:flex; align-items:center; gap:18px; }
-.ring { width:var(--s); height:var(--s); border-radius:50%; display:grid; place-items:center; flex:none; animation:spin-in .8s var(--ease) both; }
+div.ring { width:var(--s); height:var(--s); border-radius:50%; display:grid; place-items:center; flex:none; animation:spin-in .8s var(--ease) both; }
 @keyframes spin-in { from { transform:rotate(-90deg) scale(.85); opacity:0; } }
-.ring .hole { width:72%; height:72%; border-radius:50%; background:var(--surface); display:grid; place-content:center; text-align:center; }
-.ring .hole b { font-size:1.6rem; line-height:1.1; } .ring .hole span { font-size:.75rem; color:var(--fg2); }
+div.ring .hole { width:72%; height:72%; border-radius:50%; background:var(--surface); display:grid; place-content:center; text-align:center; }
+div.ring .hole b { font-size:1.6rem; line-height:1.1; } div.ring .hole span { font-size:.75rem; color:var(--fg2); }
 .ring-legend { display:grid; gap:8px; font-size:.88rem; }
 .ring-legend div { display:flex; align-items:center; gap:7px; } .ring-legend i { width:10px; height:10px; border-radius:3px; } .ring-legend b { margin-inline-start:auto; padding-inline-start:12px; }
 /* هيكل التحميل */
@@ -281,11 +281,11 @@ body.signedout nav.tabs, body.signedout header .pj, body.signedout #homeBtn, bod
 .feats { list-style:none; padding:0; margin:0 0 18px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 .feats li { background:var(--surface); border:1px solid var(--line); border-radius:var(--rl); padding:12px 14px; box-shadow:var(--shadow-sm); }
 .feats b { display:block; margin-bottom:2px; } .feats span { color:var(--fg2); font-size:.85rem; }
-.pitch-flow { width:100%; max-width:440px; } .pitch-flow .e { fill:none; stroke:var(--edge); stroke-width:2.5; stroke-dasharray:1 7; stroke-linecap:round; animation:dash 1.2s linear infinite; }
+.pitch-flow { width:100%; max-width:440px; } .pitch-flow .e { fill:none; stroke:var(--edge); stroke-width:2.5; stroke-linecap:round; }
 .connect .login { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:24px; display:grid; gap:14px; box-shadow:var(--shadow-lg); position:sticky; top:90px; }
 .connect .how summary { cursor:pointer; color:var(--fg2); font-size:.9rem; } .connect .how ol { color:var(--fg2); font-size:.88rem; padding-inline-start:20px; }
 /* وضع العرض */
-body.present #save, body.present #settings, body.present #newProject, body.present .pr-note, body.present details.fails,
+body.present #save, body.present #run, body.present #newTop, body.present #settings, body.present #newProject, body.present .pr-note, body.present details.fails,
 body.present .tablebar .btn:not(:first-child), body.present #p-flow .lead { display:none !important; }
 body.present .brand span { display:none; }
 body.present #presentBtn { display:inline-flex !important; }
@@ -296,6 +296,63 @@ body.present .hero .actions { display:none; }
   .est-total { grid-template-columns:1fr 1fr; } .est-total > :first-child { grid-column:1/-1; }
   nav.tabs { top:auto; position:static; } .brand span { display:none; }
 }
+
+/* شريط علوي مضغوط: المشروع والحالة والتشغيل ظاهرة، والباقي في القائمة */
+.top .wrap { flex-wrap:nowrap; gap:10px; }
+.brand { margin-inline-end:6px; flex:none; } .grow { flex:1; }
+header.top select#project { max-width:min(340px, 32vw); text-overflow:ellipsis; }
+header.top #state { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:300px; }
+#presentExit { display:none; } body.present #presentExit { display:inline-flex; }
+.home-only { display:none; } body.home .home-only { display:inline-flex; } body.signedout .home-only { display:none !important; }
+.menu { position:relative; }
+.menu-pop { position:absolute; inset-inline-end:0; top:calc(100% + 8px); min-width:220px; background:var(--surface); color:var(--fg); border:1px solid var(--line); border-radius:14px; padding:6px; box-shadow:var(--shadow-lg); z-index:20; display:grid; }
+.menu-pop[hidden] { display:none; }
+.menu-pop .mi { all:unset; display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:9px; cursor:pointer; font-size:.92rem; }
+.menu-pop .mi:hover, .menu-pop .mi:focus-visible { background:var(--surface2); }
+.menu-pop hr { border:0; border-top:1px solid var(--line); margin:4px 2px; }
+body.home #homeBtn { display:none; }
+body.present #presentBtn { display:flex !important; }
+@media (max-width:980px) { header.top #state { display:none; } header.top select#project { max-width:44vw; } }
+@media (max-width:640px) { .brand b { display:none; } #save { display:none; } }
+
+/* عرض التقرير */
+.report-view { position:fixed; inset:0; z-index:30; background:var(--bg); display:grid; grid-template-rows:auto 1fr; }
+.report-view[hidden] { display:none; }
+.rv-bar { display:flex; align-items:center; gap:10px; padding:10px 16px; background:var(--grad); color:#fff; }
+.rv-bar .btn { background:rgb(255 255 255 / .1); border-color:rgb(255 255 255 / .25); color:#fff; } .rv-bar .btn:hover { background:rgb(255 255 255 / .2); }
+.rv-bar #rvBack { background:#fff; color:#8e2318; border-color:#fff; font-weight:600; }
+.rv-bar b { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#rvFrame { width:100%; height:100%; border:0; background:#fff; }
+body.reading { overflow:hidden; }
+@media (max-width:640px) { .rv-bar b { display:none; } #rvDownload { display:none; } }
+
+/* لوحة تعديل الوحدة */
+.flow .node:hover circle:not(.ring) { filter:brightness(1.08); } .flow .node:hover circle.ring { stroke:var(--accent); stroke-width:2; }
+dialog.drawer { margin:0; margin-inline-start:auto; height:100dvh; max-height:100dvh; width:min(460px, 100vw); max-width:100vw; border-radius:0 !important; border:0; border-inline-start:1px solid var(--line); padding:0; }
+dialog.drawer[open] { animation:slidein .22s var(--ease); } @keyframes slidein { from { transform:translateX(24px); opacity:0; } }
+[dir=rtl] dialog.drawer { margin-inline-start:0; margin-inline-end:auto; }
+.drawer-in { display:grid; grid-template-rows:auto 1fr auto; height:100%; }
+.drawer-h { display:flex; align-items:center; gap:12px; padding:16px 18px; border-bottom:1px solid var(--line); }
+.drawer-h h2 { margin:0; font-size:1.1rem; } .drawer-h small { color:var(--fg3); } .drawer-h .btn { margin-inline-start:auto; }
+.drawer-ico { width:38px; height:38px; border-radius:50%; display:grid; place-items:center; color:#fff; font-weight:700; flex:none; }
+.drawer-b { overflow:auto; padding:16px 18px; display:grid; gap:12px; align-content:start; }
+.drawer-b h3 { margin:6px 0 0; font-size:.95rem; }
+.drawer-f { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:12px 18px; border-top:1px solid var(--line); }
+.nf { display:grid; gap:5px; } .nf span { font-size:.88rem; font-weight:500; } .nf small { color:var(--fg3); font-size:.78rem; }
+.nswitch { display:flex; gap:8px; align-items:center; } .nswitch input { width:18px; height:18px; accent-color:var(--accent); }
+.nrows { display:grid; gap:8px; } .nrow { display:flex; gap:8px; align-items:center; } .nrow.col { display:grid; gap:6px; padding:10px; border:1px solid var(--line); border-radius:12px; }
+.nrow input[type=text] { flex:1; min-width:0; } .nrow input.mini { flex:0 0 52px; text-align:center; } .nrow input[type=checkbox] { width:18px; height:18px; accent-color:var(--accent); flex:none; }
+.nrow textarea { font-family:var(--mono); font-size:12px; margin-top:6px; } .nrow details summary { cursor:pointer; color:var(--fg2); font-size:.85rem; }
+
+/* تشخيص الأخطاء */
+.diag { border:1px solid color-mix(in oklab, var(--warn) 40%, var(--line)); background:color-mix(in oklab, var(--warn-soft) 55%, var(--surface)); border-radius:var(--rl); padding:16px; margin:0 0 16px; display:grid; gap:12px; }
+.diag > header { display:flex; flex-wrap:wrap; gap:8px; align-items:baseline; } .diag > header span { color:var(--fg2); font-size:.9rem; }
+.diag-item { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:14px; display:grid; gap:8px; }
+.diag-item p { margin:0; color:var(--fg2); line-height:1.8; font-size:.93rem; }
+.diag-h { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.diag-item .acts { display:flex; flex-wrap:wrap; gap:8px; } .diag-item a.btn { text-decoration:none; color:var(--fg); }
+.diag-item details summary { cursor:pointer; color:var(--fg3); font-size:.85rem; } .diag-item ul { margin:6px 0 0; padding-inline-start:18px; font-size:.85rem; color:var(--fg2); max-height:200px; overflow:auto; }
+.diag.compact { margin-top:12px; } .diag-ok { color:var(--ok); font-size:.9rem; }
 
 /* ═══ هوية InfoTimes بأسلوب منصّات الرصد: شريط كحلي متدرّج، أزرار كبسولية، بطاقات واسعة ═══ */
 :root { --grad:linear-gradient(115deg, #111111 0%, #1f1a19 40%, #5e1a14 75%, #c0392b 112%); --rl:16px; }
@@ -323,7 +380,7 @@ nav.tabs button { border-radius:0; border-bottom-width:3px; font-weight:500; }
 nav.tabs button[aria-selected="true"] { color:var(--accent); border-bottom-color:var(--accent); }
 nav.tabs button:hover { background:transparent; color:var(--accent); }
 .kpi, .card, fieldset, .pcard, .progress, .scroll { border-color:var(--line); box-shadow:0 1px 2px rgb(20 18 10 / .04), 0 10px 30px -22px rgb(20 18 10 / .35); }
-.kpi .v, .hero .stat .v, .ring .hole b { font-weight:600; letter-spacing:-.6px; }
+.kpi .v, .hero .stat .v, div.ring .hole b { font-weight:600; letter-spacing:-.6px; }
 .kpi.big { background:var(--grad); color:#fff; border:0; }
 .kpi.big .l, .kpi.big .s { color:rgb(255 255 255 / .72); }
 .kpi.big .spark .l { stroke:#fff; } .kpi.big .spark .a { fill:#fff; opacity:.15; }
@@ -362,15 +419,24 @@ nav.tabs { position:static; }
 <header class="top">
   <div class="wrap">
     <a class="brand" id="homeLink" href="#" title="كل المشاريع"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".25"/><circle cx="16" cy="16" r="9" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".45"/><path d="M16 16 26 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="16" r="3.2" fill="var(--accent)"/><circle cx="23.5" cy="10.5" r="2" fill="var(--accent)"/></svg><b>مرصد InfoTimes</b></a>
-    <button class="btn" id="homeBtn" type="button">⌂ المشاريع</button>
     <select id="project" aria-label="المشروع" class="pj"></select>
-    <button class="btn" id="newProject" type="button">＋ مشروع</button>
     <span class="chip pj" id="state">غير متصل</span>
+    <span class="grow"></span>
     <button class="btn pj" id="save" type="button" disabled>حفظ الإعدادات</button>
     <button class="btn primary pj" id="run" type="button" disabled>▶ تشغيل الرصد</button>
-    <button class="btn ghost" id="presentBtn" type="button" aria-pressed="false" title="إخفاء أدوات التعديل لعرض النتائج على العميل"><span aria-hidden="true">◱</span><span> وضع العرض</span></button>
-    <button class="btn" id="theme" type="button" aria-label="الوضع الفاتح أو الداكن" title="الوضع الفاتح / الداكن">◐</button>
-    <button class="btn" id="settings" type="button" aria-label="إعدادات الاتصال">⚙</button>
+    <button class="btn home-only" id="newTop" type="button">＋ مشروع جديد</button>
+    <button class="btn" id="presentExit" type="button">إنهاء العرض</button>
+    <div class="menu">
+      <button class="btn icon-only" id="menuBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="menuPop" title="القائمة">☰</button>
+      <div class="menu-pop" id="menuPop" role="menu" hidden>
+        <button class="mi" id="homeBtn" type="button" role="menuitem">⌂ كل المشاريع</button>
+        <button class="mi" id="newProject" type="button" role="menuitem">＋ مشروع جديد</button>
+        <button class="mi" id="presentBtn" type="button" role="menuitem" aria-pressed="false" title="إخفاء أدوات التعديل لعرض النتائج على العميل"><span aria-hidden="true">◱</span><span> وضع العرض</span></button>
+        <hr>
+        <button class="mi" id="theme" type="button" role="menuitem">◐ الوضع الداكن</button>
+        <button class="mi" id="settings" type="button" role="menuitem">⚙ إعدادات الاتصال</button>
+      </div>
+    </div>
   </div>
 </header>
 <nav class="tabs pj"><div class="wrap" role="tablist" id="tabs"></div></nav>
@@ -442,6 +508,25 @@ nav.tabs { position:static; }
     <div class="field"><label for="newCtx">سياق الرصد (اختياري)</label><textarea id="newCtx" rows="4" placeholder="أنت محلل رصد إعلامي لحساب … قاعدة الصلة: …"></textarea></div>
     <div style="display:flex;gap:8px"><button class="btn primary" value="ok">إنشاء المشروع</button><button class="btn" value="cancel" formnovalidate>إلغاء</button></div>
   </form>
+</dialog>
+<section id="reportView" class="report-view" hidden aria-label="عرض التقرير">
+  <div class="rv-bar">
+    <button class="btn" type="button" id="rvBack">→ رجوع للتقارير</button>
+    <b id="rvTitle"></b><span class="grow"></span>
+    <button class="btn" type="button" id="rvPrint">طباعة / PDF</button>
+    <button class="btn" type="button" id="rvDownload">تنزيل HTML</button>
+    <button class="btn" type="button" id="rvTab" title="فتح في تبويب جديد">↗</button>
+  </div>
+  <iframe id="rvFrame" title="التقرير الشهري"></iframe>
+</section>
+<dialog id="nodeDlg" class="drawer" aria-labelledby="nodeTitle">
+  <div class="drawer-in">
+    <header class="drawer-h"><span class="drawer-ico" id="nodeIco"></span><div><h2 id="nodeTitle"></h2><small id="nodeSub"></small></div>
+      <button class="btn icon-only" type="button" id="nodeClose" aria-label="إغلاق">✕</button></header>
+    <div id="nodeBody" class="drawer-b"></div>
+    <footer class="drawer-f"><button class="btn primary" type="button" id="nodeDone">تم</button><button class="btn" type="button" id="nodeFull">فتح التبويب الكامل</button>
+      <span class="preview" id="nodeHint"></span></footer>
+  </div>
 </dialog>
 <dialog id="delDlg" class="wide">
   <form method="dialog" style="display:grid;gap:14px">
@@ -674,7 +759,7 @@ function renderSettings() {
   const s = S.status;
   const status = el("fieldset", {}, el("legend", {}, "آخر تشغيل"), el("div", { class: "grid" },
     [["الحالة", s.status_state], ["آخر تحديث", s.status_updated], ["الفترة", s.status_period], ["الملخص", s.status_summary]]
-      .map(([l, v]) => el("div", { class: "field" }, el("label", {}, l), el("bdi", { class: "num" }, v || "—")))), failuresList(s.failures));
+      .map(([l, v]) => el("div", { class: "field" }, el("label", {}, l), el("bdi", { class: "num" }, v || "—")))), diagnosisPanel(s.failures, true));
   const preset = (label, fn) => el("button", { class: "btn", type: "button", onclick: () => { Object.assign(st, fn()); markDirty(); renderSettings(); } }, label);
   const presets = el("div", { class: "row" }, el("span", { class: "preview" }, "الفترة بسرعة:"),
     preset("الشهر الماضي", () => monthRange(-1)), preset("الشهر الحالي", () => monthRange(0)), preset("آخر 7 أيام", () => lastDays(7)));
@@ -817,7 +902,7 @@ async function loadResults(month) {
     el("select", { "aria-label": "اختيار الشهر", onchange: e => loadResults(e.target.value) },
       el("option", { value: "" }, "كل الشهور"), ...months.slice().reverse().map(m => el("option", { value: m, selected: m === S.month }, monthAr(m)))));
   const trend = monthlyTrend(all.monthly || [], all.quarterly || []);
-  host.replaceChildren(el("h2", {}, "النتائج"), el("p", { class: "lead" }, el("bdi", {}, S.status.status_period || ""), " · آخر تحديث ", el("bdi", { dir: "ltr" }, S.status.status_updated || "—")), picker, kpis,
+  host.replaceChildren(el("h2", {}, "النتائج"), el("p", { class: "lead" }, el("bdi", {}, S.status.status_period || ""), " · آخر تحديث ", el("bdi", { dir: "ltr" }, S.status.status_updated || "—")), S.present ? null : diagnosisPanel(S.status.failures), picker, kpis,
     el("div", { class: "cards" }, ...(S.month ? [] : trend), stacked("حسب المنصة × النبرة", sm.by_platform || []), stacked("حسب المحور × النبرة", sm.by_segment || []),
       stacked("حسب الموضوع × النبرة", sm.by_topic || []), daily(), sources, stacked("حسب اللغة × النبرة", sm.by_language || []), latestCard));
 }
@@ -863,7 +948,7 @@ async function renderReports() {
       const t = await gh(`/contents/data/${S.project}/reports/${r.file}`, { raw: true });
       const url = URL.createObjectURL(new Blob([t], { type: "text/html;charset=utf-8" }));
       if (dl) { const a = el("a", { href: url, download: `${S.project}-${r.file}` }); document.body.append(a); a.click(); a.remove(); }
-      else window.open(url, "_blank", "noopener");
+      else showReport(t, url, r);
     } catch (e) { toast("تعذّر فتح التقرير: " + e.message, 6000); }
   };
   host.replaceChildren(el("h2", {}, "التقارير الشهرية"),
@@ -876,6 +961,150 @@ async function renderReports() {
           el("button", { class: "btn", type: "button", onclick: () => open(r, true) }, "⬇ تنزيل"),
           el("button", { class: "btn", type: "button", onclick: () => downloadCSV(`records-${r.month}.csv`) }, "CSV الشهر"))))))))
       : el("div", { class: "empty" }, "لا تقارير بعد. يُبنى أول تقرير بعد أول تشغيل."));
+}
+// ── عرض التقرير داخل الواجهة مع زر رجوع ─────────────────────────────
+function showReport(html, url, r) {
+  const v = $("#reportView"), f = $("#rvFrame");
+  $("#rvTitle").textContent = (S.cfg?.name || S.project) + " — " + (r.month ? monthAr(r.month) : r.file);
+  f.srcdoc = html;
+  $("#rvPrint").onclick = () => { try { f.contentWindow.focus(); f.contentWindow.print(); } catch { window.open(url, "_blank", "noopener"); } };
+  $("#rvDownload").onclick = () => { const a = el("a", { href: url, download: `${S.project}-${r.file}` }); document.body.append(a); a.click(); a.remove(); };
+  $("#rvTab").onclick = () => window.open(url, "_blank", "noopener");
+  v.hidden = false; document.body.classList.add("reading");
+  history.pushState({ report: r.file }, ""); $("#rvBack").focus();
+}
+function closeReport(fromPop) {
+  const v = $("#reportView"); if (v.hidden) return;
+  v.hidden = true; document.body.classList.remove("reading"); $("#rvFrame").srcdoc = "";
+  if (!fromPop && history.state?.report) history.back();
+}
+$("#rvBack").onclick = () => closeReport();
+addEventListener("popstate", () => closeReport(true));
+addEventListener("keydown", e => { if (e.key === "Escape" && !$("#reportView").hidden) closeReport(); });
+
+// ── تعديل وحدة من سير العمل في لوحة جانبية ─────────────────────────────
+function openNode(id) {
+  const n = S.flowNodes?.[id]; if (!n) return;
+  if (S.present) return;
+  const cfg = S.cfg, st = cfg.settings, dlg = $("#nodeDlg"), body = $("#nodeBody");
+  $("#nodeIco").textContent = n.ico; $("#nodeIco").style.background = n.c; $("#nodeTitle").textContent = n.lbl; $("#nodeSub").textContent = n.sub || "";
+  $("#nodeHint").textContent = ""; $("#nodeFull").onclick = () => { dlg.close(); goTab(n.tab); };
+  const touched = () => { markDirty(); $("#nodeHint").textContent = "تعديلات غير محفوظة — اضغط «حفظ الإعدادات» أعلى الصفحة"; };
+  const fld = (label, input, help) => el("label", { class: "nf" }, el("span", {}, label), input, help ? el("small", {}, help) : null);
+  const num = (k, ph) => el("input", { type: "number", value: st[k] ?? "", placeholder: ph || PH[k] || "", oninput: e => { st[k] = e.target.value === "" ? "" : Number(e.target.value); touched(); } });
+  const txt = (k, ph, ltr) => el("input", { type: "text", value: st[k] ?? "", placeholder: ph || PH[k] || "", dir: ltr ? "ltr" : null, oninput: e => { st[k] = e.target.value; touched(); } });
+  const stageToggle = (k, label) => { const set = new Set(st.stages || []);
+    return el("label", { class: "nswitch" }, el("input", { type: "checkbox", checked: set.has(k), onchange: e => { const s2 = new Set(st.stages || []);
+      e.target.checked ? s2.add(k) : s2.delete(k); st.stages = ["news", "social", "comments"].filter(x => s2.has(x)); touched(); } }), el("span", {}, label)); };
+  const rowList = (rows, render, add) => { const wrap = el("div", { class: "nrows" });
+    const draw = () => wrap.replaceChildren(...rows.map((r, i) => render(r, i, draw)), add ? el("button", { class: "btn", type: "button", onclick: () => { add(); touched(); draw(); } }, "＋ إضافة") : "");
+    draw(); return wrap; };
+  const active = (r) => el("input", { type: "checkbox", checked: r.active !== false, title: "مفعّل", onchange: e => { r.active = e.target.checked; touched(); } });
+  let parts = [];
+  if (id === "trigger" || id === "router") {
+    parts = [fld("بداية الفترة", el("input", { type: "date", value: st.window_start || "", oninput: e => { st.window_start = e.target.value; touched(); } })),
+      fld("نهاية الفترة", el("input", { type: "date", value: st.window_end || "", oninput: e => { st.window_end = e.target.value; touched(); } })),
+      el("label", { class: "nswitch" }, el("input", { type: "checkbox", checked: !!st.daily, onchange: e => { st.daily = e.target.checked; touched(); } }), el("span", {}, "تشغيل يومي تلقائي (23:45 القاهرة)")),
+      el("h3", {}, "المسارات"), stageToggle("news", "الأخبار"), stageToggle("social", "السوشيال"), stageToggle("comments", "تعليقات الجمهور")];
+  } else if (id.startsWith("n_")) {
+    const k = id.slice(2), rows = cfg.news.filter(r => (r.source || "google") === k);
+    parts = [stageToggle("news", "مسار الأخبار مفعّل"), el("h3", {}, k === "rss" ? "روابط الخلاصات" : "الاستعلامات"),
+      rowList(rows, (r, i, draw) => el("div", { class: "nrow" }, active(r),
+        el("input", { type: "text", value: k === "rss" ? (r.url || r.query || "") : (r.query || ""), dir: k === "rss" ? "ltr" : null, placeholder: k === "rss" ? "https://…/rss" : "كلمات البحث",
+          oninput: e => { if (k === "rss") { r.url = e.target.value; r.query = e.target.value; } else r.query = e.target.value; touched(); } }),
+        k === "rss" || k === "api" ? null : el("input", { class: "mini", type: "text", dir: "ltr", value: r.gl || "", title: "بلد النتائج (gl)", placeholder: "EG", oninput: e => { r.gl = e.target.value.toUpperCase(); touched(); } }),
+        el("button", { class: "btn icon-only danger-ghost", type: "button", title: "حذف", onclick: () => { cfg.news.splice(cfg.news.indexOf(r), 1); rows.splice(i, 1); touched(); draw(); } }, "✕")),
+        () => { const r = { active: true, source: k, language: "العربية", region: "مصر", hl: "ar", gl: "EG", query: "" }; cfg.news.push(r); rows.push(r); })];
+  } else if (id.startsWith("s_")) {
+    const k = id.slice(2), rows = cfg.social.filter(r => r.platform === k);
+    parts = [stageToggle("social", "مسار السوشيال مفعّل"), el("h3", {}, "المصادر"),
+      rowList(rows, r => el("div", { class: "nrow col" }, el("div", { class: "nrow" }, active(r),
+        el("input", { type: "text", value: r.label || "", placeholder: "وصف المصدر", oninput: e => { r.label = e.target.value; touched(); } })),
+        el("details", {}, el("summary", {}, "إدخال الـ actor (JSON)"), el("textarea", { rows: 6, dir: "ltr", oninput: e => { r.input = e.target.value; touched(); } }, r.input || "")))),
+      el("p", { class: "preview" }, "لإضافة مصدر جديد أو تغيير الـ actor استخدم «فتح التبويب الكامل».")];
+  } else if (id === "comments") {
+    parts = [stageToggle("comments", "جمع تعليقات الجمهور"), fld("عدد المواد التي تُجمع تعليقاتها", num("comments_top_posts"), "الأعلى تفاعلاً"),
+      fld("حد التعليقات لكل مادة", num("comments_per_post"))];
+  } else if (id === "filter") {
+    const ex = cfg.exclusions = cfg.exclusions || [];
+    parts = [el("p", { class: "preview" }, "يُحذف المكرر وما خارج الفترة تلقائياً. الاستثناءات تُستبعد قبل التصنيف فلا تُدفع تكلفتها."),
+      el("h3", {}, "الاستثناءات"),
+      rowList(ex, (r, i, draw) => el("div", { class: "nrow" },
+        el("select", { onchange: e => { r.type = e.target.value; touched(); } }, ["نص", "حساب", "نطاق"].map(o => el("option", { selected: r.type === o }, o))),
+        el("input", { type: "text", value: r.value || "", placeholder: "كلمة أو حساب أو موقع", oninput: e => { r.value = e.target.value; touched(); } }),
+        el("button", { class: "btn icon-only danger-ghost", type: "button", title: "حذف", onclick: () => { ex.splice(i, 1); touched(); draw(); } }, "✕")),
+        () => ex.push({ type: "نص", value: "" }))];
+  } else if (id === "ai") {
+    parts = [fld("المزوّد", el("select", { onchange: e => { st.llm_provider = e.target.value; touched(); } }, ["gemini", "claude"].map(o => el("option", { selected: (st.llm_provider || "gemini") === o }, o)))),
+      fld("النموذج", txt("llm_model", "", true)), fld("مواد في كل نداء", num("batch_size"), "كلما زاد قلّت التكلفة وطال النداء"),
+      el("label", { class: "nswitch" }, el("input", { type: "checkbox", checked: !!st.keep_irrelevant, onchange: e => { st.keep_irrelevant = e.target.checked; touched(); } }), el("span", {}, "احتفظ بالمواد غير المرتبطة")),
+      el("p", { class: "preview" }, "تصنيفات المحور والموضوع والسياق في تبويبي «التصنيف» و«السياق».")];
+  } else if (id === "csv") {
+    parts = [el("p", {}, "كل مادة مصنّفة تُكتب في records.csv، ومعها ملف لكل شهر."),
+      el("div", { class: "row" }, el("button", { class: "btn primary", type: "button", onclick: () => { dlg.close(); goTab("results"); } }, "النتائج"),
+        el("button", { class: "btn", type: "button", onclick: () => { dlg.close(); goTab("reports"); } }, "التقارير"))];
+  }
+  body.replaceChildren(...parts.filter(Boolean));
+  dlg.showModal();
+}
+$("#nodeClose").onclick = $("#nodeDone").onclick = () => $("#nodeDlg").close();
+$("#nodeDlg").addEventListener("close", () => { if (S.tab === "flow") renderFlow(); });
+$("#nodeDlg").addEventListener("click", e => { if (e.target.id === "nodeDlg") e.target.close(); });
+
+// ── تشخيص الأخطاء: نجمّع الفشل حسب السبب، ونقول الحل، ونعرض زر الإعادة المناسب ──
+const CAUSES = [
+  { k: "apify_limit", t: "رصيد Apify الشهري خلص", re: /apify_limit|usage hard limit|Monthly usage|حد الاستخدام|\(402\)/i, stages: "social,comments",
+    fix: "Apify رفض كل الطلبات لأن حد الاستخدام الشهري للحساب انتهى، فالسوشيال والتعليقات لم تُجمع. ارفع الحد الشهري من صفحة الفوترة في Apify (Billing ‹ Limits) أو رقِّ الخطة، أو انتظر بداية الدورة الجديدة، ثم أعد جمع السوشيال فقط.",
+    link: ["صفحة الفوترة والحدود في Apify", "https://console.apify.com/billing"] },
+  { k: "rate_limit", t: "Google News رفض جزءاً من الطلبات", re: /rate_limit|حظر مؤقت|تعذّر الجلب مرتين|صفحة تحقق/, stages: "news",
+    fix: "Google يحدّ عدد الطلبات القادمة من خوادم GitHub. المحرك الآن يبطّئ تلقائياً، ثم يُكمل ما تعذّر من Bing بنفس الكلمات. لتقليلها: احذف الاستعلامات المكررة لنفس الكلمات في دول كثيرة (اترك 3–4 دول رئيسية)، أو كبّر «أيام كل جزء» في الإعدادات. الإعادة الآن آمنة: المكرر لا يُكتب مرتين." },
+  { k: "key", t: "مفتاح ناقص في GitHub Secrets", re: /NEWSSCOPE_KEY|BROADCAST_API_KEY|APIFY_TOKEN|GEMINI_API_KEY|غير موجود/, stages: "news",
+    fix: "أضف المفتاح المذكور من صفحة أسرار المستودع ثم أعد التشغيل. المفاتيح لا تُكتب في الواجهة أبداً.", secrets: true },
+  { k: "auth", t: "رفض الصلاحية", re: /HTTP 40[13]\b/, stages: "",
+    fix: "المفتاح موجود لكنه مرفوض (منتهٍ أو بلا صلاحية). جدّده من حساب الخدمة وحدّثه في أسرار المستودع.", secrets: true },
+  { k: "timeout", t: "مصادر بطيئة لم تكتمل في الوقت", re: /انتهت المهلة|Timeout/i, stages: "social",
+    fix: "الـ actor أخذ وقتاً أطول من المسموح حتى بعد التشغيل الطويل. ارفع «دقائق إعادة المحاولة» في الإعدادات، أو قلّل عدد النتائج (maxItems) في إدخال المصدر." },
+  { k: "input", t: "إدخال مصدر غير صالح", re: /إدخال غير صالح|JSON|broadcast_api_url/, stages: "",
+    fix: "إدخال المصدر فيه خطأ صياغة. افتح التبويب المعني وصحّح الحقل (اضغط على اسم المصدر في القائمة بالأسفل)." },
+  { k: "other", t: "أخطاء أخرى", re: /./, stages: "",
+    fix: "أسباب متفرقة؛ افتح سجل التشغيل على GitHub لتفاصيل أكثر، وأعد المحاولة. لو تكرر نفس المصدر عطّله مؤقتاً." },
+];
+function diagnose(list) {
+  const bad = (list || []).filter(f => !f.ok), fixed = (list || []).filter(f => f.ok);
+  const groups = new Map();
+  for (const f of bad) {
+    const c = CAUSES.find(c => c.re.test((f.code || "") + " " + f.reason)) || CAUSES.at(-1);
+    if (!groups.has(c)) groups.set(c, []); groups.get(c).push(f);
+  }
+  return { bad, fixed, groups: [...groups.entries()] };
+}
+async function retryStages(stages, label) {
+  if (!stages) return;
+  if (!confirm(`إعادة ${label} فقط لنفس الفترة؟ ما جُمع من قبل لا يتكرر.`)) return;
+  try {
+    await gh(`/actions/workflows/monitor.yml/dispatches`, { method: "POST", body: JSON.stringify({ ref: "main", inputs: { project: S.project, action: "run", stages } }) });
+    setState("run", "أُرسل طلب الإعادة…"); toast("بدأت الإعادة — تتحدث الحالة هنا تلقائياً"); setTimeout(pollRuns, 6000);
+  } catch (e) { toast("تعذّرت الإعادة: " + e.message, 6000); }
+}
+const STAGE_AR = { news: "الأخبار", social: "السوشيال", comments: "التعليقات", "social,comments": "السوشيال والتعليقات" };
+function diagnosisPanel(list, compact) {
+  const d = diagnose(list);
+  if (!d.bad.length) return d.fixed.length && !compact ? el("p", { class: "diag-ok" }, `✓ ${d.fixed.length} مصدر تعثّر ثم اكتمل تلقائياً (إعادة أو بديل)`) : null;
+  return el("section", { class: "diag" + (compact ? " compact" : "") },
+    el("header", {}, el("b", {}, `اكتمل التشغيل مع ${d.bad.length} خطأ`), el("span", {}, "ما جُمع محفوظ. هذه الأسباب وحلولها:")),
+    d.groups.map(([c, fs]) => {
+      const names = [...new Set(fs.map(f => f.source))];
+      const skipped = fs.flatMap(f => f.skipped || []);
+      return el("article", { class: "diag-item " + c.k },
+        el("div", { class: "diag-h" }, el("b", {}, c.t), el("span", { class: "chip bad" }, `${skipped.length || names.length} مصدر`)),
+        el("p", {}, c.fix),
+        el("div", { class: "acts" },
+          c.stages ? el("button", { class: "btn primary", type: "button", onclick: () => retryStages(c.stages, STAGE_AR[c.stages]) }, `↻ إعادة ${STAGE_AR[c.stages]} فقط`) : null,
+          c.link ? el("a", { class: "btn", href: c.link[1], target: "_blank", rel: "noopener" }, c.link[0] + " ↗") : null,
+          c.secrets ? el("a", { class: "btn", href: `https://github.com/${S.repo}/settings/secrets/actions`, target: "_blank", rel: "noopener" }, "أسرار المستودع ↗") : null),
+        el("details", {}, el("summary", {}, "المصادر المتأثرة"),
+          el("ul", {}, (skipped.length ? skipped : names).slice(0, 60).map(n => el("li", {}, n)))));
+    }));
 }
 function failuresList(list) {
   const bad = (list || []).filter(f => !f.ok);
@@ -1260,7 +1489,7 @@ function lastDays(n) {
 function applyTheme(t) {
   if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
   const dark = t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
-  $("#theme").textContent = dark ? "☀" : "☾"; $("#theme").title = dark ? "الوضع الفاتح" : "الوضع الداكن";
+  $("#theme").textContent = dark ? "☀ الوضع الفاتح" : "☾ الوضع الداكن";
 }
 function toggleTheme() {
   const dark = document.documentElement.dataset.theme === "dark" || (!document.documentElement.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
@@ -1341,7 +1570,7 @@ function renderFlow() {
   if (newsKeys.length) svg += `<text class="branch" x="645" y="40">الأخبار</text>`;
   for (const n of nodes) {
     const r = n.r || R;
-    svg += `<g class="node${n.off ? " off" : ""}${n.live ? " live" : ""}" data-tab="${n.tab}" tabindex="0" role="button" aria-label="${esc(n.lbl)}">`
+    svg += `<g class="node${n.off ? " off" : ""}${n.live ? " live" : ""}" data-tab="${n.tab}" data-id="${esc(n.id)}" tabindex="0" role="button" aria-label="${esc(n.lbl)}">`
       + `<circle class="ring" cx="${n.x}" cy="${n.y}" r="${r + 5}"/><circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${n.c}"/>`
       + `<text class="ico" x="${n.x}" y="${n.y}" font-size="${n.ico.length > 1 ? 17 : 22}">${esc(n.ico)}</text>`
       + `<text class="lbl" x="${n.x}" y="${n.y + r + 22}">${esc(n.lbl)}</text>`
@@ -1356,12 +1585,13 @@ function renderFlow() {
   }
   svg += "</svg>";
   const box = el("div", { class: "flow", html: svg });
-  box.querySelectorAll(".node").forEach(g => { const go = () => goTab(g.dataset.tab); g.addEventListener("click", go); g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }); });
+  S.flowNodes = Object.fromEntries(nodes.map(n => [n.id, n]));
+  box.querySelectorAll(".node").forEach(g => { const go = () => openNode(g.dataset.id); g.addEventListener("click", go); g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }); });
   const per = `${cfg.settings.window_start || "؟"} ← ${cfg.settings.window_end || "؟"}`;
   const coll = p && p.collected ? Object.values(p.collected).reduce((a, b) => a + b, 0) : null;
   const k = (l, v) => el("div", { class: "kpi" }, el("div", { class: "l" }, l), el("div", { class: "v", style: "font-size:1.3rem" }, v));
   host.replaceChildren(el("h2", {}, cfg.name || S.project),
-    el("p", { class: "lead" }, "مسار البيانات من المصادر إلى ملف النتائج. اضغط أي وحدة لتعديلها. أثناء التشغيل تتحرك الوصلات، والفقاعات تعدّ ما سُحب لحظة بلحظة، وبعده تعرض الأخضر ما كُتب في الملف."),
+    el("p", { class: "lead" }, "مسار البيانات من المصادر إلى ملف النتائج. اضغط أي دائرة لتعديلها في مكانها. أثناء التشغيل تتلوّن الوحدة العاملة، والفقاعات تعدّ ما سُحب لحظة بلحظة، وبعده تعرض الأخضر ما كُتب في الملف."),
     box,
     el("div", { class: "flowstats" },
       k("الفترة", el("bdi", { dir: "ltr", style: "font-size:1rem;white-space:nowrap" }, per)),
@@ -1576,6 +1806,14 @@ $("#project").onchange = e => loadProject(e.target.value);
 $("#newProject").onclick = newProject;
 $("#theme").onclick = toggleTheme;
 $("#presentBtn").onclick = () => setPresent(!S.present);
+$("#presentExit").onclick = () => setPresent(false);
+$("#newTop").onclick = newProject;
+{ const btn = $("#menuBtn"), pop = $("#menuPop");
+  const close = () => { pop.hidden = true; btn.setAttribute("aria-expanded", "false"); };
+  btn.onclick = e => { e.stopPropagation(); pop.hidden = !pop.hidden; btn.setAttribute("aria-expanded", String(!pop.hidden)); if (!pop.hidden) pop.querySelector(".mi:not([hidden])")?.focus(); };
+  pop.addEventListener("click", e => { if (e.target.closest(".mi")) close(); });
+  document.addEventListener("click", e => { if (!e.target.closest(".menu")) close(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !pop.hidden) { close(); btn.focus(); } }); }
 if (store.get("present") === "1" || new URLSearchParams(location.search).has("present")) { S.present = true; document.body.classList.add("present"); }
 $("#token").addEventListener("keydown", e => { if (e.key === "Enter") connect(); });
 $("#homeBtn").onclick = () => showHome(true);
