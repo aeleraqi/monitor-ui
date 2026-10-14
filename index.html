@@ -199,18 +199,116 @@ dialog { border:1px solid var(--line); border-radius:var(--r); background:var(--
 dialog::backdrop { background:rgb(0 0 0 / .35); }
 @media (max-width:640px) { .kpis { grid-template-columns:repeat(2, minmax(0, 1fr)); } .bar { grid-template-columns:90px 1fr auto; } .cards { grid-template-columns:1fr; } }
 @media (prefers-reduced-motion: no-preference) { .bar .track i { transition:width .4s ease; } }
+
+/* ═══ طبقة التصميم: عرض العملاء ═══ */
+:root { --shadow-sm:0 1px 2px rgb(20 18 10 / .05), 0 1px 1px rgb(20 18 10 / .03); --shadow:0 1px 2px rgb(20 18 10 / .04), 0 8px 24px -12px rgb(20 18 10 / .14);
+  --shadow-lg:0 2px 4px rgb(20 18 10 / .05), 0 24px 48px -20px rgb(20 18 10 / .25); --rl:12px; --ease:cubic-bezier(.2,.7,.2,1); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --shadow-sm:0 1px 2px rgb(0 0 0 / .4); --shadow:0 1px 2px rgb(0 0 0 / .35), 0 10px 30px -14px rgb(0 0 0 / .7); --shadow-lg:0 30px 60px -24px rgb(0 0 0 / .8); } }
+:root[data-theme="dark"] { --shadow-sm:0 1px 2px rgb(0 0 0 / .4); --shadow:0 1px 2px rgb(0 0 0 / .35), 0 10px 30px -14px rgb(0 0 0 / .7); --shadow-lg:0 30px 60px -24px rgb(0 0 0 / .8); }
+body { background:radial-gradient(1200px 420px at 85% -120px, color-mix(in oklab, var(--accent) 7%, transparent), transparent 70%), var(--bg); background-attachment:fixed; -webkit-font-smoothing:antialiased; }
+header.top { background:color-mix(in oklab, var(--surface) 82%, transparent); backdrop-filter:saturate(1.4) blur(14px); -webkit-backdrop-filter:saturate(1.4) blur(14px); }
+.brand { display:inline-flex; align-items:center; gap:9px; }
+.brand .logo { width:28px; height:28px; color:var(--fg); flex:none; }
+.brand .logo path { transform-origin:16px 16px; animation:sweep 6s linear infinite; }
+@keyframes sweep { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .brand .logo path { animation:none; } }
+.brand > i { display:none; }
+.btn { border-radius:8px; transition:background .15s, border-color .15s, transform .08s, box-shadow .15s; display:inline-flex; align-items:center; gap:6px; }
+.btn:active { transform:translateY(1px); }
+.btn.primary { background:linear-gradient(180deg, color-mix(in oklab, var(--accent) 88%, #fff), var(--accent)); box-shadow:0 1px 0 rgb(255 255 255 / .2) inset, 0 6px 16px -8px var(--accent); }
+.btn.ghost { background:transparent; }
+.btn.ghost[aria-pressed="true"] { background:var(--fg); color:var(--bg); border-color:var(--fg); }
+.btn.big { padding:11px 18px; font-size:1rem; justify-content:center; }
+nav.tabs { background:color-mix(in oklab, var(--bg) 88%, transparent); backdrop-filter:blur(10px); position:sticky; top:57px; z-index:4; }
+nav.tabs button { display:inline-flex; align-items:center; gap:7px; border-radius:8px 8px 0 0; transition:color .15s, background .15s; }
+nav.tabs button:hover { color:var(--fg); background:var(--surface2); }
+nav.tabs .wrap { scrollbar-width:none; } nav.tabs .wrap::-webkit-scrollbar{display:none}
+@media (max-width:1400px){ nav.tabs button{padding:10px 10px;font-size:.92rem} }
+nav.tabs .ico { opacity:.7; display:inline-flex; } nav.tabs button[aria-selected="true"] .ico { opacity:1; color:var(--accent); }
+.panel:not([hidden]), #home:not([hidden]) { animation:rise .35s var(--ease) both; }
+@keyframes rise { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+@media (prefers-reduced-motion: reduce) { .panel, #home { animation:none !important; } }
+h2 { font-size:1.2rem; letter-spacing:-.1px; }
+.kpi, .card, fieldset, .pcard, .progress, .scroll { border-radius:var(--rl); box-shadow:var(--shadow-sm); }
+.kpi { padding:14px 16px; position:relative; overflow:hidden; }
+.kpi .v { font-size:1.75rem; letter-spacing:-.5px; }
+.kpi .s { color:var(--fg3); font-size:.78rem; }
+.kpi.big { background:linear-gradient(160deg, var(--surface), color-mix(in oklab, var(--accent) 6%, var(--surface))); }
+.spark { position:absolute; inset-inline-start:12px; bottom:10px; opacity:.9; }
+.spark .l { fill:none; stroke:var(--accent); stroke-width:1.8; } .spark .a { fill:var(--accent); opacity:.1; }
+.pcard { transition:transform .2s var(--ease), box-shadow .2s var(--ease), border-color .2s; }
+.pcard:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
+.card { transition:box-shadow .2s; } .card:hover { box-shadow:var(--shadow); }
+.eyebrow { display:inline-block; color:var(--accent); font-size:.8rem; font-weight:600; letter-spacing:.2px; margin-bottom:6px; }
+.hero h1 { font-size:clamp(1.8rem, 3.6vw, 2.6rem); }
+.hero .stat .v { font-size:1.9rem; }
+/* حلقة النبرة */
+.res-hero { display:grid; grid-template-columns:minmax(250px, 300px) 1fr; gap:14px; margin-bottom:18px; }
+.res-hero .kpis { margin:0; grid-template-columns:repeat(3, minmax(0, 1fr)); }
+.res-hero .kpi.big { grid-row:span 2; display:flex; flex-direction:column; justify-content:center; }
+.res-hero .kpi.big .v { font-size:2.6rem; }
+.ring-card { display:flex; align-items:center; gap:18px; }
+.ring { width:var(--s); height:var(--s); border-radius:50%; display:grid; place-items:center; flex:none; animation:spin-in .8s var(--ease) both; }
+@keyframes spin-in { from { transform:rotate(-90deg) scale(.85); opacity:0; } }
+.ring .hole { width:72%; height:72%; border-radius:50%; background:var(--surface); display:grid; place-content:center; text-align:center; }
+.ring .hole b { font-size:1.6rem; line-height:1.1; } .ring .hole span { font-size:.75rem; color:var(--fg2); }
+.ring-legend { display:grid; gap:8px; font-size:.88rem; }
+.ring-legend div { display:flex; align-items:center; gap:7px; } .ring-legend i { width:10px; height:10px; border-radius:3px; } .ring-legend b { margin-inline-start:auto; padding-inline-start:12px; }
+/* هيكل التحميل */
+.skel-wrap { display:grid; gap:14px; padding-top:6px; }
+.skel { border-radius:10px; background:linear-gradient(90deg, var(--surface2) 25%, color-mix(in oklab, var(--surface2) 55%, var(--surface)) 50%, var(--surface2) 75%); background-size:200% 100%; animation:shimmer 1.2s linear infinite; }
+@keyframes shimmer { to { background-position:-200% 0; } }
+/* تقدير التكلفة */
+.est-total { display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:12px; padding:14px; border-radius:var(--rl); background:var(--surface2); }
+.est-total .l { color:var(--fg2); font-size:.8rem; } .est-total .v { font-size:2rem; font-weight:700; } .est-total .v.sm { font-size:1.2rem; padding-top:10px; }
+.est-cap { margin-top:10px; padding:9px 12px; border-radius:8px; background:var(--ok-soft); color:var(--ok); font-size:.88rem; }
+.est-cap.over { background:var(--accent-soft); color:var(--accent); } .est-cap.muted { background:var(--surface2); color:var(--fg2); }
+.est-rows { display:grid; gap:4px; margin-top:12px; max-height:44vh; overflow:auto; }
+.est-row { display:grid; grid-template-columns:minmax(150px, 1.3fr) 1fr 110px; gap:10px; align-items:center; padding:6px 2px; border-bottom:1px solid var(--line); }
+.est-row .k b, .est-row .n b { display:block; font-size:.9rem; } .est-row small { color:var(--fg3); font-size:.75rem; }
+.est-row .bar { height:8px; border-radius:99px; background:var(--surface2); overflow:hidden; display:block; } .est-row .bar i { display:block; height:100%; background:var(--accent); border-radius:99px; }
+.est-row .n { text-align:left; }
+.capbar { display:grid; gap:6px; margin-bottom:12px; font-size:.88rem; }
+td input[type=number] { width:90px; border-color:transparent; background:transparent; padding:4px 6px; }
+td input[type=number]:hover, td input[type=number]:focus { border-color:var(--line); }
+td.mono { font-family:var(--mono); font-size:12px; }
+details.card > summary { cursor:pointer; }
+/* شاشة الدخول */
+body.signedout nav.tabs, body.signedout header .pj, body.signedout #homeBtn, body.signedout #presentBtn, body.signedout #newProject { display:none !important; }
+.connect { max-width:1080px; margin:36px auto; display:grid; grid-template-columns:1.25fr .9fr; gap:28px; background:none; border:0; box-shadow:none; padding:0; align-items:start; }
+.connect .pitch h1 { font-size:clamp(1.8rem, 3.6vw, 2.7rem); line-height:1.25; margin:0 0 12px; letter-spacing:-.3px; text-wrap:balance; }
+.connect .pitch > p { color:var(--fg2); font-size:1.05rem; max-width:56ch; margin:0 0 20px; }
+.feats { list-style:none; padding:0; margin:0 0 18px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.feats li { background:var(--surface); border:1px solid var(--line); border-radius:var(--rl); padding:12px 14px; box-shadow:var(--shadow-sm); }
+.feats b { display:block; margin-bottom:2px; } .feats span { color:var(--fg2); font-size:.85rem; }
+.pitch-flow { width:100%; max-width:440px; } .pitch-flow .e { fill:none; stroke:var(--edge); stroke-width:2.5; stroke-dasharray:1 7; stroke-linecap:round; animation:dash 1.2s linear infinite; }
+.connect .login { background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:24px; display:grid; gap:14px; box-shadow:var(--shadow-lg); position:sticky; top:90px; }
+.connect .how summary { cursor:pointer; color:var(--fg2); font-size:.9rem; } .connect .how ol { color:var(--fg2); font-size:.88rem; padding-inline-start:20px; }
+/* وضع العرض */
+body.present #save, body.present #settings, body.present #newProject, body.present .pr-note, body.present details.fails,
+body.present .tablebar .btn:not(:first-child), body.present #p-flow .lead { display:none !important; }
+body.present .brand span { display:none; }
+body.present #presentBtn { display:inline-flex !important; }
+body.present .hero .actions { display:none; }
+@media (max-width:860px) {
+  .connect { grid-template-columns:1fr; } .connect .login { position:static; } .feats { grid-template-columns:1fr; }
+  .res-hero { grid-template-columns:1fr; } .res-hero .kpis { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+  .est-total { grid-template-columns:1fr 1fr; } .est-total > :first-child { grid-column:1/-1; }
+  nav.tabs { top:auto; position:static; } .brand span { display:none; }
+}
 </style>
 </head>
 <body>
 <header class="top">
   <div class="wrap">
-    <a class="brand" id="homeLink" href="#" title="كل المشاريع"><i></i><b>مرصد InfoTimes</b><span>محرك الرصد الإعلامي</span></a>
+    <a class="brand" id="homeLink" href="#" title="كل المشاريع"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".25"/><circle cx="16" cy="16" r="9" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".45"/><path d="M16 16 26 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="16" r="3.2" fill="var(--accent)"/><circle cx="23.5" cy="10.5" r="2" fill="var(--accent)"/></svg><b>مرصد InfoTimes</b><span>الرصد الإعلامي الذكي</span></a>
     <button class="btn" id="homeBtn" type="button">⌂ المشاريع</button>
     <select id="project" aria-label="المشروع" class="pj"></select>
     <button class="btn" id="newProject" type="button">＋ مشروع</button>
     <span class="chip pj" id="state">غير متصل</span>
     <button class="btn pj" id="save" type="button" disabled>حفظ الإعدادات</button>
     <button class="btn primary pj" id="run" type="button" disabled>▶ تشغيل الرصد</button>
+    <button class="btn ghost" id="presentBtn" type="button" aria-pressed="false" title="إخفاء أدوات التعديل لعرض النتائج على العميل"><span aria-hidden="true">◱</span><span> وضع العرض</span></button>
     <button class="btn" id="theme" type="button" aria-label="الوضع الفاتح أو الداكن" title="الوضع الفاتح / الداكن">◐</button>
     <button class="btn" id="settings" type="button" aria-label="إعدادات الاتصال">⚙</button>
   </div>
@@ -219,17 +317,34 @@ dialog::backdrop { background:rgb(0 0 0 / .35); }
 
 <main class="wrap" id="main">
   <section class="connect" id="connect" hidden>
-    <h2>اربط الواجهة بالمحرك</h2>
-    <p class="lead" style="margin:0">الواجهة تقرأ الإعدادات والنتائج من الـ repo الخاص وتشغّل الرصد عبر GitHub. يُحفظ المفتاح في متصفحك فقط.</p>
-    <ol>
-      <li>افتح <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub ← Fine-grained token</a>.</li>
-      <li>Repository access: <b>Only select repositories</b> ← <span class="num">monitor-engine</span>.</li>
-      <li>Permissions: <b>Contents</b> = Read and write، <b>Actions</b> = Read and write.</li>
-      <li>انسخ المفتاح والصقه هنا.</li>
-    </ol>
-    <div class="field"><label for="repo">الـ repo</label><input type="text" id="repo" dir="ltr" value="aeleraqi/monitor-engine"></div>
-    <div class="field"><label for="token">GitHub token</label><input type="password" id="token" dir="ltr" autocomplete="off" placeholder="github_pat_…"></div>
-    <div><button class="btn primary" id="connectBtn" type="button">اتصال</button></div>
+    <div class="pitch">
+      <span class="eyebrow">مرصد InfoTimes</span>
+      <h1>كل ما يُكتب عن عملائك، مصنّفاً ومحلّلاً، في مكان واحد.</h1>
+      <p>أخبار بكل اللغات، ومنصات التواصل، وتعليقات الجمهور. يجمعها المحرك، ويستبعد المكرر، ويصنّفها بالنبرة والمحور والموضوع، ثم يكتب التقرير الشهري.</p>
+      <ul class="feats">
+        <li><b>مصادر متعددة</b><span>Google News وBing وRSS، وX وفيسبوك وإنستجرام وتيك توك ويوتيوب ولينكدإن</span></li>
+        <li><b>تصنيف بالذكاء الاصطناعي</b><span>نبرة وعاطفة ومحور وموضوع، وحقول خاصة بكل عميل</span></li>
+        <li><b>تقارير جاهزة</b><span>تقرير شهري ومقارنة بالشهر السابق والربع، وملف CSV لكل شهر</span></li>
+        <li><b>تكلفة تحت السيطرة</b><span>تقدير قبل كل تشغيل، وسقف إنفاق يوقف الجمع تلقائياً</span></li>
+      </ul>
+      <svg class="pitch-flow" viewBox="0 0 420 90" aria-hidden="true">
+        <path class="e" d="M30 45 C80 45 80 20 130 20 M30 45 C80 45 80 70 130 70 M130 20 C180 20 180 45 230 45 M130 70 C180 70 180 45 230 45 M230 45 H310 M310 45 H390"/>
+        <circle cx="30" cy="45" r="13" fill="#6D00CC"/><circle cx="130" cy="20" r="13" fill="#4285F4"/><circle cx="130" cy="70" r="13" fill="#1877F2"/>
+        <circle cx="230" cy="45" r="13" fill="#7a776d"/><circle cx="310" cy="45" r="13" fill="#7C4DFF"/><circle cx="390" cy="45" r="13" fill="#1E8E3E"/>
+      </svg>
+    </div>
+    <div class="login">
+      <h2>ربط الحساب</h2>
+      <p class="lead" style="margin:0">المفتاح يُحفظ في متصفحك فقط، ويقرأ الإعدادات والنتائج من الـ repo الخاص.</p>
+      <details class="how"><summary>كيف أحصل على المفتاح؟</summary><ol>
+        <li>افتح <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub ← Fine-grained token</a>.</li>
+        <li>Repository access: <b>Only select repositories</b> ← <span class="num">monitor-engine</span>.</li>
+        <li>Permissions: <b>Contents</b> = Read and write، <b>Actions</b> = Read and write.</li>
+      </ol></details>
+      <div class="field"><label for="repo">الـ repo</label><input type="text" id="repo" dir="ltr" value="aeleraqi/monitor-engine"></div>
+      <div class="field"><label for="token">المفتاح</label><input type="password" id="token" dir="ltr" autocomplete="off" placeholder="github_pat_…"></div>
+      <button class="btn primary big" id="connectBtn" type="button">دخول</button>
+    </div>
   </section>
 
   <section id="home" hidden></section>
@@ -243,6 +358,7 @@ dialog::backdrop { background:rgb(0 0 0 / .35); }
   <section class="panel" id="p-context" hidden></section>
   <section class="panel" id="p-results" hidden></section>
   <section class="panel" id="p-reports" hidden></section>
+  <section class="panel" id="p-cost" hidden></section>
   <section class="panel" id="p-runs" hidden></section>
 </main>
 
@@ -265,6 +381,13 @@ dialog::backdrop { background:rgb(0 0 0 / .35); }
     </div>
     <div class="field"><label for="newCtx">سياق الرصد (اختياري)</label><textarea id="newCtx" rows="4" placeholder="أنت محلل رصد إعلامي لحساب … قاعدة الصلة: …"></textarea></div>
     <div style="display:flex;gap:8px"><button class="btn primary" value="ok">إنشاء المشروع</button><button class="btn" value="cancel" formnovalidate>إلغاء</button></div>
+  </form>
+</dialog>
+<dialog id="runDlg" class="wide">
+  <form method="dialog" style="display:grid;gap:14px">
+    <h2>قبل التشغيل: التكلفة المتوقعة</h2>
+    <div id="runBody"></div>
+    <div style="display:flex;gap:8px"><button class="btn primary" value="ok">▶ تشغيل الرصد</button><button class="btn" value="cancel">إلغاء</button></div>
   </form>
 </dialog>
 <dialog id="importDlg" class="wide">
@@ -318,12 +441,13 @@ async function connect() {
     const list = await gh(`/contents/config/projects`);
     S.projects = list.filter(f => f.name.endsWith(".json")).map(f => f.name.slice(0, -5));
     store.set("repo", S.repo); store.set("token", S.token);
-    $("#connect").hidden = true; $("#save").disabled = false; $("#run").disabled = false;
+    $("#connect").hidden = true; $("#save").disabled = false; $("#run").disabled = false; document.body.classList.remove("signedout");
     await loadMeta(true); fillProjects();
     await loadProject(S.projects.includes(S.project) ? S.project : S.projects[0]);
     await pollRuns(); setInterval(pollRuns, 15000);
     S.homeLive = S.runs.filter(r => r.status !== "completed" && r.event !== "push").length;
     showHome(store.get("view") !== "project");
+    if (S.present) setPresent(true);
   } catch (e) { $("#connect").hidden = false; setState("bad", "فشل الاتصال"); toast("تعذّر الاتصال: " + e.message, 6000); }
 }
 function fillProjects() {
@@ -367,7 +491,9 @@ function renderProgress() {
       [["الأخبار", "أخبار"], ["السوشيال", "سوشيال"], ["التعليقات", "تعليقات"]].map(([c, w]) =>
         el("div", { class: "kpi" }, el("div", { class: "l" }, c + ": سُحب / كُتب"),
           el("div", { class: "v" }, fmt((p && p.collected || {})[c] || 0), el("span", { style: "color:var(--fg3);font-size:1rem" }, " / " + fmt((p && p.written || {})[w] || 0))))),
-      el("div", { class: "kpi" }, el("div", { class: "l" }, "إجمالي ما سُحب"), el("div", { class: "v" }, fmt(Object.values((p && p.collected) || {}).reduce((a, b) => a + b, 0))))),
+      el("div", { class: "kpi" }, el("div", { class: "l" }, "إجمالي ما سُحب"), el("div", { class: "v" }, fmt(Object.values((p && p.collected) || {}).reduce((a, b) => a + b, 0)))),
+      el("div", { class: "kpi" }, el("div", { class: "l" }, "التكلفة حتى الآن"), el("div", { class: "v" }, usd(p && p.cost ? p.cost.usd : 0, 3)),
+        p && p.cost && p.cost.caps && (p.cost.caps.run || p.cost.caps.month) ? el("div", { class: "s" }, "السقف " + usd(p.cost.caps.run || p.cost.caps.month)) : null)),
     failuresList(p && p.failures),
     el("small", { class: "pr-note" }, "تُحفظ النتائج على دفعات من 100 مادة. لو أوقفت التشغيل يبقى ما اكتمل حفظه في ملف CSV. المصدر الذي يفشل بسبب المهلة أو حد الاستخدام يُعاد وحده في آخر المرحلة."));
 }
@@ -379,6 +505,7 @@ async function stopRun() {
 async function run() {
   if (S.live) return stopRun();
   if (S.cfg?.settings?.archived) return toast("المشروع مؤرشف — استعده من الصفحة الرئيسية أولاً", 5000);
+  if (!(await confirmRun(S.project, S.cfg))) return;
   try {
     if (S.dirty) await save();
     await gh(`/actions/workflows/monitor.yml/dispatches`, { method: "POST", body: JSON.stringify({ ref: "main", inputs: { project: S.project, action: "run" } }) });
@@ -413,14 +540,14 @@ function ago(t) { const m = Math.round((Date.now() - new Date(t)) / 60000); retu
 
 // ── التبويبات ───────────────────────────────────────────────
 const TABS = [["flow", "سير العمل"], ["settings", "الإعدادات"], ["news", "الأخبار"], ["social", "السوشيال"], ["exclusions", "الاستثناءات"],
-              ["taxonomy", "التصنيف"], ["context", "السياق"], ["results", "النتائج"], ["reports", "التقارير"], ["runs", "السجل"]];
+              ["taxonomy", "التصنيف"], ["context", "السياق"], ["results", "النتائج"], ["reports", "التقارير"], ["cost", "التكلفة"], ["runs", "السجل"]];
 function renderTabs() {
   const counts = { news: S.cfg.news.filter(r => r.active).length + "/" + S.cfg.news.length,
                    social: S.cfg.social.filter(r => r.active).length + "/" + S.cfg.social.length, exclusions: S.cfg.exclusions.length };
-  $("#tabs").replaceChildren(...TABS.map(([k, label]) => el("button", { role: "tab", type: "button", "aria-selected": String(S.tab === k),
-    onclick: () => goTab(k) }, label, counts[k] != null ? el("span", { class: "count" }, counts[k]) : null)));
+  $("#tabs").replaceChildren(...TABS.filter(([k]) => !S.present || PRESENT_TABS.has(k)).map(([k, label]) => el("button", { role: "tab", type: "button", "aria-selected": String(S.tab === k),
+    onclick: () => goTab(k) }, icon(k), label, counts[k] != null && !S.present ? el("span", { class: "count" }, counts[k]) : null)));
 }
-function showTab() { for (const [k] of TABS) $("#p-" + k).hidden = k !== S.tab; if (S.tab === "runs") renderRuns(); if (S.tab === "flow") renderFlow(); if (S.tab === "reports") renderReports(); }
+function showTab() { for (const [k] of TABS) $("#p-" + k).hidden = k !== S.tab; if (S.tab === "runs") renderRuns(); if (S.tab === "flow") renderFlow(); if (S.tab === "reports") renderReports(); if (S.tab === "cost") renderCost(); }
 function goTab(k) { S.tab = k; store.set("tab", k); renderTabs(); showTab(); window.scrollTo({ top: 0 }); }
 function renderAll() { renderTabs(); renderFlow(); renderSettings(); renderNews(); renderSocial(); renderExclusions(); renderTaxonomy(); renderContext(); showTab(); }
 
@@ -449,6 +576,9 @@ const FORM = [
     ["keep_irrelevant", "احتفظ بغير المرتبط", "check", "اكتب المواد التي صنّفها النموذج «غير مرتبطة»"],
     ["apify_timeout", "مهلة كل actor (ثانية)", "number", "التشغيل الأول متزامن حتى 300 ثانية"],
     ["retry_minutes", "مهلة إعادة المحاولة (دقيقة)", "number", "ما يفشل بسبب المهلة أو حد الاستخدام يُعاد وحده في آخر المرحلة بتشغيل طويل"]]],
+  ["الميزانية", [
+    ["budget_run_usd", "سقف التشغيلة ($)", "number", "يوقف الجمع لو تكلفة التشغيلة قربت من الرقم ده. فارغ = بلا سقف"],
+    ["budget_month_usd", "سقف المشروع الشهري ($)", "number", "مجموع تشغيلات المشروع في الشهر. سقف الحساب كله في تبويب «التكلفة»"]]],
   ["التقرير الشهري", [
     ["monthly_report", "تقرير شهري تلقائي", "check1", "صفحة لكل شهر في تبويب «التقارير»: الأرقام، المقارنة بالشهر السابق، أعلى المواد، وقراءة تحليلية"],
     ["report_title", "عنوان التقرير", "text", "مثل «مصر كما تُروى». فارغ = اسم المشروع"],
@@ -558,7 +688,7 @@ function renderContext() {
 // النتائج
 async function loadResults(month) {
   const host = $("#p-results");
-  host.replaceChildren(el("p", { class: "lead" }, "جارٍ تحميل النتائج…"));
+  host.replaceChildren(skeleton(2));
   S.month = month || "";
   const [all, latestAll, files] = await Promise.all([readJSON(`data/${S.project}/summary.json`, null), readJSON(`data/${S.project}/latest.json`, []),
     gh(`/contents/data/${S.project}`, { allow404: true }).catch(() => null)]);
@@ -570,9 +700,16 @@ async function loadResults(month) {
   S.summary = all || {}; if (S.tab === "flow") renderFlow();
   if (!sm) { host.replaceChildren(el("h2", {}, "النتائج"), el("div", { class: "empty" }, "لا نتائج بعد. اضغط «▶ تشغيل الرصد»؛ تظهر المؤشرات هنا بعد أول تشغيل.")); return; }
   const k = (l, v, alert) => el("div", { class: "kpi" + (alert ? " alert" : "") }, el("div", { class: "l" }, l), el("div", { class: "v" }, v));
-  const kpis = el("div", { class: "kpis" }, k("إجمالي السجلات", fmt(sm.total)), k("المواد", fmt(sm.materials)), k("التعليقات", fmt(sm.comments)),
-    k("إيجابي", pct(sm.positive)), k("سلبي", pct(sm.negative), true), k("المشاهدات", fmt(sm.views)), k("التفاعلات", fmt(sm.interactions)),
-    k("تستدعي التحقق", fmt(sm.verify), sm.verify > 0));
+  const dailyVals = (sm.daily || []).map(d => (d["مادة"] || 0) + (d["تعليق"] || 0));
+  const kpis = el("div", { class: "res-hero" },
+    el("div", { class: "card ring-card" }, toneRing(sm), el("div", { class: "ring-legend" },
+      el("div", {}, el("i", { style: "background:var(--pos)" }), "إيجابي", el("b", {}, pct(sm.positive))),
+      el("div", {}, el("i", { style: "background:var(--neu)" }), "محايد", el("b", {}, pct(sm.neutral))),
+      el("div", {}, el("i", { style: "background:var(--neg)" }), "سلبي", el("b", {}, pct(sm.negative))))),
+    el("div", { class: "kpis" },
+      el("div", { class: "kpi big" }, el("div", { class: "l" }, "إجمالي السجلات"), el("div", { class: "v" }, fmt(sm.total)), sparkline(dailyVals)),
+      k("المواد", fmt(sm.materials)), k("التعليقات", fmt(sm.comments)), k("المشاهدات", fmt(sm.views)), k("التفاعلات", fmt(sm.interactions)),
+      k("تستدعي التحقق", fmt(sm.verify), sm.verify > 0)));
   const legend = () => el("div", { class: "legend" }, el("span", { style: "--c:var(--pos)" }, "إيجابي"), el("span", { style: "--c:var(--neu)" }, "محايد"), el("span", { style: "--c:var(--neg)" }, "سلبي"));
   const stacked = (title, data) => {
     const max = Math.max(1, ...data.map(d => d.total));
@@ -697,6 +834,189 @@ async function renderRuns() {
 }
 
 // مشروع جديد
+// ── عناصر التصميم: أيقونات، هياكل تحميل، وضع العرض ─────────────────
+const ICONS = {
+  flow: '<circle cx="5" cy="12" r="2.4"/><circle cx="19" cy="6" r="2.4"/><circle cx="19" cy="18" r="2.4"/><path d="M7.3 11 16.7 6.9M7.3 13l9.4 4.1"/>',
+  settings: '<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+  news: '<rect x="3" y="4" width="15" height="16" rx="2"/><path d="M18 8h3v10a2 2 0 0 1-2 2M7 8h7M7 12h7M7 16h4"/>',
+  social: '<path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16"/>',
+  exclusions: '<path d="M4 5h16l-6 7.5V19l-4 1v-7.5Z"/>',
+  taxonomy: '<path d="M3 12V4h8l10 10-8 8Z"/><circle cx="7.5" cy="8" r="1.4"/>',
+  context: '<path d="M6 3h9l4 4v14H6Z"/><path d="M14 3v5h5M9 12h7M9 16h7"/>',
+  results: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  reports: '<path d="M6 3h12v18l-6-3.5L6 21Z"/>',
+  cost: '<circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.5-1-1.6-1.6-3-1.6-1.8 0-3 .9-3 2.2 0 3 6 1.6 6 4.6 0 1.3-1.3 2.2-3 2.2-1.5 0-2.6-.7-3.1-1.7M12 6v1.6M12 16.6V18"/>',
+  runs: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',
+};
+const icon = (k, size = 16) => el("span", { class: "ico", "aria-hidden": "true", html: `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[k] || ""}</svg>` });
+function skeleton(n = 3) {
+  return el("div", { class: "skel-wrap", "aria-busy": "true", "aria-label": "جارٍ التحميل" },
+    el("div", { class: "skel", style: "width:38%;height:22px" }), el("div", { class: "skel", style: "width:62%;height:14px" }),
+    el("div", { class: "kpis" }, Array.from({ length: 4 }, () => el("div", { class: "skel", style: "height:84px" }))),
+    ...Array.from({ length: n }, () => el("div", { class: "skel", style: "height:160px" })));
+}
+// وضع العرض للعميل: يخفي أدوات التعديل ويُبقي سير العمل والنتائج والتقارير
+const PRESENT_TABS = new Set(["flow", "results", "reports"]);
+function setPresent(on) {
+  S.present = on; document.body.classList.toggle("present", on); store.set("present", on ? "1" : "");
+  $("#presentBtn").setAttribute("aria-pressed", String(on));
+  $("#presentBtn").lastChild.textContent = on ? " إنهاء العرض" : " وضع العرض";
+  if (on && S.view !== "home" && !PRESENT_TABS.has(S.tab)) goTab("results");
+  if (S.view === "home") renderHome(); else renderTabs();
+}
+// مؤشر نسبة النبرة كحلقة
+function toneRing(sm, size = 132) {
+  const p = (sm.positive || 0) * 100, n = (sm.negative || 0) * 100, u = Math.max(0, 100 - p - n);
+  return el("div", { class: "ring", style: `--s:${size}px;background:conic-gradient(var(--pos) 0 ${p}%, var(--neu) ${p}% ${p + u}%, var(--neg) ${p + u}% 100%)` },
+    el("div", { class: "hole" }, el("b", {}, Math.round(p) + "٪"), el("span", {}, "إيجابي")));
+}
+function sparkline(values, w = 120, h = 34) {
+  if (!values || values.length < 2) return null;
+  const mx = Math.max(...values, 1), x = i => i * (w - 4) / (values.length - 1) + 2, y = v => h - 3 - v / mx * (h - 8);
+  const d = values.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  return el("span", { class: "spark", html: `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><path d="${d} L${x(values.length - 1)},${h} L2,${h} Z" class="a"/><path d="${d}" class="l"/></svg>` });
+}
+
+// ── التكلفة: الأسعار، والتقدير قبل التشغيل، وتبويب «التكلفة» ──────────────
+const DEFAULT_PRICING = {
+  currency: "USD", monthly_cap_usd: 0,
+  llm: { "gemini-3.5-flash-lite": [0.10, 0.40], "gemini-2.5-flash-lite": [0.10, 0.40], "gemini-2.5-flash": [0.30, 2.50], "gemini-3.5-flash": [0.30, 2.50],
+         "claude-haiku-4-5": [1.00, 5.00], "claude-sonnet-4-5": [3.00, 15.00], default: [0.30, 2.50] },
+  apify: { "kaitoeasyapi~twitter-x-data-tweet-scraper-pay-per-result-cheapest": 0.25, "scraper_one~facebook-posts-search": 3.00, "apify~facebook-posts-scraper": 5.00,
+           "apify~facebook-comments-scraper": 2.50, "apify~instagram-hashtag-scraper": 2.30, "apify~instagram-scraper": 2.30, "apify~instagram-comment-scraper": 2.30,
+           "clockworks~tiktok-scraper": 4.00, "clockworks~tiktok-comments-scraper": 2.00, "streamers~youtube-scraper": 5.00, "streamers~youtube-comments-scraper": 2.00,
+           "harvestapi~linkedin-post-search": 2.00, "harvestapi~linkedin-company-posts": 2.00, default: 4.00 },
+  tokens_per_item: { in: 450, out: 220 }, system_tokens: 1800 };
+const usd = (v, d = 2) => "$" + (+v || 0).toFixed(d);
+async function loadPricing(force) {
+  if (S.pricing && !force) return S.pricing;
+  const p = structuredClone(DEFAULT_PRICING);
+  const f = await gh(`/contents/config/pricing.json`, { allow404: true }).catch(() => null);
+  if (f) { try { const u = JSON.parse(b64d(f.content)); for (const [k, v] of Object.entries(u)) p[k] = v && typeof v === "object" && !Array.isArray(v) && p[k] ? { ...p[k], ...v } : v; S.pricingSha = f.sha; } catch {} }
+  S.pricing = p; return p;
+}
+function expectedResults(payload) {
+  let n = 0;
+  for (const k of ["maxItems", "resultsLimit", "resultsCount", "maxPosts", "maxResults", "resultsPerPage", "maxComments", "commentsPerPost"])
+    if (typeof payload[k] === "number" && payload[k] > 0) n = Math.max(n, payload[k]);
+  const lists = ["searchTerms", "searchQueries", "hashtags", "startUrls", "directUrls", "targetUrls", "postURLs"].map(k => payload[k]).filter(Array.isArray);
+  const mult = Math.max(1, ...lists.map(l => l.length));
+  if (payload.maxResultsShorts) n += payload.maxResultsShorts;
+  return Math.max(n, 50) * ("maxItems" in payload ? 1 : mult);
+}
+function llmPrice(pr, model) {
+  model = model || ""; const t = pr.llm;
+  return t[model] || Object.entries(t).find(([k]) => k !== "default" && model.startsWith(k))?.[1] || t.default;
+}
+const monthKey = () => new Date().toISOString().slice(0, 7);
+async function usageOf(slug) { return readJSON(`data/${slug}/usage.json`, { months: {}, runs: [] }).catch(() => ({ months: {}, runs: [] })); }
+async function accountSpend() {
+  const all = await Promise.all(S.projects.map(p => usageOf(p)));
+  return all.reduce((a, u) => a + ((u.months || {})[monthKey()]?.usd || 0), 0);
+}
+async function estimateRun(cfg, slug) {
+  const pr = await loadPricing(), st = cfg.settings || {}, stages = new Set(st.stages || ["news", "social", "comments"]);
+  const rows = [];
+  const span = Math.max(1, Math.round((new Date(st.collect_until || st.window_end) - new Date(st.window_start)) / 864e5) + 1 + (+st.news_lookback_days || 0));
+  const chunk = +st.news_chunk_days || 7;
+  let newsItems = 0, newsCalls = 0;
+  if (stages.has("news")) for (const q of cfg.news.filter(r => r.active !== false)) {
+    const src = q.source || "google", w = src === "google" || src === "newsscope" ? Math.ceil(span / chunk) : 1;
+    newsCalls += w; newsItems += w * (src === "rss" ? 20 : src === "bing" ? 25 : 35);
+  }
+  if (newsCalls) rows.push({ label: "الأخبار", sub: `${fmt(newsCalls)} بحث مجاني`, n: newsItems, usd: 0 });
+  let socialItems = 0;
+  if (stages.has("social")) for (const s of cfg.social.filter(r => r.active !== false)) {
+    let payload = {}; try { payload = JSON.parse((s.input || "{}").replaceAll("{START}", st.window_start || "").replaceAll("{END}", st.window_end || "")); } catch {}
+    const n = expectedResults(payload), price = pr.apify[s.actor] ?? pr.apify.default;
+    socialItems += n; rows.push({ label: s.label || s.platform, sub: `Apify · ${usd(price)} لكل 1000`, n, usd: n / 1000 * price, platform: s.platform });
+  }
+  if (stages.has("comments") && socialItems) {
+    const n = (+st.comments_top_posts || 40) * (+st.comments_per_post || 50);
+    rows.push({ label: "التعليقات", sub: `أعلى ${st.comments_top_posts || 40} مادة`, n, usd: n / 1000 * 2.3 }); socialItems += n;
+  }
+  const toClassify = Math.round((newsItems + socialItems) * 0.7), calls = Math.ceil(toClassify / (+st.batch_size || 25));
+  const [pin, pout] = llmPrice(pr, st.llm_model), t = pr.tokens_per_item;
+  rows.push({ label: "التصنيف بالنموذج", sub: `${st.llm_model || "gemini"} · ${fmt(calls)} نداء`, n: toClassify,
+    usd: (toClassify * t.in + calls * pr.system_tokens) / 1e6 * pin + toClassify * t.out / 1e6 * pout });
+  const total = rows.reduce((a, r) => a + r.usd, 0);
+  const u = await usageOf(slug), spentProject = (u.months || {})[monthKey()]?.usd || 0, spentAccount = await accountSpend();
+  const caps = { run: +st.budget_run_usd || 0, month: +st.budget_month_usd || 0, account: +pr.monthly_cap_usd || 0 };
+  const left = [caps.run && caps.run, caps.month && caps.month - spentProject, caps.account && caps.account - spentAccount].filter(v => v !== 0 && v !== false);
+  return { rows, total, spentProject, spentAccount, caps, left: left.length ? Math.min(...left) : null, toClassify };
+}
+async function confirmRun(slug, cfg) {
+  const dlg = $("#runDlg");
+  $("#runBody").replaceChildren(el("p", { class: "lead" }, "جارٍ حساب التقدير…"));
+  dlg.showModal();
+  let e;
+  try { e = await estimateRun(cfg, slug); } catch (err) { $("#runBody").replaceChildren(el("p", { class: "lead" }, "تعذّر التقدير: " + err.message)); }
+  if (e) {
+    const max = Math.max(...e.rows.map(r => r.usd), 0.0001);
+    const over = e.left != null && e.total > e.left;
+    $("#runBody").replaceChildren(
+      el("div", { class: "est-total" }, el("div", {}, el("div", { class: "l" }, "التكلفة المتوقعة (حد أقصى تقديري)"), el("div", { class: "v" }, usd(e.total))),
+        el("div", {}, el("div", { class: "l" }, "مصروف المشروع هذا الشهر"), el("div", { class: "v sm" }, usd(e.spentProject))),
+        el("div", {}, el("div", { class: "l" }, "مصروف الحساب هذا الشهر"), el("div", { class: "v sm" }, usd(e.spentAccount)))),
+      e.left != null ? el("div", { class: "est-cap" + (over ? " over" : "") }, over
+        ? `التقدير يتخطى المتبقي من السقف (${usd(Math.max(e.left, 0))}). المحرك سيوقف الجمع تلقائياً عند السقف ويحفظ ما اكتمل.`
+        : `المتبقي من أقل سقف: ${usd(e.left)}. لو قربت التكلفة منه يتوقف الجمع تلقائياً.`)
+        : el("div", { class: "est-cap muted" }, "لا يوجد سقف إنفاق لهذا المشروع. تقدر تحدده من «الإعدادات ← الميزانية»."),
+      el("div", { class: "est-rows" }, e.rows.map(r => el("div", { class: "est-row" },
+        el("div", { class: "k" }, el("b", {}, r.label), el("small", {}, r.sub)),
+        el("div", { class: "bar" }, el("i", { style: `width:${Math.max(2, r.usd / max * 100)}%` })),
+        el("div", { class: "n" }, el("b", {}, r.usd ? usd(r.usd) : "مجاني"), el("small", {}, `~${fmt(r.n)} مادة`))))),
+      el("p", { class: "preview", style: "margin:6px 0 0" }, "التقدير يفترض أقصى عدد نتائج لكل مصدر، فالتكلفة الفعلية غالباً أقل. الأسعار من تبويب «التكلفة»، وبعد التشغيل تظهر التكلفة الفعلية."));
+  }
+  return new Promise(res => { dlg.onclose = () => res(dlg.returnValue === "ok"); });
+}
+async function renderCost() {
+  const host = $("#p-cost");
+  host.replaceChildren(skeleton(3));
+  const [pr, u, acc] = await Promise.all([loadPricing(), usageOf(S.project), accountSpend()]);
+  const st = S.cfg.settings, months = Object.entries(u.months || {}).sort((a, b) => b[0].localeCompare(a[0]));
+  const cur = (u.months || {})[monthKey()] || { usd: 0, llm_usd: 0, apify_usd: 0, runs: 0, apify_items: 0, llm_in: 0, llm_out: 0 };
+  const capBar = (spent, cap, label) => el("div", { class: "capbar" }, el("div", { class: "row" }, el("span", {}, label), el("b", { style: "margin-inline-start:auto" }, cap ? `${usd(spent)} من ${usd(cap)}` : `${usd(spent)} · بلا سقف`)),
+    el("div", { class: "pr-track" }, el("i", { style: `width:${cap ? Math.min(100, spent / cap * 100) : 0}%;background:var(${cap && spent / cap > .85 ? "--neg" : "--accent"})` })));
+  const k = (l, v, s) => el("div", { class: "kpi" }, el("div", { class: "l" }, l), el("div", { class: "v" }, v), s ? el("div", { class: "s" }, s) : null);
+  const last = S.status.cost;
+  const bySrc = last && last.by_source ? Object.entries(last.by_source).sort((a, b) => b[1].usd - a[1].usd) : [];
+  const priceRows = (obj, unit) => Object.entries(obj).map(([key, v]) => el("tr", {}, el("td", { class: "mono", dir: "ltr" }, key),
+    ...(Array.isArray(v) ? v.map((x, i) => el("td", {}, el("input", { type: "number", step: "0.01", value: x, "aria-label": unit[i], oninput: ev => { v[i] = +ev.target.value; S.pricingDirty = true; } })))
+      : [el("td", {}, el("input", { type: "number", step: "0.01", value: v, "aria-label": unit[0], oninput: ev => { obj[key] = +ev.target.value; S.pricingDirty = true; } }))])));
+  const savePricing = async () => {
+    try {
+      const body = { ...pr }; const r = await gh(`/contents/config/pricing.json`, { method: "PUT", body: JSON.stringify({ message: "تحديث الأسعار وسقف الحساب",
+        content: b64e(JSON.stringify(body, null, 2) + "\n"), ...(S.pricingSha ? { sha: S.pricingSha } : {}) }) });
+      S.pricingSha = r.content.sha; S.pricingDirty = false; toast("حُفظت الأسعار ✓");
+    } catch (e) { toast("تعذّر الحفظ: " + e.message, 6000); }
+  };
+  host.replaceChildren(el("h2", {}, "التكلفة والاستهلاك"),
+    el("p", { class: "lead" }, "تكلفة كل تشغيلة محسوبة من التوكنز الفعلية للنموذج وعدد نتائج Apify. السقف يوقف الجمع قبل ما يتخطاه ويحفظ ما اكتمل."),
+    el("div", { class: "kpis" }, k("هذا الشهر", usd(cur.usd), `${fmt(cur.runs)} تشغيل`), k("النموذج", usd(cur.llm_usd), `${fmt((cur.llm_in || 0) + (cur.llm_out || 0))} توكن`),
+      k("Apify", usd(cur.apify_usd), `${fmt(cur.apify_items)} نتيجة`), k("تكلفة السجل", cur.usd && S.summary?.total ? usd(cur.usd / Math.max(1, (S.summary.monthly || []).slice(-1)[0]?.total || S.summary.total), 4) : "—", "متوسط")),
+    el("div", { class: "cards" },
+      el("div", { class: "card" }, el("h3", {}, "السقوف"), capBar(cur.usd, +st.budget_month_usd || 0, "المشروع هذا الشهر"), capBar(acc, +pr.monthly_cap_usd || 0, "الحساب كله هذا الشهر"),
+        el("div", { class: "grid", style: "margin-top:12px" },
+          el("div", { class: "field" }, el("label", {}, "سقف التشغيلة الواحدة ($)"), el("input", { type: "number", step: "0.5", min: "0", value: st.budget_run_usd || "", placeholder: "بلا سقف", oninput: ev => { st.budget_run_usd = +ev.target.value || 0; markDirty(); } })),
+          el("div", { class: "field" }, el("label", {}, "سقف المشروع الشهري ($)"), el("input", { type: "number", step: "1", min: "0", value: st.budget_month_usd || "", placeholder: "بلا سقف", oninput: ev => { st.budget_month_usd = +ev.target.value || 0; markDirty(); } })),
+          el("div", { class: "field" }, el("label", {}, "سقف الحساب الشهري ($)"), el("input", { type: "number", step: "1", min: "0", value: pr.monthly_cap_usd || "", placeholder: "بلا سقف", oninput: ev => { pr.monthly_cap_usd = +ev.target.value || 0; S.pricingDirty = true; } }))),
+        el("small", { class: "preview" }, "سقف المشروع يُحفظ مع «حفظ الإعدادات»، وسقف الحساب مع «حفظ الأسعار».")),
+      el("div", { class: "card" }, el("h3", {}, "آخر تشغيلة حسب المصدر"), bySrc.length ? el("div", { class: "bars" }, bySrc.slice(0, 10).map(([l, v]) =>
+        el("div", { class: "bar" }, el("span", { class: "k", title: l }, l), el("div", { class: "track", style: `width:${v.usd / bySrc[0][1].usd * 100}%` }, el("i", { style: "width:100%;background:var(--accent)" })), el("span", { class: "n" }, usd(v.usd, 3)))))
+        : el("div", { class: "empty" }, "تظهر بعد أول تشغيلة بالتحديث الجديد")),
+      el("div", { class: "card", style: "grid-column:1/-1" }, el("h3", {}, "التشغيلات"), (u.runs || []).length ? el("div", { class: "scroll", style: "border:0" }, el("table", {},
+        el("thead", {}, el("tr", {}, ["الوقت", "التكلفة", "النموذج", "Apify", "نتائج Apify", "ملاحظة"].map(h => el("th", {}, h)))),
+        el("tbody", {}, u.runs.slice(0, 30).map(r => el("tr", {}, el("td", { class: "num" }, r.time), el("td", { class: "num" }, el("b", {}, usd(r.usd, 3))), el("td", { class: "num" }, usd(r.llm_usd, 3)),
+          el("td", { class: "num" }, usd(r.apify_usd, 3)), el("td", { class: "num" }, fmt(r.apify_items)), el("td", { class: r.stopped ? "tone-neg" : "" }, r.stopped || "")))))) : el("div", { class: "empty" }, "لا تشغيلات محسوبة بعد")),
+      months.length > 1 ? el("div", { class: "card" }, el("h3", {}, "حسب الشهر"), el("table", {}, el("tbody", {}, months.map(([m, v]) => el("tr", {}, el("td", {}, monthAr(m)), el("td", { class: "num" }, usd(v.usd)), el("td", { class: "num" }, `${fmt(v.runs)} تشغيل`)))))) : null,
+      el("details", { class: "card", style: "grid-column:1/-1" }, el("summary", {}, el("b", {}, "جدول الأسعار"), el("span", { class: "preview" }, " — مشترك بين كل المشاريع، عدّله من فواتيرك")),
+        el("div", { class: "cards", style: "margin-top:12px" },
+          el("div", {}, el("h3", {}, "النماذج ($ لكل مليون توكن)"), el("table", {}, el("thead", {}, el("tr", {}, el("th", {}, "النموذج"), el("th", {}, "إدخال"), el("th", {}, "إخراج"))), el("tbody", {}, priceRows(pr.llm, ["إدخال", "إخراج"])))),
+          el("div", {}, el("h3", {}, "Apify ($ لكل 1000 نتيجة)"), el("table", {}, el("thead", {}, el("tr", {}, el("th", {}, "actor"), el("th", {}, "السعر"))), el("tbody", {}, priceRows(pr.apify, ["السعر"]))))),
+        el("div", { class: "row", style: "margin-top:12px" }, el("button", { class: "btn primary", type: "button", onclick: savePricing }, "حفظ الأسعار وسقف الحساب")))));
+}
+
 // ── الصفحة الرئيسية: كل المشاريع ────────────────────────────
 const cadenceOf = c => (c && c.settings && c.settings.cadence) || (c && c.settings && c.settings.daily ? "يومي" : "حدث");
 const CAD = { "شهري": ["m", "المشاريع الشهرية", "ثابتة تُشغَّل كل شهر"], "يومي": ["d", "الرصد اليومي", "يعمل تلقائياً كل ليلة"], "حدث": ["e", "الأحداث والحملات", "فترة محددة لحدث أو زيارة"] };
@@ -709,10 +1029,10 @@ function showHome(on) {
 async function loadMeta(force) {
   if (S.meta && !force) return S.meta;
   const rows = await Promise.all(S.projects.map(async p => {
-    const [f, st, sm] = await Promise.all([gh(`/contents/config/projects/${p}.json`).catch(() => null),
-      readJSON(`data/${p}/status.json`, {}).catch(() => ({})), readJSON(`data/${p}/summary.json`, null).catch(() => null)]);
+    const [f, st, sm, us] = await Promise.all([gh(`/contents/config/projects/${p}.json`).catch(() => null),
+      readJSON(`data/${p}/status.json`, {}).catch(() => ({})), readJSON(`data/${p}/summary.json`, null).catch(() => null), usageOf(p)]);
     let cfg = null; try { cfg = f ? JSON.parse(b64d(f.content)) : null; } catch {}
-    return { slug: p, cfg, sha: f && f.sha, status: st || {}, summary: sm };
+    return { slug: p, cfg, sha: f && f.sha, status: st || {}, summary: sm, spend: (us.months || {})[monthKey()]?.usd || 0 };
   }));
   S.meta = Object.fromEntries(rows.map(r => [r.slug, r]));
   return S.meta;
@@ -727,6 +1047,8 @@ function projectCard(m) {
   const acts = arch
     ? [el("button", { class: "btn primary", type: "button", onclick: () => setArchived(m.slug, false) }, "↺ استعادة للقائمة الشهرية"),
        el("button", { class: "btn", type: "button", onclick: () => openProject(m.slug, "results") }, "النتائج")]
+    : S.present ? [el("button", { class: "btn", type: "button", onclick: () => openProject(m.slug, "results") }, "النتائج"),
+       el("button", { class: "btn", type: "button", onclick: () => openProject(m.slug, "reports") }, "التقارير")]
     : [el("button", { class: "btn", type: "button", onclick: () => openProject(m.slug, "flow") }, "فتح"),
        el("button", { class: "btn", type: "button", onclick: () => runProject(m.slug) }, live ? "يعمل…" : "▶ تشغيل"),
        el("button", { class: "btn", type: "button", onclick: () => openProject(m.slug, "reports") }, "التقارير"),
@@ -738,14 +1060,14 @@ function projectCard(m) {
     el("div", { class: "nums" },
       el("div", {}, el("b", {}, fmt(sm.total || 0)), el("span", {}, "كل السجلات")),
       el("div", {}, el("b", {}, last ? fmt(last.total) : "—"), el("span", {}, last ? monthAr(last.key) : "آخر شهر")),
-      el("div", {}, el("b", {}, fmt(srcN)), el("span", {}, "مصدر مفعّل"))),
+      S.present ? el("div", {}, el("b", {}, pct(sm.positive)), el("span", {}, "إيجابي")) : el("div", {}, el("b", {}, usd(m.spend || 0)), el("span", {}, "إنفاق الشهر"))),
     tone.length ? el("div", { class: "tone", title: `إيجابي ${pct(sm.positive)} · سلبي ${pct(sm.negative)}` }, tone.map(([v, x]) => el("i", { style: `width:${(x || 0) * 100}%;background:var(${v})` }))) : null,
     el("div", { class: "meta" }, live ? el("span", { class: "chip run" }, "يعمل الآن") : el("span", {}, state), m.status.status_updated ? el("bdi", { dir: "ltr" }, m.status.status_updated) : null),
     el("div", { class: "acts" }, acts));
 }
 async function renderHome(force) {
   const host = $("#home");
-  if (!S.meta || force) host.replaceChildren(el("p", { class: "lead", style: "padding-top:30px" }, "جارٍ تحميل المشاريع…"));
+  if (!S.meta || force) host.replaceChildren(skeleton(2));
   const meta = Object.values(await loadMeta(force));
   const active = meta.filter(m => !m.cfg?.settings?.archived), archived = meta.filter(m => m.cfg?.settings?.archived);
   const now = new Date(), thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`, prevKey = monthRange(-1).window_start.slice(0, 7);
@@ -753,11 +1075,12 @@ async function renderHome(force) {
   const liveN = S.runs.filter(r => r.status !== "completed" && r.event !== "push").length;
   const stat = (v, l) => el("div", { class: "stat" }, el("div", { class: "v" }, v), el("div", { class: "l" }, l));
   const hero = el("section", { class: "hero" },
-    el("div", {}, el("h1", {}, "مشاريع الرصد الإعلامي"),
+    el("div", {}, el("span", { class: "eyebrow" }, new Date().toLocaleDateString("ar-EG-u-nu-latn", { weekday: "long", day: "numeric", month: "long", year: "numeric" })), el("h1", {}, "مشاريع الرصد الإعلامي"),
       el("p", {}, "كل مشروع له كلماته ومصادره وملف نتائجه وتقاريره الشهرية. افتح مشروعاً لتعديله أو تشغيله، أو أرشف ما انتهى؛ المؤرشف تحتفظ ببياناته ويعود للقائمة بضغطة."),
       el("div", { class: "actions" }, el("button", { class: "btn primary", type: "button", onclick: newProject }, "＋ مشروع جديد"),
         el("button", { class: "btn", type: "button", onclick: () => renderHome(true) }, "↻ تحديث"))),
-    el("div", { class: "stats" }, stat(fmt(active.length), "مشروع نشط"), stat(fmt(monthTotal), `سجل في ${monthAr(prevKey)}`), stat(fmt(liveN), "تشغيل جارٍ الآن")));
+    el("div", { class: "stats" }, stat(fmt(active.length), "مشروع نشط"), stat(fmt(monthTotal), `سجل في ${monthAr(prevKey)}`),
+      S.present ? stat(fmt(liveN), "تشغيل جارٍ الآن") : stat(usd(meta.reduce((a, m) => a + (m.spend || 0), 0)), "إنفاق هذا الشهر")));
   const groups = ["شهري", "يومي", "حدث"].map(cad => {
     const list = active.filter(m => cadenceOf(m.cfg) === cad).sort((a, b) => (a.cfg?.name || a.slug).localeCompare(b.cfg?.name || b.slug, "ar"));
     if (!list.length && cad !== "شهري") return null;
@@ -767,7 +1090,7 @@ async function renderHome(force) {
   const arch = el("details", { class: "group archive", open: archived.length && archived.length < 4 ? true : null },
     el("summary", {}, el("header", {}, el("h2", {}, "الأرشيف"), el("span", {}, `${archived.length} · مشاريع انتهت، بياناتها وتقاريرها محفوظة`))),
     archived.length ? el("div", { class: "pcards" }, archived.map(projectCard)) : el("div", { class: "empty" }, "لا مشاريع مؤرشفة."));
-  host.replaceChildren(hero, ...groups.filter(Boolean), arch);
+  host.replaceChildren(hero, ...groups.filter(Boolean), S.present ? null : arch);
 }
 async function openProject(slug, tab) {
   if (S.project !== slug || !S.cfg) await loadProject(slug);
@@ -790,6 +1113,7 @@ async function setArchived(slug, on) {
 }
 async function runProject(slug) {
   if (S.meta?.[slug]?.cfg?.settings?.archived) return toast("المشروع مؤرشف — استعده أولاً", 4000);
+  if (!(await confirmRun(slug, S.meta[slug].cfg))) return;
   try {
     await gh(`/actions/workflows/monitor.yml/dispatches`, { method: "POST", body: JSON.stringify({ ref: "main", inputs: { project: slug, action: "run" } }) });
     toast(`بدأ تشغيل ${S.meta?.[slug]?.cfg?.name || slug}`); setTimeout(pollRuns, 6000);
@@ -1128,12 +1452,16 @@ $("#run").onclick = run;
 $("#project").onchange = e => loadProject(e.target.value);
 $("#newProject").onclick = newProject;
 $("#theme").onclick = toggleTheme;
+$("#presentBtn").onclick = () => setPresent(!S.present);
+if (store.get("present") === "1" || new URLSearchParams(location.search).has("present")) { S.present = true; document.body.classList.add("present"); }
+$("#token").addEventListener("keydown", e => { if (e.key === "Enter") connect(); });
 $("#homeBtn").onclick = () => showHome(true);
 $("#homeLink").onclick = e => { e.preventDefault(); showHome(true); };
 $("#project").addEventListener("change", () => { if (S.view === "home") showHome(false); });
 applyTheme(store.get("theme"));
 window.addEventListener("beforeunload", e => { if (S.dirty) { e.preventDefault(); e.returnValue = ""; } });
 $("#repo").value = S.repo;
+document.body.classList.toggle("signedout", !S.token);
 if (S.token) connect(); else { $("#connect").hidden = false; }
 </script>
 </body>
