@@ -315,6 +315,8 @@ body.present #presentBtn { display:flex !important; }
 @media (max-width:980px) { header.top #state { display:none; } header.top select#project { max-width:44vw; } }
 @media (max-width:640px) { .brand b { display:none; } #save { display:none; } }
 
+.res-tools { justify-content:space-between; align-items:center; margin-bottom:14px; } .res-tools .row { margin:0 !important; }
+.dedupe { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
 /* عرض التقرير */
 .report-view { position:fixed; inset:0; z-index:30; background:var(--bg); display:grid; grid-template-rows:auto 1fr; }
 .report-view[hidden] { display:none; }
@@ -680,7 +682,8 @@ async function pollRuns() {
     else if (S.status.status_state) setState(S.status.status_state.startsWith("✅") ? "ok" : S.status.status_state.startsWith("❌") ? "bad" : "",
                                              S.status.status_state.replace(/^[^\p{L}]+/u, "") + " ·", S.status.status_updated || "");
     else setState("", "لم يُشغّل بعد");
-    if (S.wasLive && !live) { S.status = await readJSON(`data/${S.project}/status.json`, {}); loadResults(); toast("انتهى التشغيل — حُدّثت النتائج"); }
+    if (S.wasLive && !live) { const prevD = S.status?.dedupe?.time; S.status = await readJSON(`data/${S.project}/status.json`, {}); loadResults();
+      const d = S.status.dedupe; toast(d && d.time !== prevD ? `🧹 تنظيف التكرار: حُذف ${fmt(d.removed || 0)} سجل، وبقي ${fmt(d.kept || 0)}` : "انتهى التشغيل — حُدّثت النتائج", 6000); }
     S.wasLive = !!live; S.progress = live ? S.progress : null;
     const rb = $("#run"); rb.textContent = live ? "⏹ إيقاف التشغيل" : "▶ تشغيل الرصد"; rb.classList.toggle("stop", !!live);
     renderProgress(); if (S.tab === "flow") renderFlow();
@@ -902,7 +905,7 @@ async function loadResults(month) {
     el("select", { "aria-label": "اختيار الشهر", onchange: e => loadResults(e.target.value) },
       el("option", { value: "" }, "كل الشهور"), ...months.slice().reverse().map(m => el("option", { value: m, selected: m === S.month }, monthAr(m)))));
   const trend = monthlyTrend(all.monthly || [], all.quarterly || []);
-  host.replaceChildren(el("h2", {}, "النتائج"), el("p", { class: "lead" }, el("bdi", {}, S.status.status_period || ""), " · آخر تحديث ", el("bdi", { dir: "ltr" }, S.status.status_updated || "—")), S.present ? null : diagnosisPanel(S.status.failures), picker, kpis,
+  host.replaceChildren(el("h2", {}, "النتائج"), el("p", { class: "lead" }, el("bdi", {}, S.status.status_period || ""), " · آخر تحديث ", el("bdi", { dir: "ltr" }, S.status.status_updated || "—")), S.present ? null : diagnosisPanel(S.status.failures), S.present ? picker : el("div", { class: "row res-tools" }, picker, dedupeTool()), kpis,
     el("div", { class: "cards" }, ...(S.month ? [] : trend), stacked("حسب المنصة × النبرة", sm.by_platform || []), stacked("حسب المحور × النبرة", sm.by_segment || []),
       stacked("حسب الموضوع × النبرة", sm.by_topic || []), daily(), sources, stacked("حسب اللغة × النبرة", sm.by_language || []), latestCard));
 }
@@ -962,6 +965,22 @@ async function renderReports() {
           el("button", { class: "btn", type: "button", onclick: () => downloadCSV(`records-${r.month}.csv`) }, "CSV الشهر"))))))))
       : el("div", { class: "empty" }, "لا تقارير بعد. يُبنى أول تقرير بعد أول تشغيل."));
 }
+// ── تنظيف التكرار ─────────────────────────────────────────────
+function dedupeTool() {
+  const d = S.status.dedupe;
+  return el("div", { class: "dedupe" },
+    d ? el("span", { class: "preview" }, `آخر تنظيف ${d.time}: حُذف ${fmt(d.removed || 0)}`) : null,
+    el("button", { class: "btn", type: "button", title: "يحذف السجلات المكررة من ملف النتائج ويحفظ المحذوف في ملف منفصل", onclick: runDedupe }, "🧹 تنظيف التكرار"));
+}
+async function runDedupe() {
+  if (S.live) return toast("فيه تشغيل جارٍ — التنظيف يبدأ بعد ما يخلص", 4000);
+  if (!confirm("تنظيف التكرار من ملف النتائج؟\n\nيُحذف كل سجل له نفس الرابط (بعد توحيده) أو نفس العنوان من نفس المصدر في نفس اليوم، ويبقى أول ظهور.\nالمحذوف لا يضيع: يُحفظ في ملف removed-duplicates بجوار records.csv.")) return;
+  try {
+    await gh(`/actions/workflows/monitor.yml/dispatches`, { method: "POST", body: JSON.stringify({ ref: "main", inputs: { project: S.project, action: "dedupe" } }) });
+    setState("run", "تنظيف التكرار…"); toast("بدأ التنظيف — النتائج تتحدّث لما يخلص (دقيقة تقريباً)", 5000); setTimeout(pollRuns, 6000);
+  } catch (e) { toast("تعذّر التنظيف: " + e.message, 6000); }
+}
+
 // ── عرض التقرير داخل الواجهة مع زر رجوع ─────────────────────────────
 function showReport(html, url, r) {
   const v = $("#reportView"), f = $("#rvFrame");
