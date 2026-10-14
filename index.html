@@ -9,21 +9,21 @@
 <style>
 /* layout: top bar (project + actions) · tab strip · one working panel per tab; results = KPI strip then paired charts then tables */
 :root {
-  --dot:#dfe2ef; --edge:#b4b9d3;
-  --bg:#f4f5fb; --surface:#ffffff; --surface2:#eef0f8; --fg:#11123a; --fg2:#565b7e; --fg3:#9095b3;
-  --line:#e2e5f1; --accent:#4a3aff; --accent-soft:#ecebff; --ok:#0b8f6e; --ok-soft:#ddf5ee; --warn:#b26b00; --warn-soft:#fdf0d8;
-  --pos:#12b38a; --neu:#aab0cc; --neg:#f0445a; --navy:#0d0e33; --pink:#ff4f8b; --sky:#26c6ff;
+  --dot:#dededb; --edge:#b5b4ae;
+  --bg:#f6f6f4; --surface:#ffffff; --surface2:#f0efec; --fg:#1a1a1a; --fg2:#6b6960; --fg3:#9c9889;
+  --line:#e5e3db; --accent:#c0392b; --accent-soft:#f8e4e1; --ok:#1f7a55; --ok-soft:#e0f2e9; --warn:#a86a00; --warn-soft:#fbefd6;
+  --pos:#1f9d6b; --neu:#b7b4aa; --neg:#c0392b; --navy:#141414; --pink:#e8603c; --sky:#ff8a65;
   --font:"Readex Pro", "Segoe UI", Tahoma, sans-serif; --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
   --r:10px;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg:#090a24; --surface:#121437; --surface2:#1a1d47; --fg:#eef0ff; --fg2:#a7abd2; --fg3:#6e73a1;
-  --line:#262a5e; --accent:#7f72ff; --accent-soft:#231f5c; --ok:#3ad6a8; --ok-soft:#10352d; --warn:#ffbe55; --warn-soft:#3a2c10;
-  --pos:#34d3a4; --neu:#5d6394; --neg:#ff6b81; --dot:#1f2250; --edge:#4a4f86; color-scheme:dark; } }
+  --bg:#111111; --surface:#1a1a1a; --surface2:#232322; --fg:#f0efeb; --fg2:#aaa79d; --fg3:#77756d;
+  --line:#2e2d2a; --accent:#e0533f; --accent-soft:#3a1c17; --ok:#4ccc95; --ok-soft:#163327; --warn:#f0b54a; --warn-soft:#3a2d12;
+  --pos:#3fc48a; --neu:#5f5d57; --neg:#ef5b47; --dot:#262624; --edge:#55534d; color-scheme:dark; } }
 :root[data-theme="dark"] {
-  --bg:#090a24; --surface:#121437; --surface2:#1a1d47; --fg:#eef0ff; --fg2:#a7abd2; --fg3:#6e73a1;
-  --line:#262a5e; --accent:#7f72ff; --accent-soft:#231f5c; --ok:#3ad6a8; --ok-soft:#10352d; --warn:#ffbe55; --warn-soft:#3a2c10;
-  --pos:#34d3a4; --neu:#5d6394; --neg:#ff6b81; --dot:#1f2250; --edge:#4a4f86; color-scheme:dark; }
+  --bg:#111111; --surface:#1a1a1a; --surface2:#232322; --fg:#f0efeb; --fg2:#aaa79d; --fg3:#77756d;
+  --line:#2e2d2a; --accent:#e0533f; --accent-soft:#3a1c17; --ok:#4ccc95; --ok-soft:#163327; --warn:#f0b54a; --warn-soft:#3a2d12;
+  --pos:#3fc48a; --neu:#5f5d57; --neg:#ef5b47; --dot:#262624; --edge:#55534d; color-scheme:dark; }
 :root[data-theme="light"] { color-scheme:light; }
 * { box-sizing:border-box; }
 [hidden] { display:none !important; }
@@ -297,19 +297,19 @@ body.present .hero .actions { display:none; }
   nav.tabs { top:auto; position:static; } .brand span { display:none; }
 }
 
-/* ═══ هوية «ميلت ووتر»: شريط كحلي متدرّج، أزرار كبسولية، بطاقات واسعة ═══ */
-:root { --grad:linear-gradient(115deg, #0d0e33 0%, #1d1a6b 45%, #4a3aff 78%, #ff4f8b 118%); --rl:16px; }
+/* ═══ هوية InfoTimes بأسلوب منصّات الرصد: شريط كحلي متدرّج، أزرار كبسولية، بطاقات واسعة ═══ */
+:root { --grad:linear-gradient(115deg, #111111 0%, #1f1a19 40%, #5e1a14 75%, #c0392b 112%); --rl:16px; }
 body { background:var(--bg); }
-header.top { background:var(--grad); border-bottom:0; color:#fff; backdrop-filter:none; -webkit-backdrop-filter:none; box-shadow:0 8px 30px -18px #1d1a6b; }
+header.top { background:var(--grad); border-bottom:0; color:#fff; backdrop-filter:none; -webkit-backdrop-filter:none; box-shadow:0 8px 30px -18px #000; }
 header.top .brand b { color:#fff; } header.top .brand span { color:rgb(255 255 255 / .62); }
 header.top .brand .logo { color:#fff; } header.top .brand .logo circle[fill] { fill:var(--sky); }
 header.top .btn { background:rgb(255 255 255 / .08); border-color:rgb(255 255 255 / .18); color:#fff; border-radius:999px; }
 header.top .btn:hover { background:rgb(255 255 255 / .18); }
-header.top .btn.primary { background:#fff; color:#1d1a6b; border-color:#fff; box-shadow:0 6px 18px -8px rgb(0 0 0 / .5); font-weight:600; }
-header.top .btn.primary:hover { background:#eef0ff; }
-header.top .btn.ghost[aria-pressed="true"] { background:#fff; color:#1d1a6b; }
+header.top .btn.primary { background:#fff; color:#8e2318; border-color:#fff; box-shadow:0 6px 18px -8px rgb(0 0 0 / .5); font-weight:600; }
+header.top .btn.primary:hover { background:#f8e4e1; }
+header.top .btn.ghost[aria-pressed="true"] { background:#fff; color:#8e2318; }
 header.top select { background:rgb(255 255 255 / .1); border-color:rgb(255 255 255 / .22); color:#fff; border-radius:999px; padding-inline:14px; }
-header.top select option { color:#11123a; background:#fff; }
+header.top select option { color:#1a1a1a; background:#fff; }
 header.top .chip { background:rgb(255 255 255 / .14) !important; color:#fff !important; }
 header.top .chip.ok::before, header.top .chip.run::before { content:""; display:inline-block; width:7px; height:7px; border-radius:50%; margin-inline-end:6px; background:#34d3a4; }
 header.top .chip.run::before { background:#ffbe55; animation:pulse 1.2s ease-in-out infinite; }
@@ -322,7 +322,7 @@ nav.tabs { background:var(--surface); border-bottom:1px solid var(--line); top:6
 nav.tabs button { border-radius:0; border-bottom-width:3px; font-weight:500; }
 nav.tabs button[aria-selected="true"] { color:var(--accent); border-bottom-color:var(--accent); }
 nav.tabs button:hover { background:transparent; color:var(--accent); }
-.kpi, .card, fieldset, .pcard, .progress, .scroll { border-color:var(--line); box-shadow:0 1px 2px rgb(17 18 58 / .04), 0 10px 30px -22px rgb(17 18 58 / .35); }
+.kpi, .card, fieldset, .pcard, .progress, .scroll { border-color:var(--line); box-shadow:0 1px 2px rgb(20 18 10 / .04), 0 10px 30px -22px rgb(20 18 10 / .35); }
 .kpi .v, .hero .stat .v, .ring .hole b { font-weight:600; letter-spacing:-.6px; }
 .kpi.big { background:var(--grad); color:#fff; border:0; }
 .kpi.big .l, .kpi.big .s { color:rgb(255 255 255 / .72); }
@@ -330,12 +330,12 @@ nav.tabs button:hover { background:transparent; color:var(--accent); }
 .spark .l { stroke:var(--accent); } .spark .a { fill:var(--accent); }
 .eyebrow { color:var(--accent); text-transform:none; background:var(--accent-soft); padding:3px 10px; border-radius:999px; }
 .hero { background:var(--grad); color:#fff; border-radius:24px; padding:30px 30px 26px; margin-top:18px; position:relative; overflow:hidden; border:0; }
-.hero::after { content:""; position:absolute; inset:auto -80px -140px auto; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle, rgb(38 198 255 / .35), transparent 65%); pointer-events:none; }
+.hero::after { content:""; position:absolute; inset:auto -80px -140px auto; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle, rgb(232 96 60 / .35), transparent 65%); pointer-events:none; }
 .hero h1, .hero b { color:#fff; } .hero p, .hero .muted, .hero .stat .l, .hero small { color:rgb(255 255 255 / .75) !important; }
 .hero .eyebrow { background:rgb(255 255 255 / .14); color:#fff; }
 .hero .stat { border-inline-start-color:var(--sky); }
 .hero .btn { background:rgb(255 255 255 / .1); color:#fff; border-color:rgb(255 255 255 / .25); }
-.hero .btn.primary { background:#fff; color:#1d1a6b; border-color:#fff; }
+.hero .btn.primary { background:#fff; color:#8e2318; border-color:#fff; }
 .pcard { border-radius:18px; } .pcard:hover { border-color:color-mix(in oklab, var(--accent) 40%, var(--line)); }
 .tag.m { background:var(--accent-soft); color:var(--accent); }
 .flow .bub rect { fill:var(--accent); }
@@ -345,6 +345,14 @@ nav.tabs button:hover { background:transparent; color:var(--accent); }
 .pr-track i { background:linear-gradient(90deg, var(--accent), var(--pink)); }
 .est-row .bar i { background:linear-gradient(90deg, var(--accent), var(--sky)); }
 dialog { border-radius:22px !important; }
+.btn.danger { background:var(--neg); border-color:var(--neg); color:#fff; } .btn.danger:disabled { opacity:.45; cursor:not-allowed; }
+.btn.danger-ghost { color:var(--neg); } .btn.danger-ghost:hover { background:var(--accent-soft); border-color:var(--neg); }
+.btn.icon-only { padding-inline:10px; }
+.danger-h { color:var(--neg); }
+.del-modes { display:grid; gap:8px; }
+.del-opt { display:flex; gap:10px; align-items:flex-start; padding:12px 14px; border:1px solid var(--line); border-radius:14px; cursor:pointer; }
+.del-opt:has(input:checked) { border-color:var(--neg); background:var(--accent-soft); }
+.del-opt input { margin-top:5px; accent-color:var(--neg); } .del-opt b { display:block; } .del-opt span { color:var(--fg2); font-size:.86rem; }
 @media (max-width:1500px) { header.top .brand span { display:none; } header.top .btn { padding-inline:12px; } header.top .top .wrap, .top .wrap { gap:8px; } }
 nav.tabs { position:static; }
 @media (max-width:860px) { .hero { padding:22px 18px; border-radius:18px; } nav.tabs { top:auto; } }
@@ -353,7 +361,7 @@ nav.tabs { position:static; }
 <body>
 <header class="top">
   <div class="wrap">
-    <a class="brand" id="homeLink" href="#" title="كل المشاريع"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".25"/><circle cx="16" cy="16" r="9" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".45"/><path d="M16 16 26 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="16" r="3.2" fill="var(--accent)"/><circle cx="23.5" cy="10.5" r="2" fill="var(--accent)"/></svg><b>مرصد InfoTimes</b><span>الرصد الإعلامي الذكي</span></a>
+    <a class="brand" id="homeLink" href="#" title="كل المشاريع"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".25"/><circle cx="16" cy="16" r="9" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".45"/><path d="M16 16 26 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="16" r="3.2" fill="var(--accent)"/><circle cx="23.5" cy="10.5" r="2" fill="var(--accent)"/></svg><b>مرصد InfoTimes</b></a>
     <button class="btn" id="homeBtn" type="button">⌂ المشاريع</button>
     <select id="project" aria-label="المشروع" class="pj"></select>
     <button class="btn" id="newProject" type="button">＋ مشروع</button>
@@ -433,6 +441,13 @@ nav.tabs { position:static; }
     </div>
     <div class="field"><label for="newCtx">سياق الرصد (اختياري)</label><textarea id="newCtx" rows="4" placeholder="أنت محلل رصد إعلامي لحساب … قاعدة الصلة: …"></textarea></div>
     <div style="display:flex;gap:8px"><button class="btn primary" value="ok">إنشاء المشروع</button><button class="btn" value="cancel" formnovalidate>إلغاء</button></div>
+  </form>
+</dialog>
+<dialog id="delDlg" class="wide">
+  <form method="dialog" style="display:grid;gap:14px">
+    <h2 class="danger-h">حذف المشروع نهائياً</h2>
+    <div id="delBody"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn danger" value="ok" id="delOk" disabled>حذف نهائي</button><button class="btn" value="cancel">إلغاء</button></div>
   </form>
 </dialog>
 <dialog id="runDlg" class="wide">
@@ -1098,13 +1113,15 @@ function projectCard(m) {
   const state = (m.status.status_state || "لم يُشغّل بعد").replace(/^[^\p{L}]+/u, "");
   const acts = arch
     ? [el("button", { class: "btn primary", type: "button", onclick: () => setArchived(m.slug, false) }, "↺ استعادة للقائمة الشهرية"),
-       el("button", { class: "btn", type: "button", onclick: () => openProject(m.slug, "results") }, "النتائج")]
+       el("button", { class: "btn", type: "button", onclick: () => openProject(m.slug, "results") }, "النتائج"),
+       el("button", { class: "btn danger-ghost", type: "button", title: "حذف المشروع نهائياً", onclick: () => deleteProject(m.slug) }, "حذف")]
     : S.present ? [el("button", { class: "btn", type: "button", onclick: () => openProject(m.slug, "results") }, "النتائج"),
        el("button", { class: "btn", type: "button", onclick: () => openProject(m.slug, "reports") }, "التقارير")]
     : [el("button", { class: "btn", type: "button", onclick: () => openProject(m.slug, "flow") }, "فتح"),
        el("button", { class: "btn", type: "button", onclick: () => runProject(m.slug) }, live ? "يعمل…" : "▶ تشغيل"),
        el("button", { class: "btn", type: "button", onclick: () => openProject(m.slug, "reports") }, "التقارير"),
-       el("button", { class: "btn", type: "button", title: "نقل إلى الأرشيف", onclick: () => setArchived(m.slug, true) }, "أرشفة")];
+       el("button", { class: "btn", type: "button", title: "نقل إلى الأرشيف", onclick: () => setArchived(m.slug, true) }, "أرشفة"),
+       el("button", { class: "btn danger-ghost icon-only", type: "button", title: "حذف المشروع نهائياً", "aria-label": "حذف المشروع", onclick: () => deleteProject(m.slug) }, "🗑")];
   return el("article", { class: "pcard" + (arch ? " arch" : "") + (live ? " live" : "") },
     el("div", { class: "meta" }, el("span", { class: "tag " + CAD[cad][0] }, cad), arch ? el("span", { class: "tag" }, "مؤرشف" + (st.archived_at ? " · " + st.archived_at : "")) : null,
       el("bdi", { dir: "ltr" }, `${st.window_start || "؟"} ← ${st.window_end || "؟"}`)),
@@ -1128,7 +1145,6 @@ async function renderHome(force) {
   const stat = (v, l) => el("div", { class: "stat" }, el("div", { class: "v" }, v), el("div", { class: "l" }, l));
   const hero = el("section", { class: "hero" },
     el("div", {}, el("span", { class: "eyebrow" }, new Date().toLocaleDateString("ar-EG-u-nu-latn", { weekday: "long", day: "numeric", month: "long", year: "numeric" })), el("h1", {}, "مشاريع الرصد الإعلامي"),
-      el("p", {}, "كل مشروع له كلماته ومصادره وملف نتائجه وتقاريره الشهرية. افتح مشروعاً لتعديله أو تشغيله، أو أرشف ما انتهى؛ المؤرشف تحتفظ ببياناته ويعود للقائمة بضغطة."),
       el("div", { class: "actions" }, el("button", { class: "btn primary", type: "button", onclick: newProject }, "＋ مشروع جديد"),
         el("button", { class: "btn", type: "button", onclick: () => renderHome(true) }, "↻ تحديث"))),
     el("div", { class: "stats" }, stat(fmt(active.length), "مشروع نشط"), stat(fmt(monthTotal), `سجل في ${monthAr(prevKey)}`),
@@ -1162,6 +1178,61 @@ async function setArchived(slug, on) {
     fillProjects(); renderHome();
     toast(on ? "نُقل إلى الأرشيف ✓" : "عاد إلى القائمة الشهرية ✓ — الفترة مضبوطة على الشهر الماضي", 4500);
   } catch (e) { toast("تعذّر الحفظ: " + e.message, 6000); }
+}
+// ── حذف مشروع: commit واحد يحذف الإعدادات (والبيانات اختيارياً) ──────────
+async function projectPaths(slug) {
+  const ref = await gh(`/git/ref/heads/main`), head = ref.object.sha;
+  const commit = await gh(`/git/commits/${head}`);
+  const tree = await gh(`/git/trees/${commit.tree.sha}?recursive=1`);
+  const files = (tree.tree || []).filter(t => t.type === "blob");
+  const pick = pre => files.filter(t => pre.some(x => x.endsWith("/") ? t.path.startsWith(x) : t.path === x));
+  const cfg = pick([`config/projects/${slug}.json`, `config/keywords/${slug}.txt`, `progress/${slug}.json`]);
+  const data = pick([`data/${slug}/`]);
+  return { head, base: commit.tree.sha, cfg, data, truncated: tree.truncated };
+}
+async function deleteProject(slug) {
+  const m = S.meta?.[slug] || {}, name = m.cfg?.name || slug;
+  if (S.runs.some(r => r.status !== "completed" && r.event !== "push" && (r.display_title || "").includes(slug)))
+    return toast("المشروع يعمل الآن — أوقفه أولاً ثم احذفه", 5000);
+  const dlg = $("#delDlg"), body = $("#delBody"), ok = $("#delOk");
+  body.replaceChildren(skeleton(0)); ok.disabled = true; dlg.showModal();
+  let P;
+  try { P = await projectPaths(slug); } catch (e) { body.replaceChildren(el("p", {}, "تعذّر قراءة ملفات المشروع: " + e.message)); return; }
+  const kb = n => n > 1048576 ? (n / 1048576).toFixed(1) + " م.ب" : Math.max(1, Math.round(n / 1024)) + " ك.ب";
+  const dataSize = P.data.reduce((a, t) => a + (t.size || 0), 0);
+  const csvs = P.data.filter(t => t.path.endsWith(".csv")).length, reps = P.data.filter(t => t.path.includes("/reports/")).length;
+  const mode = el("div", { class: "del-modes" },
+    el("label", { class: "del-opt" }, el("input", { type: "radio", name: "delmode", value: "cfg" }),
+      el("div", {}, el("b", {}, "حذف المشروع فقط"), el("span", {}, `تُحذف الإعدادات والكلمات المفتاحية، وتبقى البيانات في data/${slug} (${P.data.length} ملف).`))),
+    el("label", { class: "del-opt" }, el("input", { type: "radio", name: "delmode", value: "all", checked: true }),
+      el("div", {}, el("b", {}, "حذف المشروع وكل بياناته"), el("span", {}, `${P.data.length} ملف · ${kb(dataSize)} — منها ${csvs} ملف CSV و${reps} تقرير شهري.`))));
+  const inp = el("input", { type: "text", placeholder: slug, dir: "ltr", autocomplete: "off", style: "width:100%" });
+  inp.oninput = () => { ok.disabled = inp.value.trim() !== slug; };
+  body.replaceChildren(...[
+    el("p", {}, "سيُحذف «", el("b", {}, name), "» من القائمة ولن يعمل بعد ذلك. لا يمكن التراجع من الواجهة، وإن احتجت تحتفظ به دون أن يظهر فاستخدم «أرشفة» بدلاً من الحذف."),
+    mode,
+    P.truncated ? el("p", { class: "est-cap over" }, "المستودع كبير جداً ولم تُقرأ كل الملفات؛ قد تبقى بعض ملفات البيانات.") : null,
+    el("label", { style: "display:grid;gap:6px" }, el("span", {}, "للتأكيد اكتب اسم المشروع: ", el("code", { dir: "ltr" }, slug)), inp)].filter(Boolean));
+  setTimeout(() => inp.focus(), 50);
+  const choice = await new Promise(res => dlg.addEventListener("close", () => res(dlg.returnValue), { once: true }));
+  if (choice !== "ok") return;
+  const all = (document.querySelector('input[name="delmode"]:checked') || {}).value === "all";
+  const paths = [...P.cfg, ...(all ? P.data : [])].map(t => t.path);
+  toast("جارٍ الحذف…", 2500);
+  try {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const cur = attempt ? await projectPaths(slug) : P;
+      const tree = await gh(`/git/trees`, { method: "POST", body: JSON.stringify({ base_tree: cur.base,
+        tree: paths.map(path => ({ path, mode: "100644", type: "blob", sha: null })) }) });
+      const c = await gh(`/git/commits`, { method: "POST", body: JSON.stringify({ message: `حذف مشروع ${slug}${all ? " وبياناته" : ""}`, tree: tree.sha, parents: [cur.head] }) });
+      try { await gh(`/git/refs/heads/main`, { method: "PATCH", body: JSON.stringify({ sha: c.sha }) }); break; }
+      catch (e) { if (attempt) throw e; }
+    }
+  } catch (e) { return toast("تعذّر الحذف: " + e.message, 7000); }
+  S.projects = S.projects.filter(p => p !== slug); if (S.meta) delete S.meta[slug];
+  if (S.project === slug) { S.project = S.projects[0] || ""; S.cfg = null; store.set("project", S.project); }
+  fillProjects(); showHome(true);
+  toast(`حُذف «${name}» ✓${all ? " مع بياناته" : " — البيانات باقية في data/" + slug}`, 5000);
 }
 async function runProject(slug) {
   if (S.meta?.[slug]?.cfg?.settings?.archived) return toast("المشروع مؤرشف — استعده أولاً", 4000);
@@ -1200,7 +1271,7 @@ function toggleTheme() {
 const SRC = {
   google:    { label: "Google News", ico: "G",  c: "#4285F4", kind: "news" },
   bing:      { label: "Bing News",   ico: "b",  c: "#00897B", kind: "news" },
-  newsscope: { label: "NewsScope",   ico: "N",  c: "#4a3aff", kind: "news" },
+  newsscope: { label: "NewsScope",   ico: "N",  c: "#c0392b", kind: "news" },
   rss:       { label: "RSS",         ico: "◉",  c: "#F26522", kind: "news" },
   api:       { label: "تلفزيون",     ico: "📺", c: "#5E35B1", kind: "news" },
   X:         { label: "X",           ico: "𝕏",  c: "#14171A", kind: "social" },
