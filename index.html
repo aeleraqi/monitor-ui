@@ -468,6 +468,7 @@ nav.tabs { position:static; }
         <li>افتح <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub ← Fine-grained token</a>.</li>
         <li>Repository access: <b>Only select repositories</b> ← <span class="num">monitor-engine</span>.</li>
         <li>Permissions: <b>Contents</b> = Read and write، <b>Actions</b> = Read and write.</li>
+        <li>لحفظ مفتاح Apify خاص بكل مشروع من صفحة الإعدادات أضف كمان <b>Secrets</b> = Read and write.</li>
       </ol></details>
       <div class="field"><label for="repo">الـ repo</label><input type="text" id="repo" dir="ltr" value="aeleraqi/monitor-engine"></div>
       <div class="field"><label for="token">المفتاح</label><input type="password" id="token" dir="ltr" autocomplete="off" placeholder="github_pat_…"></div>
@@ -562,7 +563,7 @@ const el = (tag, attrs = {}, ...kids) => {
     if (k === "class") e.className = v; else if (k === "html") e.innerHTML = v;
     else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else if (v !== false && v != null) e.setAttribute(k, v === true ? "" : v);
   }
-  for (const c of kids.flat()) if (c != null) e.append(c.nodeType ? c : document.createTextNode(c));
+  for (const c of kids.flat(Infinity)) if (c != null) e.append(c.nodeType ? c : document.createTextNode(c));
   return e;
 };
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } },
@@ -581,7 +582,8 @@ async function gh(path, opts = {}) {
   if (r.status === 404 && opts.allow404) return null;
   if (!r.ok) { let m = r.status + ""; try { m += " — " + (await r.json()).message; } catch {} throw new Error(m); }
   if (r.status === 204) return true;
-  return opts.raw ? r.text() : r.json();
+  if (opts.raw) return r.text();
+  const t = await r.text(); return t ? JSON.parse(t) : true;   // بعض الردود (201 لحفظ Secret) بلا محتوى
 }
 const b64e = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
 const b64d = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g, "")), c => c.charCodeAt(0)));
@@ -769,7 +771,114 @@ function renderSettings() {
   const presets = el("div", { class: "row" }, el("span", { class: "preview" }, "الفترة بسرعة:"),
     preset("الشهر الماضي", () => monthRange(-1)), preset("الشهر الحالي", () => monthRange(0)), preset("آخر 7 أيام", () => lastDays(7)));
   $("#p-settings").replaceChildren(el("h2", {}, S.cfg.name || S.project),
-    el("p", { class: "lead" }, "عدّل القيم ثم «حفظ الإعدادات». زر «تشغيل الرصد» يحفظ تلقائياً قبل البدء."), el("div", { class: "form" }, status, presets, ...sets));
+    el("p", { class: "lead" }, "عدّل القيم ثم «حفظ الإعدادات». زر «تشغيل الرصد» يحفظ تلقائياً قبل البدء."),
+    el("div", { class: "form" }, status, presets, ...sets.slice(0, 2), el("fieldset", { id: "apifyBox" }), ...sets.slice(2)));
+  renderApify();
+}
+
+// حساب Apify لكل مشروع: المفتاح يُحفظ مشفّراً في GitHub Secrets (APIFY_TOKEN_<المشروع>) ولا يُكتب في ملف المشروع.
+// المحرك يستخدمه إن وُجد، وإلا المفتاح العام APIFY_TOKEN. settings.apify_secret يختار مفتاح مشروع آخر أو العام.
+const APIFY_RE = /^APIFY_TOKEN(_[A-Z0-9_]+)?$/;
+const ownSecret = p => "APIFY_TOKEN_" + p.toUpperCase().replace(/[^A-Z0-9]/g, "_");
+const projectSecret = (p, st) => { const s = String(st?.apify_secret || "").trim().toUpperCase(); return APIFY_RE.test(s) ? s : ownSecret(p); };
+const NACL = [["https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js", "sha384-05+sicyRJQ56XpL4U9HJ8YbtSzFDvAg7apPKOGV6A0JsAJKFM68jp5oLnUjG5mEp", "nacl"],
+              ["https://cdn.jsdelivr.net/npm/tweetnacl-sealedbox-js@1.2.0/sealedbox.web.js", "sha384-gCr/Ers2SYUTIvvm+iWV5lakrZ/tTqxgYQckm0Znr3blQzNfOPirDZlpvkINLyhv", "sealedBox"]];
+async function sealSecret(value, keyB64) {   // تشفير libsodium sealed box كما تطلبه GitHub
+  for (const [src, integrity, g] of NACL) if (!window[g]) await new Promise((ok, bad) => document.head.append(
+    el("script", { src, integrity, crossorigin: "anonymous", onload: ok, onerror: () => bad(new Error("تعذّر تحميل مكتبة التشفير")) })));
+  const sealed = window.sealedBox.seal(new TextEncoder().encode(value), Uint8Array.from(atob(keyB64), c => c.charCodeAt(0)));
+  let bin = ""; for (const b of sealed) bin += String.fromCharCode(b);
+  return btoa(bin);
+}
+async function loadApifySecrets(force) {
+  if (S.apifyKeys && !force) return S.apifyKeys;
+  try { const r = await gh("/actions/secrets?per_page=100"); S.apifyKeys = { ok: true, list: (r.secrets || []).filter(s => APIFY_RE.test(s.name)) }; }
+  catch (e) { S.apifyKeys = { ok: false, denied: /^40[34]/.test(e.message), msg: e.message }; }
+  return S.apifyKeys;
+}
+function renderApify() {
+  const host = $("#apifyBox"); if (!host || !S.cfg) return;
+  const st = S.cfg.settings, own = ownSecret(S.project), cur = projectSecret(S.project, st), K = S.apifyKeys, last = S.status?.apify;
+  if (!K) { host.replaceChildren(el("legend", {}, "حساب Apify"), el("small", { class: "preview" }, "جارٍ قراءة المفاتيح…")); loadApifySecrets().then(renderApify); return; }
+  const row = n => K.ok ? K.list.find(s => s.name === n) : undefined;
+  const has = n => n === "APIFY_TOKEN" || (K.ok ? !!row(n) : null);       // null = غير معروف (بلا صلاحية Secrets)
+  const pname = p => S.meta?.[p]?.cfg?.name || p, plabel = p => S.meta?.[p]?.cfg?.settings?.apify_label;
+  const ownerOf = n => S.projects.find(p => p !== S.project && ownSecret(p) === n);
+  const nameOf = n => n === "APIFY_TOKEN" ? "المفتاح العام للمنصة" : n === own ? "مفتاح خاص بهذا المشروع"
+    : ownerOf(n) ? `مفتاح مشروع «${pname(ownerOf(n))}»` + (plabel(ownerOf(n)) ? ` · ${plabel(ownerOf(n))}` : "") : n;
+  const opts = [own, ...(K.ok ? K.list.map(s => s.name).filter(n => n !== own && n !== "APIFY_TOKEN") : []), "APIFY_TOKEN"];
+  if (!opts.includes(cur)) opts.splice(1, 0, cur);
+  const sel = el("select", { id: "f-apify_secret", onchange: e => { const v = e.target.value; if (v === own) delete st.apify_secret; else st.apify_secret = v; markDirty(); renderApify(); } },
+    opts.map(n => el("option", { value: n, selected: n === cur }, nameOf(n) + (has(n) === false ? " — لم يُضف بعد" : ""))));
+  const B = t => el("bdi", { class: "num", dir: "ltr" }, t), updated = row(cur)?.updated_at?.slice(0, 10);
+  const state = cur === "APIFY_TOKEN" ? ["المشروع بيسحب بالمفتاح العام ", B("APIFY_TOKEN"), "."]
+    : has(cur) === false ? (cur === own ? ["لا يوجد مفتاح خاص بعد، فالمشروع بيسحب بالمفتاح العام. الصق مفتاح الحساب اللي عاوزه هنا."] : ["المفتاح ", B(cur), " غير موجود، فالمشروع بيسحب بالمفتاح العام."])
+    : has(cur) ? [cur === own ? "المشروع بيسحب بمفتاحه الخاص" : `المشروع بيسحب بـ${nameOf(cur)}`, cur === own && st.apify_label ? ["، حساب ", B(st.apify_label)] : null,
+                  updated ? [" · حُفظ ", B(updated)] : null, "."]
+    : ["يُستخدم المفتاح المحفوظ باسم ", B(cur), " لو موجود، وإلا المفتاح العام."];
+  let lastLine = null;
+  if (last) {
+    const near = last.usage_usd != null && last.limit_usd ? last.usage_usd / last.limit_usd >= 0.9 : false;
+    lastLine = el("small", { class: last.error || near ? "tone-neg" : "preview" }, "آخر تشغيل ", B(last.time || "—"), ": ",
+      last.error || ["حساب ", B(last.username), last.plan ? [" · خطة ", B(last.plan)] : null],
+      last.usage_usd != null ? [" · استهلاك الشهر ", B(usd(last.usage_usd)), " من ", B(last.limit_usd != null ? usd(last.limit_usd) : "—"), near ? " (قرب الحد)" : ""] : null,
+      last.cycle_end ? [" · تتجدد الدورة ", B(last.cycle_end)] : null, " · المفتاح: ", last.source === "APIFY_TOKEN" ? "العام" : B(last.source));
+  }
+  const link = (href, t) => el("a", { href, target: "_blank", rel: "noopener" }, t);
+  const denied = K.ok ? null : el("small", { class: "tone-neg" },
+    K.denied ? "الـ token الحالي لا يملك صلاحية Secrets، فالصفحة لا تقدر تحفظ المفتاح أو تتأكد من وجوده. " : `تعذّر قراءة المفاتيح (${K.msg}). `,
+    link("https://github.com/settings/personal-access-tokens", "أضف للـ token صلاحية Secrets = Read and write"), " ثم اضغط «إعادة الفحص»، أو أضف المفتاح يدوياً من ",
+    link(`https://github.com/${S.repo}/settings/secrets/actions/new`, "أسرار المستودع"), " باسم ", el("bdi", { class: "num", dir: "ltr" }, own), ".");
+  const inp = el("input", { type: "password", id: "f-apify_key", dir: "ltr", autocomplete: "off", spellcheck: "false", placeholder: "apify_api_…",
+    onkeydown: e => { if (e.key === "Enter") saveApifyKey(inp); } });
+  const users = S.projects.filter(p => p !== S.project && projectSecret(p, S.meta?.[p]?.cfg?.settings) === own);
+  host.replaceChildren(...[el("legend", {}, "حساب Apify"),
+    el("p", { class: "preview", style: "margin:0 0 10px" }, "كل مشروع يقدر يسحب من حساب Apify مختلف. المفتاح يُحفظ مشفّراً في GitHub Secrets، لا يُكتب في ملف المشروع ولا يظهر هنا بعد الحفظ."),
+    el("div", { class: "grid" },
+      el("div", { class: "field" }, el("label", { for: "f-apify_secret" }, "المفتاح المستخدم"), sel, el("small", {}, state)),
+      cur === own ? el("div", { class: "field" }, el("label", { for: "f-apify_key" }, has(own) ? "استبدال بمفتاح جديد" : "مفتاح Apify للمشروع"), inp,
+        el("small", {}, "من Apify ‹ Settings ‹ API & Integrations. نتأكد منه مع Apify قبل الحفظ.")) : null),
+    el("div", { class: "row", style: "margin-top:10px" },
+      cur === own ? el("button", { class: "btn primary", type: "button", disabled: !K.ok, onclick: () => saveApifyKey(inp) }, has(own) ? "تحقق واستبدل" : "تحقق واحفظ") : null,
+      cur === own && has(own) ? el("button", { class: "btn", type: "button", onclick: () => removeApifyKey(users) }, "إزالة المفتاح الخاص") : null,
+      el("button", { class: "btn", type: "button", onclick: async () => { S.apifyKeys = null; renderApify(); } }, "إعادة الفحص"),
+      users.length ? el("span", { class: "preview" }, `يستخدمه كمان: ${users.map(pname).join("، ")}`) : null),
+    lastLine ? el("div", { style: "margin-top:10px" }, lastLine) : null, denied ? el("div", { style: "margin-top:8px" }, denied) : null].filter(Boolean));
+}
+async function saveApifyKey(inp) {
+  const v = inp.value.trim(), st = S.cfg.settings, name = ownSecret(S.project), project = S.project;
+  if (!v) return toast("الصق مفتاح Apify أولاً");
+  if (/\s/.test(v) || v.length < 20) return toast("المفتاح يبدو ناقصاً — انسخه كاملاً من Apify", 5000);
+  const btn = $("#apifyBox .btn.primary"), label = btn.textContent; btn.disabled = true; btn.textContent = "جارٍ التحقق…";
+  try {
+    let acct = null;
+    try {
+      const r = await fetch("https://api.apify.com/v2/users/me", { headers: { Authorization: "Bearer " + v } });
+      if (r.status === 401 || r.status === 403) throw Object.assign(new Error("Apify رفض المفتاح — تأكد إنك نسخته كاملاً ومن الحساب الصحيح"), { rejected: true });
+      if (r.ok) acct = (await r.json()).data || null;
+    } catch (e) { if (e.rejected) throw e; }      // تعذّر الوصول لـ Apify من المتصفح: نحفظ بلا تحقق
+    btn.textContent = "جارٍ الحفظ…";
+    const pk = await gh("/actions/secrets/public-key");
+    await gh(`/actions/secrets/${name}`, { method: "PUT", body: JSON.stringify({ encrypted_value: await sealSecret(v, pk.key), key_id: pk.key_id }) });
+    inp.value = "";
+    if (S.project === project) {
+      delete st.apify_secret; st.apify_key_updated = new Date().toISOString().slice(0, 10);
+      if (acct?.username) st.apify_label = acct.username; else delete st.apify_label;
+      await save(`مفتاح Apify خاص لمشروع ${project}`);
+    }
+    await loadApifySecrets(true); renderApify();
+    toast(acct?.username ? `حُفظ المفتاح ✓ — المشروع هيسحب من حساب ${acct.username} من التشغيل الجاي` : "حُفظ المفتاح ✓ — يُستخدم من التشغيل الجاي", 6000);
+  } catch (e) { toast("لم يُحفظ المفتاح: " + e.message, 7000); btn.disabled = false; btn.textContent = label; }
+}
+async function removeApifyKey(users) {
+  const name = ownSecret(S.project);
+  if (!confirm(`حذف المفتاح الخاص بهذا المشروع؟ المشروع هيرجع للمفتاح العام.` + (users.length ? `\nمشاريع تستخدمه كمان وهترجع للعام: ${users.map(p => S.meta?.[p]?.cfg?.name || p).join("، ")}` : ""))) return;
+  try {
+    await gh(`/actions/secrets/${name}`, { method: "DELETE" });
+    const st = S.cfg.settings; delete st.apify_label; delete st.apify_key_updated;
+    await save(`إزالة مفتاح Apify الخاص لمشروع ${S.project}`);
+    await loadApifySecrets(true); renderApify(); toast("اتشال المفتاح — المشروع بيسحب بالمفتاح العام دلوقتي");
+  } catch (e) { toast("تعذّرت الإزالة: " + e.message, 6000); }
 }
 
 // جدول عام قابل للتحرير
@@ -1075,7 +1184,7 @@ $("#nodeDlg").addEventListener("click", e => { if (e.target.id === "nodeDlg") e.
 // ── تشخيص الأخطاء: نجمّع الفشل حسب السبب، ونقول الحل، ونعرض زر الإعادة المناسب ──
 const CAUSES = [
   { k: "apify_limit", t: "رصيد Apify الشهري خلص", re: /apify_limit|usage hard limit|Monthly usage|حد الاستخدام|\(402\)/i, stages: "social,comments",
-    fix: "Apify رفض كل الطلبات لأن حد الاستخدام الشهري للحساب انتهى، فالسوشيال والتعليقات لم تُجمع. ارفع الحد الشهري من صفحة الفوترة في Apify (Billing ‹ Limits) أو رقِّ الخطة، أو انتظر بداية الدورة الجديدة، ثم أعد جمع السوشيال فقط.",
+    fix: "Apify رفض كل الطلبات لأن حد الاستخدام الشهري للحساب انتهى، فالسوشيال والتعليقات لم تُجمع. ارفع الحد الشهري من صفحة الفوترة في Apify (Billing ‹ Limits) أو رقِّ الخطة، أو انتظر بداية الدورة الجديدة، ثم أعد جمع السوشيال فقط. أو اربط المشروع بحساب Apify تاني من الإعدادات ‹ «حساب Apify».",
     link: ["صفحة الفوترة والحدود في Apify", "https://console.apify.com/billing"] },
   { k: "rate_limit", t: "Google News رفض جزءاً من الطلبات", re: /rate_limit|حظر مؤقت|تعذّر الجلب مرتين|صفحة تحقق/, stages: "news",
     fix: "Google يحدّ عدد الطلبات القادمة من خوادم GitHub. المحرك الآن يبطّئ تلقائياً، ثم يُكمل ما تعذّر من Bing بنفس الكلمات. لتقليلها: احذف الاستعلامات المكررة لنفس الكلمات في دول كثيرة (اترك 3–4 دول رئيسية)، أو كبّر «أيام كل جزء» في الإعدادات. الإعادة الآن آمنة: المكرر لا يُكتب مرتين." },
@@ -1547,7 +1656,7 @@ function renderFlow() {
   N("router", 930, 215, { ico: "⑂", c: "#8f8b80", lbl: "توزيع", sub: "المسارات", r: 22, tab: "settings" });
   edges.push(["trigger", "router"]);
   const newsKeys = Object.keys(newsBy), socKeys = Object.keys(socBy);
-  const xs = (n, from, to) => n <= 1 ? [(from + to) / 2] : Array.from({ length: n }, (_, i) => from - i * Math.min(95, (from - to) / (n - 1)));
+  const xs = (n, from, to) => n < 1 ? [] : n === 1 ? [(from + to) / 2] : Array.from({ length: n }, (_, i) => from - i * Math.min(95, (from - to) / (n - 1)));
   const bub = (k) => {
     if (p && p.by_source && p.by_source[k] != null) return { n: p.by_source[k], done: false };
     const fromSum = k in SRC && SRC[k].kind === "news" ? (sm.by_collector || {})[SRC[k].label] : (sm.by_platform || []).find(b => b.key === k)?.total;
