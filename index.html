@@ -830,7 +830,7 @@ function renderApify() {
     link("https://github.com/settings/personal-access-tokens", "أضف للـ token صلاحية Secrets = Read and write"), " ثم اضغط «إعادة الفحص»، أو أضف المفتاح يدوياً من ",
     link(`https://github.com/${S.repo}/settings/secrets/actions/new`, "أسرار المستودع"), " باسم ", el("bdi", { class: "num", dir: "ltr" }, own), ".");
   const inp = el("input", { type: "password", id: "f-apify_key", dir: "ltr", autocomplete: "off", spellcheck: "false", placeholder: "apify_api_…",
-    onkeydown: e => { if (e.key === "Enter") saveApifyKey(inp); } });
+    onkeydown: e => { if (e.key === "Enter" && K.ok) saveApifyKey(inp); } });
   const users = S.projects.filter(p => p !== S.project && projectSecret(p, S.meta?.[p]?.cfg?.settings) === own);
   host.replaceChildren(...[el("legend", {}, "حساب Apify"),
     el("p", { class: "preview", style: "margin:0 0 10px" }, "كل مشروع يقدر يسحب من حساب Apify مختلف. المفتاح يُحفظ مشفّراً في GitHub Secrets، لا يُكتب في ملف المشروع ولا يظهر هنا بعد الحفظ."),
@@ -848,6 +848,7 @@ function renderApify() {
 async function saveApifyKey(inp) {
   const v = inp.value.trim(), st = S.cfg.settings, name = ownSecret(S.project), project = S.project;
   if (!v) return toast("الصق مفتاح Apify أولاً");
+  if (!S.apifyKeys?.ok) return toast("المفتاح لم يُحفظ: الـ token بتاع GitHub ملوش صلاحية Secrets. افتح إعدادات الـ token وخلّي Secrets = Read and write ثم اضغط «إعادة الفحص»، أو ضيف المفتاح يدوياً من الرابط اللي تحت الخانة باسم " + name + ".", 12000);
   if (/\s/.test(v) || v.length < 20) return toast("المفتاح يبدو ناقصاً — انسخه كاملاً من Apify", 5000);
   const btn = $("#apifyBox .btn.primary"), label = btn.textContent; btn.disabled = true; btn.textContent = "جارٍ التحقق…";
   try {
@@ -868,7 +869,10 @@ async function saveApifyKey(inp) {
     }
     await loadApifySecrets(true); renderApify();
     toast(acct?.username ? `حُفظ المفتاح ✓ — المشروع هيسحب من حساب ${acct.username} من التشغيل الجاي` : "حُفظ المفتاح ✓ — يُستخدم من التشغيل الجاي", 6000);
-  } catch (e) { toast("لم يُحفظ المفتاح: " + e.message, 7000); btn.disabled = false; btn.textContent = label; }
+  } catch (e) {
+    const why = /^403/.test(e.message) ? "الـ token بتاع GitHub ملوش صلاحية Secrets (Read and write). ضيفها من إعدادات الـ token، أو ضيف المفتاح يدوياً من أسرار المستودع باسم " + name + "." : e.message;
+    toast("لم يُحفظ المفتاح: " + why, 12000); btn.disabled = false; btn.textContent = label;
+  }
 }
 async function removeApifyKey(users) {
   const name = ownSecret(S.project);
