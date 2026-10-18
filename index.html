@@ -818,10 +818,10 @@ function renderApify() {
     : ["يُستخدم المفتاح المحفوظ باسم ", B(cur), " لو موجود، وإلا المفتاح العام."];
   let lastLine = null;
   if (last) {
-    const near = last.usage_usd != null && last.limit_usd ? last.usage_usd / last.limit_usd >= 0.9 : false;
+    const ratio = last.usage_usd != null && last.limit_usd ? last.usage_usd / last.limit_usd : 0, near = ratio >= 0.9;
     lastLine = el("small", { class: last.error || near ? "tone-neg" : "preview" }, "آخر تشغيل ", B(last.time || "—"), ": ",
       last.error || ["حساب ", B(last.username), last.plan ? [" · خطة ", B(last.plan)] : null],
-      last.usage_usd != null ? [" · استهلاك الشهر ", B(usd(last.usage_usd)), " من ", B(last.limit_usd != null ? usd(last.limit_usd) : "—"), near ? " (قرب الحد)" : ""] : null,
+      last.usage_usd != null ? [" · استهلاك الشهر ", B(usd(last.usage_usd)), " من ", B(last.limit_usd != null ? usd(last.limit_usd) : "—"), ratio >= 1 ? " — وصل للحد، Apify هيرفض الطلبات لحد ما ترفع الحد أو تتجدد الدورة" : near ? " (قرب الحد)" : ""] : null,
       last.cycle_end ? [" · تتجدد الدورة ", B(last.cycle_end)] : null, " · المفتاح: ", last.source === "APIFY_TOKEN" ? "العام" : B(last.source));
   }
   const link = (href, t) => el("a", { href, target: "_blank", rel: "noopener" }, t);
