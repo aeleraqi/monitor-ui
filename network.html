@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>خريطة العلاقات | مرصد InfoTimes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&display=swap">
+<style>
+:root {
+  --bg:#f6f6f4; --surface:#ffffff; --surface2:#f0efec; --fg:#1a1a1a; --fg2:#6b6960; --fg3:#9c9889;
+  --line:#e5e3db; --accent:#c0392b; --edge:#c9c7c0; --edge-hi:#1a1a1a;
+  --c1:#2a78d6; --c2:#eb6834; --c3:#1baf7a; --cx:#b7b4aa; --person:#8f8c83; --topic:#1a1a1a;
+  --font:"Readex Pro", "Segoe UI", Tahoma, sans-serif; --r:10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#111111; --surface:#1a1a1a; --surface2:#232322; --fg:#f0efeb; --fg2:#aaa79d; --fg3:#77756d;
+  --line:#2e2d2a; --accent:#e0533f; --edge:#3a3935; --edge-hi:#f0efeb;
+  --c1:#3987e5; --c2:#d95926; --c3:#199e70; --cx:#5f5d57; --person:#77756d; --topic:#f0efeb; color-scheme:dark; } }
+:root[data-theme="dark"] {
+  --bg:#111111; --surface:#1a1a1a; --surface2:#232322; --fg:#f0efeb; --fg2:#aaa79d; --fg3:#77756d;
+  --line:#2e2d2a; --accent:#e0533f; --edge:#3a3935; --edge-hi:#f0efeb;
+  --c1:#3987e5; --c2:#d95926; --c3:#199e70; --cx:#5f5d57; --person:#77756d; --topic:#f0efeb; color-scheme:dark; }
+* { box-sizing:border-box; }
+[hidden] { display:none !important; }
+html, body { margin:0; }
+body { background:var(--bg); color:var(--fg); font-family:var(--font); font-size:14px; line-height:1.65; }
+a { color:var(--accent); }
+button, input, select { font:inherit; color:inherit; }
+header { background:var(--surface); border-bottom:1px solid var(--line); }
+.wrap { max-width:1280px; margin:0 auto; padding-inline:16px; }
+header .wrap { display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 14px; padding-block:12px; }
+h1 { font-size:1.2rem; margin:0; font-weight:600; }
+.sub { color:var(--fg2); font-size:.88rem; }
+.back { margin-inline-start:auto; font-size:.88rem; }
+.controls { display:flex; flex-wrap:wrap; gap:10px 16px; align-items:end; padding-block:14px; }
+.ctl { display:flex; flex-direction:column; gap:3px; font-size:.8rem; color:var(--fg2); }
+select, input[type=search] { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:6px 10px; min-width:0; }
+input[type=range] { accent-color:var(--accent); width:150px; }
+.seg { display:inline-flex; border:1px solid var(--line); border-radius:var(--r); overflow:hidden; background:var(--surface); }
+.seg button { border:0; background:none; padding:6px 12px; cursor:pointer; color:var(--fg2); }
+.seg button[aria-pressed="true"] { background:var(--fg); color:var(--bg); }
+.btn { border:1px solid var(--line); background:var(--surface); border-radius:var(--r); padding:6px 12px; cursor:pointer; }
+.btn:hover { background:var(--surface2); }
+:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+.grid { display:grid; grid-template-columns:minmax(0, 1fr) 320px; gap:16px; padding-bottom:24px; }
+@media (max-width:860px) { .grid { grid-template-columns:minmax(0, 1fr); } }
+.card { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); }
+.stage { position:relative; height:min(72vh, 720px); min-height:420px; overflow:hidden; touch-action:none; }
+svg { display:block; width:100%; height:100%; cursor:grab; user-select:none; }
+svg.panning { cursor:grabbing; }
+.edge { stroke:var(--edge); stroke-linecap:round; }
+.edge.hi { stroke:var(--edge-hi); }
+.node circle, .node rect { stroke:var(--surface); stroke-width:2px; cursor:pointer; }
+.node text { fill:var(--fg); font-size:11px; pointer-events:none; paint-order:stroke; stroke:var(--surface); stroke-width:3px; stroke-linejoin:round; }
+.node.topic text { font-weight:600; font-size:12px; }
+.dim { opacity:.12; }
+.tip { position:absolute; pointer-events:none; background:var(--fg); color:var(--bg); padding:7px 10px; border-radius:8px; font-size:.82rem; line-height:1.5; max-width:260px; z-index:3; }
+.legend { display:flex; flex-wrap:wrap; gap:6px 14px; padding:10px 14px; border-top:1px solid var(--line); font-size:.8rem; color:var(--fg2); }
+.legend span { display:inline-flex; align-items:center; gap:6px; }
+.legend i { width:10px; height:10px; border-radius:50%; display:inline-block; }
+.legend i.sq { border-radius:2px; }
+.side { padding:14px 16px; align-self:start; }
+.side h2 { font-size:1rem; margin:0 0 4px; }
+.side .meta { color:var(--fg2); font-size:.82rem; margin-bottom:10px; }
+.kv { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+.kv div { background:var(--surface2); border-radius:8px; padding:6px 8px; }
+.kv b { display:block; font-size:1.05rem; font-variant-numeric:tabular-nums; }
+.kv small { color:var(--fg2); font-size:.75rem; }
+.list { list-style:none; margin:0; padding:0; }
+.list li { display:flex; justify-content:space-between; gap:8px; padding:5px 0; border-bottom:1px solid var(--line); font-size:.85rem; }
+.list li button { background:none; border:0; padding:0; color:var(--fg); cursor:pointer; text-align:start; }
+.list li button:hover { color:var(--accent); }
+.list .n { color:var(--fg2); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.note { color:var(--fg2); font-size:.82rem; }
+.msg { padding:40px 16px; text-align:center; color:var(--fg2); }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th, td { text-align:start; padding:6px 10px; border-bottom:1px solid var(--line); }
+th { color:var(--fg2); font-weight:500; background:var(--surface2); }
+td.n { font-variant-numeric:tabular-nums; }
+.tablewrap { max-height:420px; overflow:auto; }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>خريطة العلاقات</h1><span class="sub" id="sub">جارٍ التحميل…</span>
+  <a class="back" id="back" href="./">العودة إلى المرصد ←</a>
+</div></header>
+
+<main class="wrap">
+  <div class="controls" role="group" aria-label="خيارات الخريطة">
+    <div class="ctl">العلاقة
+      <div class="seg" id="view">
+        <button type="button" data-v="audience" aria-pressed="true">الجمهور المشترك</button>
+        <button type="button" data-v="topics" aria-pressed="false">الصفحات والموضوعات</button>
+      </div>
+    </div>
+    <label class="ctl">الصلة بالموضوع
+      <select id="rel"><option value="all">الكل</option><option value="rel">مرتبط فقط</option><option value="unrel">غير مرتبط فقط</option></select>
+    </label>
+    <label class="ctl">المنصة <select id="plat"><option value="">كل المنصات</option></select></label>
+    <label class="ctl"><span id="minLbl">حد أدنى</span>
+      <input type="range" id="min" min="1" max="30" value="3"></label>
+    <label class="ctl">ابحث عن صفحة <input type="search" id="q" placeholder="اسم الصفحة" list="names"></label>
+    <datalist id="names"></datalist>
+    <button class="btn" type="button" id="tableBtn" aria-expanded="false">عرض كجدول</button>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="stage" id="stage">
+        <svg id="svg" role="img" aria-label="شبكة العلاقات بين الصفحات"><g id="vp"><g id="edges"></g><g id="nodes"></g></g></svg>
+        <div class="tip" id="tip" hidden></div>
+        <div class="msg" id="msg" hidden></div>
+      </div>
+      <div class="legend" id="legend"></div>
+      <div class="tablewrap" id="tableWrap" hidden></div>
+    </section>
+    <aside class="card side" id="side" aria-live="polite"></aside>
+  </div>
+</main>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const store = k => { try { return localStorage.getItem(k); } catch { return null; } };
+const params = new URLSearchParams(location.search);
+const REPO = store("repo") || "aeleraqi/monitor-engine";
+const TOKEN = store("token") || "";
+const PROJECT = params.get("p") || store("project") || "";
+const fmt = n => Math.round(n || 0).toLocaleString("en-US");
+const pct = x => Math.round((x || 0) * 100) + "%";
+const NS = "http://www.w3.org/2000/svg";
+const svgEl = (tag, attrs = {}) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+
+// فئات الناشر: ثلاث مجموعات (حد الألوان المميَّزة في الشبكة) + غير معروف
+const GROUPS = [
+  { key: "official", label: "جهات رسمية وأحزاب", color: "var(--c1)", match: ["جهة حكومية رسمية", "حزب أو برلمان", "جامعة أو مؤسسة تعليمية"] },
+  { key: "media", label: "إعلام وصحفيون", color: "var(--c2)", match: ["وسيلة إعلام مصرية", "وسيلة إعلام عربية", "وسيلة إعلام دولية", "صحفي أو إعلامي", "وكالة أنباء"] },
+  { key: "people", label: "مؤثرون وأفراد ومجتمع مدني", color: "var(--c3)", match: ["مؤثر أو صانع محتوى", "مواطن أو شاب مشارك", "صانع محتوى", "صاحب رأي أو مؤثر", "منظمة مجتمع مدني"] },
+  { key: "other", label: "نوع الناشر غير محدد", color: "var(--cx)", match: [] }];
+const groupOf = t => GROUPS.find(g => g.match.includes(t)) || GROUPS[3];
+
+function parseCSV(s) {
+  const rows = []; let r = [], f = "", q = false;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (q) { if (c === '"') { if (s[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ",") { r.push(f); f = ""; }
+    else if (c === "\n") { r.push(f); rows.push(r); r = []; f = ""; }
+    else if (c !== "\r") f += c;
+  }
+  if (f || r.length) { r.push(f); rows.push(r); }
+  return rows;
+}
+
+let REC = [];
+const S = { view: "audience", rel: "all", plat: "", min: 3, focus: null };
+
+async function load() {
+  if (!TOKEN || !PROJECT) return fail("افتح المرصد وسجّل الدخول واختر مشروعاً أولاً، ثم ارجع لهذه الصفحة.");
+  $("#back").href = "./";
+  try {
+    const r = await fetch(`https://api.github.com/repos/${REPO}/contents/data/${encodeURIComponent(PROJECT)}/records.csv`, {
+      cache: "no-store", headers: { Authorization: `Bearer ${TOKEN}`, Accept: "application/vnd.github.raw", "X-GitHub-Api-Version": "2022-11-28" } });
+    if (!r.ok) throw new Error(r.status === 404 ? "لا يوجد ملف نتائج لهذا المشروع بعد." : `تعذّر تحميل النتائج (${r.status}).`);
+    const rows = parseCSV(await r.text());
+    const H = rows[0], ix = n => H.indexOf(n);
+    const I = { type: ix("نوع السجل"), src: ix("المصدر / الحساب"), owner: ix("صاحب المادة الأصلية"), plat: ix("المنصة"), tone: ix("النبرة"),
+                inter: ix("التفاعلات"), pub: ix("نوع الناشر"), topic: ix("الموضوع"), rel: ix("الصلة"), date: ix("تاريخ النشر") };
+    REC = rows.slice(1).filter(r => r.length > 5).map(r => ({
+      type: r[I.type], src: (r[I.src] || "").trim(), owner: (r[I.owner] || "").trim(), plat: r[I.plat], tone: r[I.tone],
+      inter: +r[I.inter] || 0, pub: r[I.pub] || "", topic: r[I.topic] || "", rel: r[I.rel] === "غير مرتبط" ? "unrel" : "rel", date: r[I.date] || "" }));
+    const dates = REC.map(r => r.date).filter(Boolean).sort();
+    $("#sub").textContent = `${PROJECT} · ${fmt(REC.length)} سجل · ${dates[0] || ""} ← ${dates[dates.length - 1] || ""}`;
+    const plats = [...new Set(REC.map(r => r.plat).filter(Boolean))].sort();
+    $("#plat").append(...plats.map(p => Object.assign(document.createElement("option"), { value: p, textContent: p })));
+    render();
+  } catch (e) { fail(e.message); }
+}
+function fail(m) { $("#sub").textContent = ""; const el = $("#msg"); el.hidden = false; el.textContent = m; $("#side").hidden = true; }
+
+// ── بناء الشبكة ─────────────────────────────────────────────
+function pageStats(recs) {
+  const P = new Map();
+  const get = name => { if (!P.has(name)) P.set(name, { id: "p:" + name, name, kind: "page", posts: 0, inter: 0, comments: 0, neg: 0, people: new Set(), pubs: {}, plats: {}, topics: {} }); return P.get(name); };
+  for (const r of recs) {
+    if (r.type === "مادة" && r.src) {
+      const p = get(r.src); p.posts++; p.inter += r.inter;
+      if (r.pub) p.pubs[r.pub] = (p.pubs[r.pub] || 0) + 1;
+      if (r.plat) p.plats[r.plat] = (p.plats[r.plat] || 0) + 1;
+      if (r.topic) p.topics[r.topic] = (p.topics[r.topic] || 0) + 1;
+    } else if (r.type === "تعليق" && r.owner) {
+      const p = get(r.owner); p.comments++; if (r.tone === "سلبي") p.neg++; if (r.src) p.people.add(r.src);
+      if (r.plat) p.plats[r.plat] = (p.plats[r.plat] || 0) + 1;
+    }
+  }
+  const top = o => Object.entries(o).sort((a, b) => b[1] - a[1])[0]?.[0] || "";
+  for (const p of P.values()) { p.pub = top(p.pubs); p.plat = top(p.plats); p.group = groupOf(p.pub); }
+  return P;
+}
+
+function build() {
+  const recs = REC.filter(r => (S.rel === "all" || r.rel === S.rel) && (!S.plat || r.plat === S.plat));
+  const P = pageStats(recs);
+  const nodes = [], edges = [];
+  if (S.view === "audience") {
+    const pages = [...P.values()].filter(p => p.comments >= S.min);
+    const keep = new Set(pages.map(p => p.name));
+    const byPerson = new Map();
+    for (const r of recs) if (r.type === "تعليق" && keep.has(r.owner) && r.src) {
+      if (!byPerson.has(r.src)) byPerson.set(r.src, new Map());
+      const m = byPerson.get(r.src); m.set(r.owner, (m.get(r.owner) || 0) + 1);
+    }
+    const pair = new Map();
+    for (const [person, m] of byPerson) {
+      if (m.size < 2) continue;
+      const names = [...m.keys()].sort();
+      for (let i = 0; i < names.length; i++) for (let j = i + 1; j < names.length; j++) {
+        const k = names[i] + "\u0001" + names[j];
+        if (!pair.has(k)) pair.set(k, { a: names[i], b: names[j], w: 0, people: [] });
+        const e = pair.get(k); e.w++; e.people.push(person);
+      }
+    }
+    const linked = new Set(); for (const e of pair.values()) { linked.add(e.a); linked.add(e.b); }
+    for (const p of pages) nodes.push({ ...p, size: p.comments, linked: linked.has(p.name) });
+    for (const e of pair.values()) edges.push({ s: "p:" + e.a, t: "p:" + e.b, w: e.w, people: e.people });
+    return { nodes, edges, P, note: `${fmt(pages.length)} صفحة جمعت ${S.min} تعليقات فأكثر، و${fmt(pair.size)} علاقة جمهور مشترك. الخط بين صفحتين يعني أن شخصاً واحداً على الأقل علّق على الاثنتين، ويزيد سمكه بعدد هؤلاء الأشخاص.` };
+  }
+  const pages = [...P.values()].filter(p => p.posts >= S.min);
+  const topicCount = {};
+  for (const p of pages) for (const [t, c] of Object.entries(p.topics)) {
+    edges.push({ s: "p:" + p.name, t: "t:" + t, w: c }); topicCount[t] = (topicCount[t] || 0) + c;
+  }
+  for (const p of pages) nodes.push({ ...p, size: p.inter, linked: true });
+  for (const [t, c] of Object.entries(topicCount)) nodes.push({ id: "t:" + t, name: t, kind: "topic", size: c, posts: c, linked: true });
+  return { nodes, edges, P, note: `${fmt(pages.length)} صفحة نشرت ${S.min} مواد فأكثر، موصولة بأنواع المنشورات التي نشرتها. يزيد سمك الخط بعدد المواد، وحجم الصفحة بمجموع تفاعلاتها.` };
+}
+
+// ── محاكاة القوى (بدون مكتبات) ──────────────────────────────
+let G = null, raf = 0, T = { x: 0, y: 0, k: 1 };
+function radius(n, maxSize) {
+  if (n.kind === "topic") return 8 + 16 * Math.sqrt(n.size / maxSize.topic);
+  return 4 + 20 * Math.sqrt((n.size || 0) / (maxSize.page || 1));
+}
+function layout() {
+  cancelAnimationFrame(raf);
+  const { nodes, edges } = G;
+  const W = $("#stage").clientWidth, H = $("#stage").clientHeight;
+  const maxSize = { page: Math.max(1, ...nodes.filter(n => n.kind === "page").map(n => n.size)), topic: Math.max(1, ...nodes.filter(n => n.kind === "topic").map(n => n.size)) };
+  const byId = new Map(nodes.map((n, i) => {
+    const a = i * 2.39996, rr = 30 + 9 * Math.sqrt(i);
+    Object.assign(n, { r: radius(n, maxSize), x: W / 2 + rr * Math.cos(a), y: H / 2 + rr * Math.sin(a), vx: 0, vy: 0 });
+    return [n.id, n]; }));
+  for (const e of edges) { e.S = byId.get(e.s); e.T = byId.get(e.t); }
+  G.edges = edges.filter(e => e.S && e.T);
+  G.byId = byId;
+  const maxW = Math.max(1, ...G.edges.map(e => e.w));
+  let alpha = 1;
+  const step = () => {
+    const n = nodes.length;
+    for (let i = 0; i < n; i++) {
+      const a = nodes[i];
+      for (let j = i + 1; j < n; j++) {
+        const b = nodes[j]; let dx = b.x - a.x, dy = b.y - a.y; let d2 = dx * dx + dy * dy || 0.01;
+        const min = a.r + b.r + 6;
+        const f = (900 * alpha) / d2;
+        if (d2 < min * min) { const d = Math.sqrt(d2), push = (min - d) / d * 0.5; dx *= push; dy *= push; a.x -= dx; a.y -= dy; b.x += dx; b.y += dy; continue; }
+        a.vx -= dx * f; a.vy -= dy * f; b.vx += dx * f; b.vy += dy * f;
+      }
+    }
+    for (const e of G.edges) {
+      const dx = e.T.x - e.S.x, dy = e.T.y - e.S.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+      const target = 60 + e.S.r + e.T.r, k = 0.02 * alpha * (0.4 + 0.6 * e.w / maxW);
+      const fx = dx / d * (d - target) * k, fy = dy / d * (d - target) * k;
+      e.S.vx += fx; e.S.vy += fy; e.T.vx -= fx; e.T.vy -= fy;
+    }
+    for (const a of nodes) {
+      const g = a.linked ? 0.012 : 0.03;
+      a.vx += (W / 2 - a.x) * g * alpha; a.vy += (H / 2 - a.y) * g * alpha;
+      if (a.fixed) { a.vx = a.vy = 0; continue; }
+      a.x += a.vx; a.y += a.vy; a.vx *= 0.6; a.vy *= 0.6;
+    }
+  };
+  draw();
+  const tick = () => { for (let i = 0; i < 3; i++) step(); alpha *= 0.975; position(); if (alpha > 0.02) raf = requestAnimationFrame(tick); else fit(); };
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { for (let i = 0; i < 300; i++) { step(); alpha *= 0.985; } position(); fit(); }
+  else raf = requestAnimationFrame(tick);
+  G.reheat = () => { if (alpha < 0.2) { alpha = 0.3; raf = requestAnimationFrame(tick); } };
+}
+
+function draw() {
+  const eg = $("#edges"), ng = $("#nodes"); eg.replaceChildren(); ng.replaceChildren();
+  const maxW = Math.max(1, ...G.edges.map(e => e.w));
+  for (const e of G.edges) { e.el = svgEl("line", { class: "edge", "stroke-width": (1 + 5 * e.w / maxW).toFixed(1) }); eg.append(e.el); }
+  const labelCut = [...G.nodes].filter(n => n.kind === "page").sort((a, b) => b.size - a.size)[Math.min(14, G.nodes.length - 1)]?.size ?? 0;
+  for (const n of G.nodes) {
+    const g = svgEl("g", { class: "node " + n.kind, tabindex: "0", role: "button", "aria-label": n.name });
+    if (n.kind === "topic") {
+      g.append(svgEl("rect", { x: -n.r, y: -n.r, width: 2 * n.r, height: 2 * n.r, rx: 4, fill: "var(--topic)" }));
+    } else {
+      g.append(svgEl("circle", { r: n.r, fill: n.group.color }));
+    }
+    if (n.kind === "topic" || n.size >= labelCut || n.name === S.focus) {
+      const t = svgEl("text", { y: n.r + 13, "text-anchor": "middle" }); t.textContent = n.name.length > 26 ? n.name.slice(0, 25) + "…" : n.name; g.append(t);
+    }
+    g.addEventListener("pointerenter", ev => showTip(n, ev));
+    g.addEventListener("pointermove", ev => moveTip(ev));
+    g.addEventListener("pointerleave", hideTip);
+    g.addEventListener("click", () => select(n.id));
+    g.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); select(n.id); } });
+    g.addEventListener("pointerdown", ev => dragNode(ev, n));
+    n.el = g; ng.append(g);
+  }
+  legend();
+}
+function position() {
+  for (const e of G.edges) { e.el.setAttribute("x1", e.S.x); e.el.setAttribute("y1", e.S.y); e.el.setAttribute("x2", e.T.x); e.el.setAttribute("y2", e.T.y); }
+  for (const n of G.nodes) n.el.setAttribute("transform", `translate(${n.x.toFixed(1)},${n.y.toFixed(1)})`);
+}
+function fit() {
+  if (!G.nodes.length) return;
+  const W = $("#stage").clientWidth, H = $("#stage").clientHeight;
+  const xs = G.nodes.map(n => [n.x - n.r, n.x + n.r]).flat(), ys = G.nodes.map(n => [n.y - n.r, n.y + n.r + 16]).flat();
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const k = Math.min(1.6, 0.92 * Math.min(W / (x1 - x0 || 1), H / (y1 - y0 || 1)));
+  T = { k, x: W / 2 - k * (x0 + x1) / 2, y: H / 2 - k * (y0 + y1) / 2 }; applyT();
+}
+const applyT = () => $("#vp").setAttribute("transform", `translate(${T.x},${T.y}) scale(${T.k})`);
+
+// ── تفاعل: تكبير وسحب وتحديد ───────────────────────────────
+const svg = $("#svg");
+svg.addEventListener("wheel", ev => {
+  ev.preventDefault();
+  const rect = svg.getBoundingClientRect(), mx = ev.clientX - rect.left, my = ev.clientY - rect.top;
+  const k2 = Math.max(0.2, Math.min(5, T.k * Math.exp(-ev.deltaY * 0.0015)));
+  T.x = mx - (mx - T.x) * k2 / T.k; T.y = my - (my - T.y) * k2 / T.k; T.k = k2; applyT();
+}, { passive: false });
+svg.addEventListener("pointerdown", ev => {
+  if (ev.target.closest(".node")) return;
+  const sx = ev.clientX, sy = ev.clientY, ox = T.x, oy = T.y; let moved = false;
+  svg.classList.add("panning"); svg.setPointerCapture(ev.pointerId);
+  const mv = e => { moved = moved || Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 4; T.x = ox + e.clientX - sx; T.y = oy + e.clientY - sy; applyT(); };
+  const up = () => { svg.classList.remove("panning"); svg.removeEventListener("pointermove", mv); svg.removeEventListener("pointerup", up); if (!moved) select(null); };
+  svg.addEventListener("pointermove", mv); svg.addEventListener("pointerup", up);
+});
+function dragNode(ev, n) {
+  ev.stopPropagation();
+  const rect = svg.getBoundingClientRect(); n.fixed = true; hideTip();
+  const mv = e => { n.x = (e.clientX - rect.left - T.x) / T.k; n.y = (e.clientY - rect.top - T.y) / T.k; position(); };
+  const up = () => { n.fixed = false; window.removeEventListener("pointermove", mv); window.removeEventListener("pointerup", up); G.reheat?.(); };
+  window.addEventListener("pointermove", mv); window.addEventListener("pointerup", up);
+}
+function tipHTML(n) {
+  if (n.kind === "topic") return `<b>${esc(n.name)}</b><br>${fmt(n.size)} مادة من الصفحات المعروضة`;
+  return `<b>${esc(n.name)}</b><br>${esc(n.plat || "")}${n.pub ? " · " + esc(n.pub) : ""}<br>${fmt(n.posts)} مادة · ${fmt(n.inter)} تفاعل<br>${fmt(n.comments)} تعليق مرصود من ${fmt(n.people.size)} شخص`;
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function showTip(n, ev) { const t = $("#tip"); t.innerHTML = tipHTML(n); t.hidden = false; moveTip(ev); }
+function moveTip(ev) {
+  const t = $("#tip"), rect = $("#stage").getBoundingClientRect();
+  let x = ev.clientX - rect.left + 14, y = ev.clientY - rect.top + 14;
+  if (x + t.offsetWidth > rect.width) x = ev.clientX - rect.left - t.offsetWidth - 14;
+  if (y + t.offsetHeight > rect.height) y = ev.clientY - rect.top - t.offsetHeight - 14;
+  t.style.left = x + "px"; t.style.top = y + "px";
+}
+function hideTip() { $("#tip").hidden = true; }
+
+function select(id) {
+  S.focus = id ? G.byId.get(id)?.name : null;
+  const nb = new Set(id ? [id] : []);
+  if (id) for (const e of G.edges) { if (e.s === id) nb.add(e.t); if (e.t === id) nb.add(e.s); }
+  for (const n of G.nodes) n.el.classList.toggle("dim", !!id && !nb.has(n.id));
+  for (const e of G.edges) { const on = id && (e.s === id || e.t === id); e.el.classList.toggle("hi", !!on); e.el.classList.toggle("dim", !!id && !on); }
+  side(id ? G.byId.get(id) : null);
+}
+
+function side(n) {
+  const el = $("#side");
+  if (!n) {
+    const pages = G.nodes.filter(x => x.kind === "page");
+    const deg = new Map(); for (const e of G.edges) { deg.set(e.s, (deg.get(e.s) || 0) + e.w); deg.set(e.t, (deg.get(e.t) || 0) + e.w); }
+    const hubs = pages.filter(p => deg.get(p.id)).sort((a, b) => deg.get(b.id) - deg.get(a.id)).slice(0, 10);
+    el.innerHTML = `<h2>كيف تقرأ الخريطة</h2><p class="note">${esc(G.note)}</p>
+      <p class="note">اضغط على أي صفحة لترى علاقاتها. اسحب الخلفية للتحريك، واستخدم عجلة الفأرة للتكبير.</p>
+      <h2 style="margin-top:14px">${S.view === "audience" ? "الصفحات الأكثر اتصالاً" : "الصفحات الأكثر نشراً"}</h2>
+      ${hubs.length ? `<ul class="list">${hubs.map(p => `<li><button type="button" data-id="${esc(p.id)}">${esc(p.name)}</button><span class="n">${fmt(deg.get(p.id))} ${S.view === "audience" ? "شخص مشترك" : "مادة"}</span></li>`).join("")}</ul>` : `<p class="note">لا توجد علاقات بهذا الحد الأدنى. جرّب تقليل الحد.</p>`}`;
+  } else if (n.kind === "topic") {
+    const rows = G.edges.filter(e => e.t === n.id).sort((a, b) => b.w - a.w);
+    el.innerHTML = `<h2>${esc(n.name)}</h2><div class="meta">نوع منشور · ${fmt(n.size)} مادة</div>
+      <ul class="list">${rows.slice(0, 20).map(e => `<li><button type="button" data-id="${esc(e.s)}">${esc(e.S.name)}</button><span class="n">${fmt(e.w)} مادة</span></li>`).join("")}</ul>`;
+  } else {
+    const links = G.edges.filter(e => e.s === n.id || e.t === n.id).map(e => ({ o: e.s === n.id ? e.T : e.S, w: e.w, people: e.people })).sort((a, b) => b.w - a.w);
+    el.innerHTML = `<h2>${esc(n.name)}</h2><div class="meta">${esc(n.plat || "")}${n.pub ? " · " + esc(n.pub) : ""}</div>
+      <div class="kv"><div><b>${fmt(n.posts)}</b><small>مادة منشورة</small></div><div><b>${fmt(n.inter)}</b><small>تفاعل على مواده</small></div>
+      <div><b>${fmt(n.comments)}</b><small>تعليق مرصود</small></div><div><b>${n.comments ? pct(n.neg / n.comments) : "—"}</b><small>تعليقات سلبية</small></div></div>
+      <h2>${S.view === "audience" ? "صفحات يشاركها الجمهور" : "ما تنشره"}</h2>
+      ${links.length ? `<ul class="list">${links.slice(0, 20).map(l => `<li><button type="button" data-id="${esc(l.o.id)}">${esc(l.o.name)}</button><span class="n">${fmt(l.w)} ${S.view === "audience" ? "شخص" : "مادة"}</span></li>`).join("")}</ul>` : `<p class="note">لا توجد علاقات لهذه الصفحة بالخيارات الحالية.</p>`}
+      ${S.view === "audience" && links.length ? `<p class="note" style="margin-top:10px">أكثر من يربطها بغيرها: ${esc([...new Set(links.flatMap(l => l.people))].slice(0, 8).join("، "))}</p>` : ""}`;
+  }
+  el.querySelectorAll("button[data-id]").forEach(b => b.addEventListener("click", () => select(b.dataset.id)));
+}
+
+function legend() {
+  const used = new Set(G.nodes.filter(n => n.kind === "page").map(n => n.group.key));
+  const items = GROUPS.filter(g => used.has(g.key)).map(g => `<span><i style="background:${g.color}"></i>${g.label}</span>`);
+  if (S.view === "topics") items.push(`<span><i class="sq" style="background:var(--topic)"></i>نوع منشور</span>`);
+  items.push(`<span>${S.view === "audience" ? "حجم الدائرة: عدد التعليقات المرصودة" : "حجم الدائرة: مجموع التفاعلات"}</span>`);
+  $("#legend").innerHTML = items.join("");
+}
+
+function table() {
+  const rows = [...G.edges].sort((a, b) => b.w - a.w).slice(0, 200);
+  const unit = S.view === "audience" ? "أشخاص مشتركون" : "عدد المواد";
+  $("#tableWrap").innerHTML = `<table><thead><tr><th>${S.view === "audience" ? "الصفحة" : "الصفحة"}</th><th>${S.view === "audience" ? "الصفحة الأخرى" : "نوع المنشور"}</th><th>${unit}</th></tr></thead>
+    <tbody>${rows.map(e => `<tr><td>${esc(e.S.name)}</td><td>${esc(e.T.name)}</td><td class="n">${fmt(e.w)}</td></tr>`).join("") || `<tr><td colspan="3">لا توجد علاقات.</td></tr>`}</tbody></table>`;
+}
+
+function render() {
+  $("#msg").hidden = true;
+  $("#minLbl").textContent = S.view === "audience" ? `الصفحات التي جمعت ${S.min} تعليقات فأكثر` : `الصفحات التي نشرت ${S.min} مواد فأكثر`;
+  G = build();
+  $("#names").replaceChildren(...G.nodes.filter(n => n.kind === "page").map(n => Object.assign(document.createElement("option"), { value: n.name })));
+  if (!G.nodes.length) { $("#edges").replaceChildren(); $("#nodes").replaceChildren(); const m = $("#msg"); m.hidden = false; m.textContent = "لا توجد صفحات بهذه الخيارات. قلّل الحد الأدنى أو غيّر الفلاتر."; side(null); return; }
+  layout(); side(null); if (!$("#tableWrap").hidden) table();
+}
+
+document.querySelectorAll("#view button").forEach(b => b.addEventListener("click", () => {
+  S.view = b.dataset.v; document.querySelectorAll("#view button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  S.min = S.view === "audience" ? 3 : 2; $("#min").value = S.min; render(); }));
+$("#rel").addEventListener("change", e => { S.rel = e.target.value; render(); });
+$("#plat").addEventListener("change", e => { S.plat = e.target.value; render(); });
+$("#min").addEventListener("input", e => { S.min = +e.target.value; $("#minLbl").textContent = S.view === "audience" ? `الصفحات التي جمعت ${S.min} تعليقات فأكثر` : `الصفحات التي نشرت ${S.min} مواد فأكثر`; });
+$("#min").addEventListener("change", render);
+$("#q").addEventListener("change", e => { const n = G.nodes.find(x => x.name === e.target.value.trim()); if (n) select(n.id); });
+$("#tableBtn").addEventListener("click", e => { const w = $("#tableWrap"); w.hidden = !w.hidden; e.target.setAttribute("aria-expanded", !w.hidden); e.target.textContent = w.hidden ? "عرض كجدول" : "إخفاء الجدول"; if (!w.hidden) table(); });
+let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => G && fit(), 200); });
+load();
+</script>
+</body>
+</html>
