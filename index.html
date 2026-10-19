@@ -1013,7 +1013,8 @@ async function loadResults(month) {
   const latestCard = el("div", { class: "card", style: "grid-column:1/-1" }, el("h3", {}, "أحدث السجلات"),
     el("div", { class: "tablebar" }, el("input", { type: "search", placeholder: "بحث في أحدث 300 سجل…", "aria-label": "بحث في السجلات", oninput: e => { q = e.target.value.trim(); drawLatest(); } }),
       el("button", { class: "btn", type: "button", onclick: () => downloadCSV(csvName) }, `⬇ ${S.month ? "ملف " + monthAr(S.month) : "كل السجلات"} (CSV · ${fmt(sm.total)} سجل${csvFile ? " · " + size(csvFile.size) : ""})`),
-      csvFile ? el("a", { class: "btn", href: csvFile.html_url, target: "_blank", rel: "noopener" }, "فتح الملف على GitHub") : null),
+      csvFile ? el("a", { class: "btn", href: csvFile.html_url, target: "_blank", rel: "noopener" }, "فتح الملف على GitHub") : null,
+      el("a", { class: "btn", href: `network.html?p=${encodeURIComponent(S.project)}`, target: "_blank", rel: "noopener" }, "خريطة العلاقات ↗")),
     el("div", { class: "scroll" }, el("table", {}, el("thead", {}, el("tr", {}, ["التاريخ", "المنصة", "المصدر", "العنوان / النص", "المحور", "النبرة", "النوع"].map(h => el("th", {}, h)))), tb)));
   const months = (all.monthly || []).map(m => m.key);
   const picker = el("div", { class: "row", style: "margin-bottom:14px" }, el("span", { class: "preview" }, "الفترة:"),
