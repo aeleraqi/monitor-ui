@@ -52,8 +52,8 @@ svg.panning { cursor:grabbing; }
 .edge { stroke:var(--edge); stroke-linecap:round; }
 .edge.hi { stroke:var(--edge-hi); }
 .node circle, .node rect { stroke:var(--surface); stroke-width:2px; cursor:pointer; }
-.node text { fill:var(--fg); font-size:11px; pointer-events:none; paint-order:stroke; stroke:var(--surface); stroke-width:3px; stroke-linejoin:round; }
-.node.topic text { font-weight:600; font-size:12px; }
+.node text { fill:var(--fg); font-size:var(--lbl, 11px); pointer-events:none; paint-order:stroke; stroke:var(--surface); stroke-width:var(--lblw, 3px); stroke-linejoin:round; }
+.node.topic text { font-weight:600; }
 .dim { opacity:.12; }
 .tip { position:absolute; pointer-events:none; background:var(--fg); color:var(--bg); padding:7px 10px; border-radius:8px; font-size:.82rem; line-height:1.5; max-width:260px; z-index:3; }
 .legend { display:flex; flex-wrap:wrap; gap:6px 14px; padding:10px 14px; border-top:1px solid var(--line); font-size:.8rem; color:var(--fg2); }
@@ -103,6 +103,7 @@ td.n { font-variant-numeric:tabular-nums; }
       <input type="range" id="min" min="1" max="30" value="3"></label>
     <label class="ctl">ابحث عن صفحة <input type="search" id="q" placeholder="اسم الصفحة" list="names"></label>
     <datalist id="names"></datalist>
+    <label class="ctl" style="flex-direction:row;align-items:center;gap:6px;padding-bottom:6px"><input type="checkbox" id="iso"> إظهار الصفحات غير المتصلة</label>
     <button class="btn" type="button" id="tableBtn" aria-expanded="false">عرض كجدول</button>
   </div>
 
@@ -156,7 +157,7 @@ function parseCSV(s) {
 }
 
 let REC = [];
-const S = { view: "audience", rel: "all", plat: "", min: 3, focus: null };
+const S = { view: "audience", rel: "all", plat: "", min: 3, focus: null, iso: false };
 
 async function load() {
   if (!TOKEN || !PROJECT) return fail("افتح المرصد وسجّل الدخول واختر مشروعاً أولاً، ثم ارجع لهذه الصفحة.");
@@ -224,9 +225,9 @@ function build() {
       }
     }
     const linked = new Set(); for (const e of pair.values()) { linked.add(e.a); linked.add(e.b); }
-    for (const p of pages) nodes.push({ ...p, size: p.comments, linked: linked.has(p.name) });
+    for (const p of pages) if (S.iso || linked.has(p.name)) nodes.push({ ...p, size: p.comments, linked: linked.has(p.name) });
     for (const e of pair.values()) edges.push({ s: "p:" + e.a, t: "p:" + e.b, w: e.w, people: e.people });
-    return { nodes, edges, P, note: `${fmt(pages.length)} صفحة جمعت ${S.min} تعليقات فأكثر، و${fmt(pair.size)} علاقة جمهور مشترك. الخط بين صفحتين يعني أن شخصاً واحداً على الأقل علّق على الاثنتين، ويزيد سمكه بعدد هؤلاء الأشخاص.` };
+    return { nodes, edges, P, note: `${fmt(pages.length)} صفحة جمعت ${S.min} تعليقات فأكثر، منها ${fmt(linked.size)} صفحة يشاركها جمهور مع صفحة أخرى، في ${fmt(pair.size)} علاقة.${S.iso ? "" : " الصفحات غير المتصلة مخفية."} الخط بين صفحتين يعني أن شخصاً واحداً على الأقل علّق على الاثنتين، ويزيد سمكه بعدد هؤلاء الأشخاص.` };
   }
   const pages = [...P.values()].filter(p => p.posts >= S.min);
   const topicCount = {};
@@ -258,6 +259,7 @@ function layout() {
   G.byId = byId;
   const maxW = Math.max(1, ...G.edges.map(e => e.w));
   let alpha = 1;
+  const REP = nodes.length > 60 ? 380 : 900;
   const step = () => {
     const n = nodes.length;
     for (let i = 0; i < n; i++) {
@@ -265,7 +267,7 @@ function layout() {
       for (let j = i + 1; j < n; j++) {
         const b = nodes[j]; let dx = b.x - a.x, dy = b.y - a.y; let d2 = dx * dx + dy * dy || 0.01;
         const min = a.r + b.r + 6;
-        const f = (900 * alpha) / d2;
+        const f = (REP * alpha) / d2;
         if (d2 < min * min) { const d = Math.sqrt(d2), push = (min - d) / d * 0.5; dx *= push; dy *= push; a.x -= dx; a.y -= dy; b.x += dx; b.y += dy; continue; }
         a.vx -= dx * f; a.vy -= dy * f; b.vx += dx * f; b.vy += dy * f;
       }
@@ -277,14 +279,15 @@ function layout() {
       e.S.vx += fx; e.S.vy += fy; e.T.vx -= fx; e.T.vy -= fy;
     }
     for (const a of nodes) {
-      const g = a.linked ? 0.012 : 0.03;
+      const g = (a.linked ? 0.012 : 0.03) * (nodes.length > 60 ? 2 : 1);
       a.vx += (W / 2 - a.x) * g * alpha; a.vy += (H / 2 - a.y) * g * alpha;
       if (a.fixed) { a.vx = a.vy = 0; continue; }
       a.x += a.vx; a.y += a.vy; a.vx *= 0.6; a.vy *= 0.6;
     }
   };
   draw();
-  const tick = () => { for (let i = 0; i < 3; i++) step(); alpha *= 0.975; position(); if (alpha > 0.02) raf = requestAnimationFrame(tick); else fit(); };
+  let frames = 0;
+  const tick = () => { for (let i = 0; i < 3; i++) step(); alpha *= 0.975; position(); if (++frames % 12 === 0) fit(); if (alpha > 0.02) raf = requestAnimationFrame(tick); else fit(); };
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) { for (let i = 0; i < 300; i++) { step(); alpha *= 0.985; } position(); fit(); }
   else raf = requestAnimationFrame(tick);
   G.reheat = () => { if (alpha < 0.2) { alpha = 0.3; raf = requestAnimationFrame(tick); } };
@@ -323,11 +326,23 @@ function fit() {
   if (!G.nodes.length) return;
   const W = $("#stage").clientWidth, H = $("#stage").clientHeight;
   const xs = G.nodes.map(n => [n.x - n.r, n.x + n.r]).flat(), ys = G.nodes.map(n => [n.y - n.r, n.y + n.r + 16]).flat();
-  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const q = (a, p) => { const b = [...a].sort((m, n) => m - n); return b[Math.min(b.length - 1, Math.max(0, Math.round(p * (b.length - 1))))]; };
+  const tight = G.nodes.length > 40;
+  const x0 = tight ? q(xs, .02) : Math.min(...xs), x1 = tight ? q(xs, .98) : Math.max(...xs), y0 = tight ? q(ys, .02) : Math.min(...ys), y1 = tight ? q(ys, .98) : Math.max(...ys);
   const k = Math.min(1.6, 0.92 * Math.min(W / (x1 - x0 || 1), H / (y1 - y0 || 1)));
   T = { k, x: W / 2 - k * (x0 + x1) / 2, y: H / 2 - k * (y0 + y1) / 2 }; applyT();
 }
-const applyT = () => $("#vp").setAttribute("transform", `translate(${T.x},${T.y}) scale(${T.k})`);
+const applyT = () => {
+  $("#vp").setAttribute("transform", `translate(${T.x},${T.y}) scale(${T.k})`);
+  const k = Math.min(1, T.k);   // النص والدوائر الصغيرة تبقى مقروءة عند التصغير
+  $("#nodes").style.setProperty("--lbl", (11 / k).toFixed(1) + "px");
+  $("#nodes").style.setProperty("--lblw", (3 / k).toFixed(1) + "px");
+  if (G) for (const n of G.nodes) {
+    const c = n.el?.firstChild, t = n.el?.querySelector("text"), r = n.kind === "page" ? Math.max(n.r, 4 / k) : n.r;
+    if (c && n.kind === "page") c.setAttribute("r", r);
+    if (t) t.setAttribute("y", r + 12 / k);
+  }
+};
 
 // ── تفاعل: تكبير وسحب وتحديد ───────────────────────────────
 const svg = $("#svg");
@@ -419,6 +434,7 @@ function table() {
 
 function render() {
   $("#msg").hidden = true;
+  $("#iso").closest("label").hidden = S.view !== "audience";
   $("#minLbl").textContent = S.view === "audience" ? `الصفحات التي جمعت ${S.min} تعليقات فأكثر` : `الصفحات التي نشرت ${S.min} مواد فأكثر`;
   G = build();
   $("#names").replaceChildren(...G.nodes.filter(n => n.kind === "page").map(n => Object.assign(document.createElement("option"), { value: n.name })));
@@ -429,6 +445,7 @@ function render() {
 document.querySelectorAll("#view button").forEach(b => b.addEventListener("click", () => {
   S.view = b.dataset.v; document.querySelectorAll("#view button").forEach(x => x.setAttribute("aria-pressed", x === b));
   S.min = S.view === "audience" ? 3 : 2; $("#min").value = S.min; render(); }));
+$("#iso").addEventListener("change", e => { S.iso = e.target.checked; render(); });
 $("#rel").addEventListener("change", e => { S.rel = e.target.value; render(); });
 $("#plat").addEventListener("change", e => { S.plat = e.target.value; render(); });
 $("#min").addEventListener("input", e => { S.min = +e.target.value; $("#minLbl").textContent = S.view === "audience" ? `الصفحات التي جمعت ${S.min} تعليقات فأكثر` : `الصفحات التي نشرت ${S.min} مواد فأكثر`; });
